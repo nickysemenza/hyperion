@@ -1,4 +1,4 @@
-package main
+package cue
 
 import (
 	"testing"
@@ -8,22 +8,22 @@ import (
 //Tests getting the Duration of a CueFrame
 func TestCueFrameGetDuration(t *testing.T) {
 	tt := []struct {
-		cf               CueFrame
+		cf               Frame
 		expectedDuration time.Duration
 	}{
-		{CueFrame{
-			Actions: []CueFrameAction{
+		{Frame{
+			Actions: []FrameAction{
 				{Duration: time.Second},
 			},
 		}, time.Second},
-		{CueFrame{
-			Actions: []CueFrameAction{
+		{Frame{
+			Actions: []FrameAction{
 				{Duration: time.Second},
 				{Duration: time.Second * 3},
 			},
 		}, time.Second * 3},
-		{CueFrame{
-			Actions: []CueFrameAction{},
+		{Frame{
+			Actions: []FrameAction{},
 		}, time.Duration(0)},
 	}
 	for _, x := range tt {
