@@ -50,6 +50,8 @@ func main() {
 	CueMaster.ProcessForever()
 	fmt.Println("faaa")
 
+	light.TestSendDmx()
+
 	for {
 		time.Sleep(1 * time.Second)
 	}

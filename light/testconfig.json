@@ -33,5 +33,8 @@
     "hue": {
       "hostname": "10.0.1.55",
       "username": "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
+    },
+    "ola": {
+      "hostname": "localhost:9010"
     }
   }

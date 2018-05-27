@@ -6,6 +6,22 @@ import (
 	"github.com/heatxsink/go-hue/lights"
 )
 
+type HueLight struct {
+	HueID int    `json:"hue_id"`
+	Name  string `json:"name"`
+}
+
+func (hl *HueLight) getName() string {
+	return hl.Name
+}
+
+func (hl *HueLight) getType() string {
+	return "hue"
+}
+func (hl *HueLight) SetColor(c RGBColor) {
+	Config.HueBridge.SetColor(hl.HueID, c, time.Duration(time.Second))
+}
+
 type Bridge struct {
 	Hostname string `json:"hostname"`
 	Username string `json:"username"`
