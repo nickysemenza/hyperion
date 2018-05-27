@@ -4,17 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/nickysemenza/hyperion/cue"
 	"github.com/nickysemenza/hyperion/light"
 )
 
 func main() {
-
 	fmt.Println("Hello!")
 
 	light.ReadLightConfigFromFile("./light/testconfig.json")
-	spew.Dump(light.Config)
 
 	CueMaster := &cue.Master{}
 
@@ -40,11 +37,6 @@ func main() {
 		}, fmt.Sprintf("Cue #%d", x))
 		mainCueStack.Cues = append(mainCueStack.Cues, a)
 	}
-
-	// secondaryCuestack := CueStack{}
-	// copier.Copy(&secondaryCuestack, &mainCueStack)
-	// secondaryCuestack.Name = "secondary"
-
 	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
 	// spew.Dump(CueMaster)
 
