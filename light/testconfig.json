@@ -2,12 +2,12 @@
     "lights": {
       "hue": [
       {
-        "hue_id": 4,
-        "name": "asdf"
+        "hue_id": 1,
+        "name": "hue1"
       },
       {
         "hue_id": 2,
-        "name": "aaa"
+        "name": "hue2"
       }
     ],
     "dmx": [

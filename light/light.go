@@ -5,11 +5,40 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
+
+	"github.com/fatih/color"
+	colorful "github.com/lucasb-eyer/go-colorful"
 )
+
+//RGBColor holds RGB values (0-255)
+type RGBColor struct {
+	R int
+	G int
+	B int
+}
+
+func (c *RGBColor) FancyString() string {
+
+	red := color.New(color.BgRed).SprintFunc()
+	green := color.New(color.BgGreen).SprintFunc()
+	blue := color.New(color.BgBlue).SprintFunc()
+	return fmt.Sprintf("%s %s %s", red(c.R), green(c.G), blue(c.B))
+}
+
+func (c *RGBColor) GetXyy() (x, y, Yout float64) {
+	cc := colorful.Color{
+		R: float64(c.R / 255),
+		G: float64(c.G / 255),
+		B: float64(c.B / 255),
+	}
+	//OLD:  x, y, _ := cc.Xyz()
+	return colorful.XyzToXyy(colorful.LinearRgbToXyz(cc.LinearRgb()))
+}
 
 //Light is a light
 type Light interface {
-	// setColor(string)
+	SetColor(RGBColor)
 	// getColor() string
 	getType() string
 	getName() string
@@ -36,6 +65,9 @@ func (d *DMXLight) getType() string {
 func (d *DMXLight) getName() string {
 	return d.Name
 }
+func (d *DMXLight) SetColor(c RGBColor) {
+
+}
 
 type HueLight struct {
 	HueID int    `json:"hue_id"`
@@ -49,11 +81,19 @@ func (hl *HueLight) getName() string {
 func (hl *HueLight) getType() string {
 	return "hue"
 }
+func (hl *HueLight) SetColor(c RGBColor) {
+	br := Bridge{
+		Hostname: "10.0.1.55",
+		Username: "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF",
+	}
+	br.SetColor(hl.HueID, c, time.Duration(time.Second))
+
+}
 
 //GenericLight is for testing
 type GenericLight struct {
 	Name  string `json:"name"`
-	Color string
+	Color RGBColor
 }
 
 func (gl *GenericLight) getType() string {
@@ -62,11 +102,9 @@ func (gl *GenericLight) getType() string {
 func (gl *GenericLight) getName() string {
 	return gl.Name
 }
-func (gl *GenericLight) setColor(color string) {
-	gl.Color = color
-}
-func (gl *GenericLight) getColor() string {
-	return gl.Color
+
+func (gl *GenericLight) SetColor(c RGBColor) {
+	gl.Color = c
 }
 
 type LightConfig struct {
@@ -77,6 +115,8 @@ type LightConfig struct {
 		Generic []GenericLight `json:"generic"`
 	} `json:"lights"`
 }
+
+var Config LightConfig
 
 func ReadLightConfigFromFile(file string) LightConfig {
 	raw, err := ioutil.ReadFile(file)
@@ -91,22 +131,23 @@ func ReadLightConfigFromFile(file string) LightConfig {
 	}
 	lc.Loaded = true
 
+	Config = *lc
 	return *lc
 }
 
-func GetLightByName(config *LightConfig, name string) Light {
+func GetLightByName(name string) Light {
 	//TODO: interate over config.Lights using reflect
-	for _, x := range config.Lights.Hue {
+	for _, x := range Config.Lights.Hue {
 		if x.getName() == name {
 			return &x
 		}
 	}
-	for _, x := range config.Lights.Dmx {
+	for _, x := range Config.Lights.Dmx {
 		if x.getName() == name {
 			return &x
 		}
 	}
-	for _, x := range config.Lights.Generic {
+	for _, x := range Config.Lights.Generic {
 		if x.getName() == name {
 			return &x
 		}

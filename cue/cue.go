@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/nickysemenza/hyperion/light"
 )
 
 //Master is the parent of all CueStacks, is a singleton
@@ -43,23 +45,19 @@ type Frame struct {
 
 //FrameAction is an action within a Cue(Frame) to be executed simultaneously
 type FrameAction struct {
-	Duration time.Duration
-	Color    RGBColor
-	ID       int64
-}
-
-//RGBColor holds RGB values (0-255)
-type RGBColor struct {
-	R int
-	G int
-	B int
+	Duration  time.Duration
+	Color     light.RGBColor
+	ID        int64
+	LightName string
+	//TODO: add `light`
+	//TODO: add way to have a noop action (to block aka wait for time)
 }
 
 //NewFrameAction creates a new instate with incr ID
-func (cm *Master) NewFrameAction(duration time.Duration, color RGBColor) FrameAction {
+func (cm *Master) NewFrameAction(duration time.Duration, color light.RGBColor, lightName string) FrameAction {
 	id := cm.CurrentIDs.CueFrameAction
 	cm.CurrentIDs.CueFrameAction++
-	return FrameAction{ID: id, Duration: duration, Color: color}
+	return FrameAction{ID: id, Duration: duration, Color: color, LightName: lightName}
 }
 
 //NewFrame creates a new instate with incr ID
@@ -127,7 +125,26 @@ func (cf *Frame) ProcessFrame() {
 func (cfa *FrameAction) ProcessFrameAction() {
 	//TODO: send dmx, call hue func, etc
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	log.Printf("[FrameAction #2] processing @ %d (delta=%s)", now, cfa.Duration)
+	log.Printf("[FrameAction #2] processing @ %d (delta=%s) (color=%v) (light=%s)", now, cfa.Duration, cfa.Color.FancyString(), cfa.LightName)
+
+	//TODO: switch based on light type/ID
+	// br := hue.Bridge{
+	// 	Hostname: "10.0.1.55",
+	// 	Username: "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF",
+	// }
+
+	// LightConfig
+
+	l := light.GetLightByName(cfa.LightName)
+	if l != nil {
+		go l.SetColor(cfa.Color)
+	} else {
+		fmt.Printf("Cannot find lighty by name: %s", cfa.LightName)
+	}
+
+	// go br.SetColor(2, cfa.Color, cfa.Duration)
+	// go br.SetColor(1, cfa.Color, cfa.Duration)
+
 	time.Sleep(cfa.Duration)
 
 }

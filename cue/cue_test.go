@@ -3,6 +3,9 @@ package cue
 import (
 	"testing"
 	"time"
+
+	"github.com/nickysemenza/hyperion/light"
+	"github.com/stretchr/testify/assert"
 )
 
 //Tests getting the Duration of a CueFrame
@@ -13,15 +16,15 @@ func TestCueFrameGetDuration(t *testing.T) {
 	}{
 		{Frame{
 			Actions: []FrameAction{
-				{Duration: time.Second},
+				{Duration: time.Millisecond, Color: light.RGBColor{}},
 			},
-		}, time.Second},
+		}, time.Millisecond},
 		{Frame{
 			Actions: []FrameAction{
-				{Duration: time.Second},
-				{Duration: time.Second * 3},
+				{Duration: time.Millisecond},
+				{Duration: time.Millisecond * 50},
 			},
-		}, time.Second * 3},
+		}, time.Millisecond * 50},
 		{Frame{
 			Actions: []FrameAction{},
 		}, time.Duration(0)},
@@ -30,5 +33,14 @@ func TestCueFrameGetDuration(t *testing.T) {
 		if x.cf.GetDuration() != x.expectedDuration {
 			t.Errorf("got %d, wanted %d", x.cf.GetDuration(), x.expectedDuration)
 		}
+
+		t1 := time.Now()
+		x.cf.ProcessFrame()
+		t2 := time.Now()
+		//5ms of padding/lenience
+		assert.WithinDuration(t, t1, t2, x.expectedDuration+(5*time.Millisecond))
+
+		// t.Error(diff)
+
 	}
 }

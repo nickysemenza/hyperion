@@ -13,19 +13,31 @@ func main() {
 
 	fmt.Println("Hello!")
 
-	spew.Dump(light.ReadLightConfigFromFile("./light/testconfig.json"))
+	light.ReadLightConfigFromFile("./light/testconfig.json")
+	spew.Dump(light.Config)
 
-	// os.Exit(0)
-
-	cm := &cue.Master{}
+	CueMaster := &cue.Master{}
 
 	mainCueStack := cue.Stack{Priority: 2, Name: "main"}
 	for x := 1; x <= 2; x++ {
-		a := cm.New([]cue.Frame{
-			cm.NewFrame([]cue.FrameAction{
-				cm.NewFrameAction(time.Millisecond*1500, cue.RGBColor{}),
-				cm.NewFrameAction(time.Second*time.Duration(x), cue.RGBColor{}),
-			})}, fmt.Sprintf("Cue #%d", x))
+		a := CueMaster.New([]cue.Frame{
+			CueMaster.NewFrame([]cue.FrameAction{
+				CueMaster.NewFrameAction(time.Millisecond*1500, light.RGBColor{R: 255}, "hue1"),
+				CueMaster.NewFrameAction(0, light.RGBColor{R: 255}, "hue2"),
+			}),
+			CueMaster.NewFrame([]cue.FrameAction{
+				CueMaster.NewFrameAction(time.Second*time.Duration(x), light.RGBColor{G: 255}, "hue1"),
+				CueMaster.NewFrameAction(0, light.RGBColor{B: 255}, "hue2"),
+			}),
+			CueMaster.NewFrame([]cue.FrameAction{
+				CueMaster.NewFrameAction(0, light.RGBColor{B: 255}, "hue1"),
+				CueMaster.NewFrameAction(0, light.RGBColor{R: 255}, "hue2"),
+			}),
+			CueMaster.NewFrame([]cue.FrameAction{
+				CueMaster.NewFrameAction(time.Second*2, light.RGBColor{B: 255}, "hue1"),
+				CueMaster.NewFrameAction(0, light.RGBColor{B: 255}, "hue2"),
+			}),
+		}, fmt.Sprintf("Cue #%d", x))
 		mainCueStack.Cues = append(mainCueStack.Cues, a)
 	}
 
@@ -33,9 +45,9 @@ func main() {
 	// copier.Copy(&secondaryCuestack, &mainCueStack)
 	// secondaryCuestack.Name = "secondary"
 
-	cm.CueStacks = append(cm.CueStacks, mainCueStack)
-	spew.Dump(cm)
-	cm.ProcessForever()
+	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
+	spew.Dump(CueMaster)
+	CueMaster.ProcessForever()
 	fmt.Println("faaa")
 
 	for {
