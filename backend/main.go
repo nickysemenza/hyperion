@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nickysemenza/hyperion/backend/api"
 	"github.com/nickysemenza/hyperion/backend/cue"
 	"github.com/nickysemenza/hyperion/backend/light"
 )
@@ -13,7 +14,8 @@ func main() {
 
 	light.ReadLightConfigFromFile("./light/testconfig.json")
 
-	CueMaster := &cue.Master{}
+	cue.CM = cue.Master{}
+	CueMaster := &cue.CM
 
 	mainCueStack := cue.Stack{Priority: 2, Name: "main"}
 	for x := 1; x <= 2; x++ {
@@ -41,7 +43,8 @@ func main() {
 	// spew.Dump(CueMaster)
 
 	//go api.ServeRPC(8888)
-	CueMaster.ProcessForever()
+	go api.ServeHTTP()
+	// CueMaster.ProcessForever()
 	fmt.Println("faaa")
 
 	for {

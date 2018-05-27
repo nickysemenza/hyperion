@@ -18,7 +18,7 @@ func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
 	return &pb.Ping{Message: fmt.Sprintf("hi back! (%s)", in.Message)}, nil
 }
 
-//ServerRPC runs a RPC server
+//ServeRPC runs a RPC server
 func ServeRPC(port int) {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

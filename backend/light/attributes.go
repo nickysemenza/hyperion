@@ -11,15 +11,15 @@ import (
 //State represents the state of a light, is source of truth
 type State struct {
 	// On   bool
-	RGB      RGBColor      //RGB color
-	Duration time.Duration //time to transition to the new state
+	RGB      RGBColor      `json:"rgb"`      //RGB color
+	Duration time.Duration `json:"duration"` //time to transition to the new state
 }
 
 //RGBColor holds RGB values (0-255)
 type RGBColor struct {
-	R int
-	G int
-	B int
+	R int `json:"r"`
+	G int `json:"g"`
+	B int `json:"b"`
 }
 
 //FancyString returns a ANSI-color formatted r/g/b string

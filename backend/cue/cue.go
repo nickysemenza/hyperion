@@ -10,9 +10,11 @@ import (
 	"github.com/nickysemenza/hyperion/backend/light"
 )
 
+var CM Master
+
 //Master is the parent of all CueStacks, is a singleton
 type Master struct {
-	CueStacks  []Stack
+	CueStacks  []Stack `json:"cue_stacks"`
 	CurrentIDs struct {
 		CueStack       int64
 		Cue            int64
@@ -23,16 +25,16 @@ type Master struct {
 
 //Stack is basically a precedence priority queue (really a CueQueue sigh)
 type Stack struct {
-	Priority int64
-	Name     string
-	Cues     []Cue
+	Priority int64  `json:"priority"`
+	Name     string `json:"name"`
+	Cues     []Cue  `json:"cues"`
 }
 
 //Cue is a cue.
 type Cue struct {
-	ID              int64
-	Frames          []Frame
-	Name            string
+	ID              int64   `json:"id"`
+	Frames          []Frame `json:"frames"`
+	Name            string  `json:"name"`
 	shouldRepeat    bool
 	shouldHoldAfter bool //default false, will pause the CueStack after executing this cue, won't move on to next
 	waitBefore      time.Duration
@@ -41,15 +43,15 @@ type Cue struct {
 
 //Frame is a single 'animation frame' of a Cue
 type Frame struct {
-	Actions []FrameAction
-	ID      int64
+	Actions []FrameAction `json:"actions"`
+	ID      int64         `json:"id"`
 }
 
 //FrameAction is an action within a Cue(Frame) to be executed simultaneously
 type FrameAction struct {
-	NewState  light.State
-	ID        int64
-	LightName string
+	NewState  light.State `json:"new_state"`
+	ID        int64       `json:"id"`
+	LightName string      `json:"light_name"`
 	//TODO: add `light`
 	//TODO: add way to have a noop action (to block aka wait for time)
 }
