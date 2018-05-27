@@ -46,7 +46,8 @@ func main() {
 	// secondaryCuestack.Name = "secondary"
 
 	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
-	spew.Dump(CueMaster)
+	// spew.Dump(CueMaster)
+
 	CueMaster.ProcessForever()
 	fmt.Println("faaa")
 

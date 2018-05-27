@@ -61,8 +61,8 @@ func ReadLightConfigFromFile(file string) Inventory {
 	return *lc
 }
 
-//GetLightByName looks up a light by name
-func GetLightByName(name string) Light {
+//GetByName looks up a light by name
+func GetByName(name string) Light {
 	//TODO: interate over config.Lights using reflect
 	for _, x := range Config.Lights.Hue {
 		if x.GetName() == name {

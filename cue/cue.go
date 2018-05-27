@@ -1,7 +1,9 @@
 package cue
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -57,6 +59,16 @@ func (cm *Master) NewFrameAction(duration time.Duration, color light.RGBColor, l
 	id := cm.CurrentIDs.CueFrameAction
 	cm.CurrentIDs.CueFrameAction++
 	return FrameAction{ID: id, LightName: lightName, NewState: light.State{RGB: color, Duration: duration}}
+}
+
+//DumpToFile write the CueMaster to a file
+func (cm *Master) DumpToFile(fileName string) error {
+	jsonData, err := json.MarshalIndent(cm, "", " ")
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(fileName, jsonData, 0644)
+
 }
 
 //NewFrame creates a new instate with incr ID
@@ -126,25 +138,16 @@ func (cfa *FrameAction) ProcessFrameAction() {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 	log.Printf("[FrameAction #2] processing @ %d (delta=%s) (color=%v) (light=%s)", now, cfa.NewState.Duration, cfa.NewState.RGB.FancyString(), cfa.LightName)
 
-	//TODO: switch based on light type/ID
-	// br := hue.Bridge{
-	// 	Hostname: "10.0.1.55",
-	// 	Username: "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF",
-	// }
-
-	// LightConfig
-
-	l := light.GetLightByName(cfa.LightName)
-	if l != nil {
+	if l := light.GetByName(cfa.LightName); l != nil {
 		//here l is the Light interface.
 		switch lightType := l.GetType(); lightType {
 		case light.TypeDMX:
-			fmt.Println("TODO: properly timee l.SetState for DMX")
+			fmt.Println("TODO: properly time l.SetState for DMX")
 		default:
 			go l.SetState(cfa.NewState)
 		}
 	} else {
-		fmt.Printf("Cannot find lighty by name: %s", cfa.LightName)
+		fmt.Printf("Cannot find light by name: %s", cfa.LightName)
 	}
 
 	time.Sleep(cfa.NewState.Duration)
