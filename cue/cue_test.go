@@ -16,13 +16,13 @@ func TestCueFrameGetDuration(t *testing.T) {
 	}{
 		{Frame{
 			Actions: []FrameAction{
-				{Duration: time.Millisecond, Color: light.RGBColor{}},
+				{NewState: light.State{Duration: time.Millisecond, RGB: light.RGBColor{}}},
 			},
 		}, time.Millisecond},
 		{Frame{
 			Actions: []FrameAction{
-				{Duration: time.Millisecond},
-				{Duration: time.Millisecond * 50},
+				{NewState: light.State{Duration: time.Millisecond}},
+				{NewState: light.State{Duration: time.Millisecond * 50}},
 			},
 		}, time.Millisecond * 50},
 		{Frame{

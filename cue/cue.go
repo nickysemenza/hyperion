@@ -45,8 +45,7 @@ type Frame struct {
 
 //FrameAction is an action within a Cue(Frame) to be executed simultaneously
 type FrameAction struct {
-	Duration  time.Duration
-	Color     light.RGBColor
+	NewState  light.State
 	ID        int64
 	LightName string
 	//TODO: add `light`
@@ -57,7 +56,7 @@ type FrameAction struct {
 func (cm *Master) NewFrameAction(duration time.Duration, color light.RGBColor, lightName string) FrameAction {
 	id := cm.CurrentIDs.CueFrameAction
 	cm.CurrentIDs.CueFrameAction++
-	return FrameAction{ID: id, Duration: duration, Color: color, LightName: lightName}
+	return FrameAction{ID: id, LightName: lightName, NewState: light.State{RGB: color, Duration: duration}}
 }
 
 //NewFrame creates a new instate with incr ID
@@ -104,8 +103,8 @@ func (c *Cue) ProcessCue() {
 func (cf *Frame) GetDuration() time.Duration {
 	longest := time.Duration(0)
 	for _, action := range cf.Actions {
-		if action.Duration > longest {
-			longest = action.Duration
+		if d := action.NewState.Duration; d > longest {
+			longest = d
 		}
 	}
 	return longest
@@ -125,7 +124,7 @@ func (cf *Frame) ProcessFrame() {
 func (cfa *FrameAction) ProcessFrameAction() {
 	//TODO: send dmx, call hue func, etc
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	log.Printf("[FrameAction #2] processing @ %d (delta=%s) (color=%v) (light=%s)", now, cfa.Duration, cfa.Color.FancyString(), cfa.LightName)
+	log.Printf("[FrameAction #2] processing @ %d (delta=%s) (color=%v) (light=%s)", now, cfa.NewState.Duration, cfa.NewState.RGB.FancyString(), cfa.LightName)
 
 	//TODO: switch based on light type/ID
 	// br := hue.Bridge{
@@ -137,7 +136,7 @@ func (cfa *FrameAction) ProcessFrameAction() {
 
 	l := light.GetLightByName(cfa.LightName)
 	if l != nil {
-		go l.SetColor(cfa.Color)
+		go l.SetColor(cfa.NewState.RGB)
 	} else {
 		fmt.Printf("Cannot find lighty by name: %s", cfa.LightName)
 	}
@@ -145,6 +144,6 @@ func (cfa *FrameAction) ProcessFrameAction() {
 	// go br.SetColor(2, cfa.Color, cfa.Duration)
 	// go br.SetColor(1, cfa.Color, cfa.Duration)
 
-	time.Sleep(cfa.Duration)
+	time.Sleep(cfa.NewState.Duration)
 
 }

@@ -2,10 +2,18 @@ package light
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fatih/color"
 	colorful "github.com/lucasb-eyer/go-colorful"
 )
+
+//State represents the state of a light, is source of truth
+type State struct {
+	// On   bool
+	RGB      RGBColor      //RGB color
+	Duration time.Duration //time to transition to the new state
+}
 
 //RGBColor holds RGB values (0-255)
 type RGBColor struct {
