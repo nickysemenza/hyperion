@@ -22,6 +22,7 @@ type RGBColor struct {
 	B int
 }
 
+//FancyString returns a ANSI-color formatted r/g/b string
 func (c *RGBColor) FancyString() string {
 
 	red := color.New(color.BgRed).SprintFunc()
@@ -30,6 +31,7 @@ func (c *RGBColor) FancyString() string {
 	return fmt.Sprintf("%s %s %s", red(c.R), green(c.G), blue(c.B))
 }
 
+//GetXyy returns the RGB color in xyy color space
 func (c *RGBColor) GetXyy() (x, y, Yout float64) {
 	cc := colorful.Color{
 		R: float64(c.R / 255),

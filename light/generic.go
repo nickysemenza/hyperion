@@ -3,16 +3,20 @@ package light
 //GenericLight is for testing
 type GenericLight struct {
 	Name  string `json:"name"`
-	Color RGBColor
+	State State
 }
 
-func (gl *GenericLight) getType() string {
-	return "GenericLight"
-}
-func (gl *GenericLight) getName() string {
+//GetName returns the light's name.
+func (gl *GenericLight) GetName() string {
 	return gl.Name
 }
 
-func (gl *GenericLight) SetColor(c RGBColor) {
-	gl.Color = c
+//GetType returns the type of light.
+func (gl *GenericLight) GetType() string {
+	return TypeGeneric
+}
+
+//SetState updates the light's state.
+func (gl *GenericLight) SetState(s State) {
+	gl.State = s
 }

@@ -15,18 +15,21 @@ type DMXLight struct {
 	Profile      string `json:"profile"`
 }
 
-func (d *DMXLight) getType() string {
-	return "DMX"
-}
-
-func (d *DMXLight) getName() string {
+//GetName returns the light's name.
+func (d *DMXLight) GetName() string {
 	return d.Name
 }
-func (d *DMXLight) SetColor(c RGBColor) {
 
+//GetType returns the type of light.
+func (d *DMXLight) GetType() string {
+	return TypeDMX
 }
 
-func TestSendDmx() {
+//SetState updates the light's state.
+func (d *DMXLight) SetState(s State) {
+}
+
+func testSendDmx() {
 	client := gola.New(Config.Ola.Hostname)
 	defer client.Close()
 

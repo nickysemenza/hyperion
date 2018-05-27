@@ -136,13 +136,16 @@ func (cfa *FrameAction) ProcessFrameAction() {
 
 	l := light.GetLightByName(cfa.LightName)
 	if l != nil {
-		go l.SetColor(cfa.NewState.RGB)
+		//here l is the Light interface.
+		switch lightType := l.GetType(); lightType {
+		case light.TypeDMX:
+			fmt.Println("TODO: properly timee l.SetState for DMX")
+		default:
+			go l.SetState(cfa.NewState)
+		}
 	} else {
 		fmt.Printf("Cannot find lighty by name: %s", cfa.LightName)
 	}
-
-	// go br.SetColor(2, cfa.Color, cfa.Duration)
-	// go br.SetColor(1, cfa.Color, cfa.Duration)
 
 	time.Sleep(cfa.NewState.Duration)
 

@@ -7,7 +7,7 @@ import (
 func TestGenericLightInterface(t *testing.T) {
 	l := &GenericLight{Name: "a"}
 	s := GetLightDebugString(l)
-	expected := "a - GenericLight"
+	expected := "a - generic"
 	if s != expected {
 		t.Errorf("got %s, expected %s", s, expected)
 	}
@@ -15,7 +15,7 @@ func TestGenericLightInterface(t *testing.T) {
 }
 
 func TestFindLightByName(t *testing.T) {
-	lc := &LightConfig{}
+	lc := &Inventory{}
 	generic1 := &GenericLight{Name: "test1"}
 	// dmx1 := &DMXLight{Name: "dmx1"}
 	// hue1 := &HueLight{Name: "hue1"}
@@ -38,7 +38,7 @@ func TestFindLightByName(t *testing.T) {
 		if res == nil && x.expected == nil {
 			continue
 		}
-		if res.getName() != x.expected.getName() {
+		if res.GetName() != x.expected.GetName() {
 			t.Errorf("got %s, expected %s", res, x.expected)
 		}
 	}
