@@ -7,8 +7,8 @@ import (
 )
 
 type Bridge struct {
-	Hostname string
-	Username string
+	Hostname string `json:"hostname"`
+	Username string `json:"username"`
 }
 
 func (br *Bridge) SetColor(lightID int, color RGBColor, timing time.Duration) {

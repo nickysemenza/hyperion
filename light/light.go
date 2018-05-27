@@ -82,12 +82,7 @@ func (hl *HueLight) getType() string {
 	return "hue"
 }
 func (hl *HueLight) SetColor(c RGBColor) {
-	br := Bridge{
-		Hostname: "10.0.1.55",
-		Username: "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF",
-	}
-	br.SetColor(hl.HueID, c, time.Duration(time.Second))
-
+	Config.HueBridge.SetColor(hl.HueID, c, time.Duration(time.Second))
 }
 
 //GenericLight is for testing
@@ -114,6 +109,7 @@ type LightConfig struct {
 		Dmx     []DMXLight     `json:"dmx"`
 		Generic []GenericLight `json:"generic"`
 	} `json:"lights"`
+	HueBridge Bridge `json:"hue"`
 }
 
 var Config LightConfig
