@@ -40,6 +40,7 @@ func main() {
 	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
 	// spew.Dump(CueMaster)
 
+	//go api.ServeRPC(8888)
 	CueMaster.ProcessForever()
 	fmt.Println("faaa")
 
