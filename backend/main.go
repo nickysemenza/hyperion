@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/nickysemenza/hyperion/cue"
-	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/backend/cue"
+	"github.com/nickysemenza/hyperion/backend/light"
 )
 
 func main() {

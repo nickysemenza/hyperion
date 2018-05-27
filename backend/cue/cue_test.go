@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/backend/light"
 	"github.com/stretchr/testify/assert"
 )
 

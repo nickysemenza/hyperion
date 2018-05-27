@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/backend/light"
 )
 
 //Master is the parent of all CueStacks, is a singleton
