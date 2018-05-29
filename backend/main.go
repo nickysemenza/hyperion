@@ -6,6 +6,7 @@ import (
 
 	"github.com/nickysemenza/hyperion/backend/api"
 	"github.com/nickysemenza/hyperion/backend/cue"
+	"github.com/nickysemenza/hyperion/backend/homekit"
 	"github.com/nickysemenza/hyperion/backend/light"
 )
 
@@ -47,6 +48,9 @@ func main() {
 	mainCueStack := getTempCueStack(CueMaster)
 	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
 
+	//Set up Homekit Server
+	go homekit.Start()
+
 	//Set up RPC server
 	//go api.ServeRPC(8888)
 
@@ -54,7 +58,7 @@ func main() {
 	go api.ServeHTTP()
 
 	//proceess cues forever
-	CueMaster.ProcessForever()
+	// CueMaster.ProcessForever()
 	for {
 		time.Sleep(1 * time.Second)
 	}

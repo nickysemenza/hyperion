@@ -12,6 +12,7 @@ Hyperion is a lighting control solution. It is cue-based, heavily inspired by th
 2. gRPC protobuf API
 3. timers
 4. React UI interface
+5. iOS HomeKit
 
 ## Etymology
 (Hyperion)[https://en.wikipedia.org/wiki/Hyperion_(mythology)] is a titan of _heavenly light_. 
