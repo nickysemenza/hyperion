@@ -9,14 +9,7 @@ import (
 	"github.com/nickysemenza/hyperion/backend/light"
 )
 
-func main() {
-	fmt.Println("Hello!")
-
-	light.ReadLightConfigFromFile("./light/testconfig.json")
-
-	cue.CM = cue.Master{}
-	CueMaster := &cue.CM
-
+func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 	mainCueStack := cue.Stack{Priority: 2, Name: "main"}
 	for x := 1; x <= 2; x++ {
 		a := CueMaster.New([]cue.Frame{
@@ -39,14 +32,29 @@ func main() {
 		}, fmt.Sprintf("Cue #%d", x))
 		mainCueStack.Cues = append(mainCueStack.Cues, a)
 	}
+	return mainCueStack
+}
+func main() {
+	fmt.Println("Hello!")
+
+	//read light config
+	//TODO: other config like ports and addresses in another file?
+	light.ReadLightConfigFromFile("./light/testconfig.json")
+
+	//Set up cue stacks
+	cue.CM = cue.Master{}
+	CueMaster := &cue.CM
+	mainCueStack := getTempCueStack(CueMaster)
 	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
-	// spew.Dump(CueMaster)
 
+	//Set up RPC server
 	//go api.ServeRPC(8888)
-	go api.ServeHTTP()
-	// CueMaster.ProcessForever()
-	fmt.Println("faaa")
 
+	//Setup API server
+	go api.ServeHTTP()
+
+	//proceess cues forever
+	CueMaster.ProcessForever()
 	for {
 		time.Sleep(1 * time.Second)
 	}
