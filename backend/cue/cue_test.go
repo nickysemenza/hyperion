@@ -44,3 +44,11 @@ func TestCueFrameGetDuration(t *testing.T) {
 
 	}
 }
+func BenchmarkCueFrameProcessing(b *testing.B) {
+	actions := []FrameAction{}
+	for i := 0; i < b.N; i++ {
+		actions = append(actions, FrameAction{NewState: light.State{Duration: 0, RGB: light.RGBColor{}}})
+	}
+	frame := Frame{Actions: actions}
+	frame.ProcessFrame()
+}

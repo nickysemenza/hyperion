@@ -151,27 +151,20 @@ func (cf *Frame) ProcessFrame() {
 	for x := range cf.Actions {
 		go cf.Actions[x].ProcessFrameAction()
 	}
+	//no blocking, so wait until all the child frames have theoretically finished
 	time.Sleep(cf.GetDuration())
 }
 
 //ProcessFrameAction does job stuff
 func (cfa *FrameAction) ProcessFrameAction() {
-	//TODO: send dmx, call hue func, etc
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	log.Printf("[FrameAction #%d] processing @ %d (delta=%s) (color=%v) (light=%s)", cfa.ID, now, cfa.NewState.Duration, cfa.NewState.RGB.FancyString(), cfa.LightName)
+	log.Printf("[FrameAction #%d] processing @ %d (delta=%s) (color=%v) (light=%s)\n", cfa.ID, now, cfa.NewState.Duration, cfa.NewState.RGB.FancyString(), cfa.LightName)
 
 	if l := light.GetByName(cfa.LightName); l != nil {
-		//here l is the Light interface.
-		switch lightType := l.GetType(); lightType {
-		case light.TypeDMX:
-			fmt.Println("TODO: properly time l.SetState for DMX")
-		default:
-			go l.SetState(cfa.NewState)
-		}
+		go l.SetState(cfa.NewState)
 	} else {
-		fmt.Printf("Cannot find light by name: %s", cfa.LightName)
+		fmt.Printf("Cannot find light by name: %s\n", cfa.LightName)
 	}
-
+	//goroutine doesn't block, so hold until the SetState has (hopefully) finished timing-wise
 	time.Sleep(cfa.NewState.Duration)
-
 }

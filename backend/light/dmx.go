@@ -34,6 +34,7 @@ func (d *DMXLight) SetState(s State) {
 	//	get r/g/b channels based on mapping
 	//	call setDMXValue on given channels
 	//	other properties? on/off?
+	//properly time l.SetState for DMX
 }
 
 //dmxState holds the DMX512 values for each channel
