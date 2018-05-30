@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/nickysemenza/hyperion/backend/cue"
 	"github.com/nickysemenza/hyperion/backend/light"
 )
@@ -23,6 +25,30 @@ func getLightInventory(c *gin.Context) {
 	c.JSON(200, light.Config)
 }
 
+var wsupgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func wshandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := wsupgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("Failed to set websocket upgrade: %+v", err)
+		return
+	}
+
+	for {
+		t, msg, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+		conn.WriteMessage(t, msg)
+	}
+}
+
 //ServeHTTP runs the gin server
 func ServeHTTP() {
 
@@ -34,6 +60,9 @@ func ServeHTTP() {
 
 	router.GET("/ping", aa("ff"))
 	router.GET("/lights", getLightInventory)
+	router.GET("/ws", func(c *gin.Context) {
+		wshandler(c.Writer, c.Request)
+	})
 
 	srv := &http.Server{
 		Addr:    ":8080",

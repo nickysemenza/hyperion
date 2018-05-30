@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import Home from './pages/static/Home';
 import LightList from './pages/LightList';
+import WSTest from './pages/WSTest';
 import Nav from './components/Nav';
 import { Container } from 'semantic-ui-react';
 import ReduxToastr from 'react-redux-toastr';
@@ -26,6 +27,7 @@ const App = () => (
       >
         <Switch>
           <Route exact path="/" component={Home} />
+          <Route path="/wstest" component={WSTest}/>
           <Route path="/lights" component={LightList} />
         </Switch>
       </Container>
