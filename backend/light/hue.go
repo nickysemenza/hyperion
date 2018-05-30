@@ -1,6 +1,7 @@
 package light
 
 import (
+	"sync"
 	"time"
 
 	"github.com/heatxsink/go-hue/lights"
@@ -11,7 +12,7 @@ type HueLight struct {
 	HueID int    `json:"hue_id"`
 	Name  string `json:"name"`
 	State State  `json:"state"`
-	Test  int
+	m     sync.Mutex
 }
 
 //GetName returns the light's name.
@@ -26,9 +27,11 @@ func (hl *HueLight) GetType() string {
 
 //SetState updates the Hue's state.
 func (hl *HueLight) SetState(s State) {
+	hl.m.Lock()
+	defer hl.m.Unlock()
+
 	hl.State = s
-	hl.Test++
-	Config.HueBridge.SetColor(hl.HueID, s.RGB, s.Duration)
+	go Config.HueBridge.SetColor(hl.HueID, s.RGB, s.Duration)
 }
 
 //HueBridge holds credentials for communicating with hues.
