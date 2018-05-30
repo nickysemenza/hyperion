@@ -16,6 +16,8 @@ import (
 	"github.com/nickysemenza/hyperion/backend/light"
 )
 
+const wsInterval = 80 * time.Millisecond
+
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
 		c.JSON(200, cue.CM)
@@ -39,6 +41,13 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Failed to set websocket upgrade: %+v", err)
 		return
 	}
+
+	go func() {
+		for {
+			conn.WriteJSON(light.WrapperMap)
+			time.Sleep(wsInterval)
+		}
+	}()
 
 	for {
 		t, msg, err := conn.ReadMessage()

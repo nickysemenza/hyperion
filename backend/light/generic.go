@@ -3,7 +3,7 @@ package light
 //GenericLight is for testing
 type GenericLight struct {
 	Name  string `json:"name"`
-	State State
+	State State  `json:"state"`
 }
 
 //GetName returns the light's name.

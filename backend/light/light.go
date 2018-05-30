@@ -16,7 +16,7 @@ type Light interface {
 
 //Wrapper holds Lights
 type Wrapper struct {
-	Light Light
+	Light Light `json:"light"`
 }
 
 //constants for the different types of lights
