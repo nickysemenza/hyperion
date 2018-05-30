@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -15,7 +14,8 @@ type Light interface {
 	SetState(State)
 }
 
-type LightWrapper struct {
+//Wrapper holds Lights
+type Wrapper struct {
 	Light Light
 }
 
@@ -48,7 +48,8 @@ type Inventory struct {
 //Config is a global var containing the current lights
 var Config Inventory
 
-var WrapperMap map[string]LightWrapper
+//WrapperMap holds a name-keyed map of LightWrappers
+var WrapperMap map[string]Wrapper
 
 //ReadLightConfigFromFile reads a config.json
 func ReadLightConfigFromFile(file string) Inventory {
@@ -64,19 +65,17 @@ func ReadLightConfigFromFile(file string) Inventory {
 	}
 	lc.Loaded = true
 
-	WrapperMap = make(map[string]LightWrapper)
+	WrapperMap = make(map[string]Wrapper)
+	for i, x := range lc.Lights.Hue {
+		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Hue[i]}
+	}
+	for i, x := range lc.Lights.Dmx {
+		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Dmx[i]}
+	}
+	for i, x := range lc.Lights.Generic {
+		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Generic[i]}
+	}
 
-	for _, x := range lc.Lights.Hue {
-		WrapperMap[x.GetName()] = LightWrapper{&x}
-	}
-	for _, x := range lc.Lights.Dmx {
-		WrapperMap[x.GetName()] = LightWrapper{&x}
-	}
-	for _, x := range lc.Lights.Generic {
-		WrapperMap[x.GetName()] = LightWrapper{&x}
-	}
-
-	log.Println(WrapperMap)
 	Config = *lc
 	return *lc
 

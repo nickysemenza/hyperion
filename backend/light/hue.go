@@ -11,6 +11,7 @@ type HueLight struct {
 	HueID int    `json:"hue_id"`
 	Name  string `json:"name"`
 	State State  `json:"state"`
+	Test  int
 }
 
 //GetName returns the light's name.
@@ -26,6 +27,7 @@ func (hl *HueLight) GetType() string {
 //SetState updates the Hue's state.
 func (hl *HueLight) SetState(s State) {
 	hl.State = s
+	hl.Test++
 	Config.HueBridge.SetColor(hl.HueID, s.RGB, s.Duration)
 }
 
