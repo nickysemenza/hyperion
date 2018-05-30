@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { API_BASE_URL } from '../config';
+import { WS_URL } from '../config';
 
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -11,7 +11,7 @@ class WSTest extends Component {
     lights: {}
   };
   componentDidMount() {
-    const ws = new Sockette('ws://localhost:8080/ws', {
+    const ws = new Sockette(WS_URL, {
       timeout: 5e3,
       maxAttempts: 10,
       onopen: e => {
