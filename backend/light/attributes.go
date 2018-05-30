@@ -15,15 +15,29 @@ type State struct {
 	Duration time.Duration `json:"duration"` //time to transition to the new state
 }
 
-//RGBColor holds RGB values (0-255)
+func (s *State) String() string {
+	return fmt.Sprintf("Duration: %s, RGB: %s", s.Duration, s.RGB.String())
+}
+
+//RGBColor holds RGB values (0-255, although they can be negative in the case of a delta)
 type RGBColor struct {
 	R int `json:"r"`
 	G int `json:"g"`
 	B int `json:"b"`
 }
 
-//FancyString returns a ANSI-color formatted r/g/b string
-func (c *RGBColor) FancyString() string {
+//DeltaTo returns a RGBColor that represents
+//	the transformation necessary for a color to become the target
+func (c *RGBColor) DeltaTo(target RGBColor) RGBColor {
+	return RGBColor{
+		R: target.R - c.R,
+		G: target.G - c.G,
+		B: target.B - c.B,
+	}
+}
+
+//String returns a ANSI-color formatted r/g/b string
+func (c *RGBColor) String() string {
 
 	red := color.New(color.BgRed).SprintFunc()
 	green := color.New(color.BgGreen).SprintFunc()
