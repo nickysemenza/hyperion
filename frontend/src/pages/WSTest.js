@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { WS_URL } from '../config';
-
+import moment from 'moment';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import LightState from '../components/LightState';
@@ -8,9 +8,17 @@ import Sockette from 'sockette';
 
 class WSTest extends Component {
   state = {
-    lights: {}
+    lights: {},
+    curTime: null
   };
   componentDidMount() {
+    setInterval( () => {
+        this.setState({
+        //   curTime : moment().valueOf() 
+        curTime : moment().format("HH:mm:ss:SS (x)")
+        })
+      },10)
+
     const ws = new Sockette(WS_URL, {
       timeout: 5e3,
       maxAttempts: 10,
@@ -19,7 +27,7 @@ class WSTest extends Component {
         ws.send('hi');
       },
       onmessage: e => {
-        console.log('Received:', e);
+        // console.log('Received:', e);
         try {
           let lights = JSON.parse(e.data);
           this.setState({ lights });
@@ -45,7 +53,7 @@ class WSTest extends Component {
       <div>
         hello
         {lightDetail}
-        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+        <pre>{JSON.stringify(this.state.curTime, null, 2)}</pre>
       </div>
     );
   }

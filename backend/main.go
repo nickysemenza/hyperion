@@ -31,7 +31,7 @@ func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 			}),
 			CueMaster.NewFrame([]cue.FrameAction{
 				CueMaster.NewFrameAction(time.Second*2, light.RGBColor{B: 255}, "hue1"),
-				CueMaster.NewFrameAction(0, light.RGBColor{B: 255}, "hue2"),
+				CueMaster.NewFrameAction(time.Second*2, light.RGBColor{B: 255}, "hue2"),
 			}),
 		}, fmt.Sprintf("Cue #%d", x))
 		mainCueStack.Cues = append(mainCueStack.Cues, a)
