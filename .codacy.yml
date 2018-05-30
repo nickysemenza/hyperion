@@ -1,0 +1,3 @@
+exclude_paths:
+  - 'frontend/src/registerServiceWorker.js'
+  - '**.pb.go'
