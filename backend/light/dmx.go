@@ -14,6 +14,7 @@ type DMXLight struct {
 	NumChannels  int    `json:"num_channels"`
 	Universe     int    `json:"universe"`
 	Profile      string `json:"profile"`
+	State        State  `json:"state"`
 }
 
 //GetName returns the light's name.
@@ -28,6 +29,7 @@ func (d *DMXLight) GetType() string {
 
 //SetState updates the light's state.
 func (d *DMXLight) SetState(s State) {
+	d.State = s
 	//TODO:
 	//	get r/g/b channels based on mapping
 	//	call setDMXValue on given channels

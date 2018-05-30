@@ -22,7 +22,7 @@ func aa(b string) func(*gin.Context) {
 	}
 }
 func getLightInventory(c *gin.Context) {
-	c.JSON(200, light.Config)
+	c.JSON(200, light.WrapperMap)
 }
 
 var wsupgrader = websocket.Upgrader{

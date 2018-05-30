@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -12,6 +13,10 @@ type Light interface {
 	GetName() string
 	GetType() string
 	SetState(State)
+}
+
+type LightWrapper struct {
+	Light Light
 }
 
 //constants for the different types of lights
@@ -43,6 +48,8 @@ type Inventory struct {
 //Config is a global var containing the current lights
 var Config Inventory
 
+var WrapperMap map[string]LightWrapper
+
 //ReadLightConfigFromFile reads a config.json
 func ReadLightConfigFromFile(file string) Inventory {
 	raw, err := ioutil.ReadFile(file)
@@ -57,26 +64,29 @@ func ReadLightConfigFromFile(file string) Inventory {
 	}
 	lc.Loaded = true
 
+	WrapperMap = make(map[string]LightWrapper)
+
+	for _, x := range lc.Lights.Hue {
+		WrapperMap[x.GetName()] = LightWrapper{&x}
+	}
+	for _, x := range lc.Lights.Dmx {
+		WrapperMap[x.GetName()] = LightWrapper{&x}
+	}
+	for _, x := range lc.Lights.Generic {
+		WrapperMap[x.GetName()] = LightWrapper{&x}
+	}
+
+	log.Println(WrapperMap)
 	Config = *lc
 	return *lc
+
 }
 
 //GetByName looks up a light by name
 func GetByName(name string) Light {
-	//TODO: interate over config.Lights using reflect
-	for _, x := range Config.Lights.Hue {
-		if x.GetName() == name {
-			return &x
-		}
-	}
-	for _, x := range Config.Lights.Dmx {
-		if x.GetName() == name {
-			return &x
-		}
-	}
-	for _, x := range Config.Lights.Generic {
-		if x.GetName() == name {
-			return &x
+	for _, x := range WrapperMap {
+		if x.Light.GetName() == name {
+			return x.Light
 		}
 	}
 	return nil

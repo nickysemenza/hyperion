@@ -15,20 +15,17 @@ func TestGenericLightInterface(t *testing.T) {
 }
 
 func TestFindLightByName(t *testing.T) {
-	lc := &Inventory{}
-	generic1 := &GenericLight{Name: "test1"}
 	dmx1 := &DMXLight{Name: "dmx1"}
 	hue1 := &HueLight{Name: "hue1"}
-	lc.Lights.Generic = []GenericLight{*generic1}
-	lc.Lights.Hue = []HueLight{*hue1}
-	lc.Lights.Dmx = []DMXLight{*dmx1}
 
-	Config = *lc
+	WrapperMap = make(map[string]LightWrapper)
+	WrapperMap["hue1"] = LightWrapper{hue1}
+	WrapperMap["dmx1"] = LightWrapper{dmx1}
+
 	tt := []struct {
 		nameToFind string
 		expected   Light
 	}{
-		{"test1", generic1},
 		{"hue1", hue1},
 		{"dmx1", dmx1},
 		{"aaa", nil},
