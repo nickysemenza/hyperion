@@ -10,7 +10,7 @@ before_install:
 install:
 - npm install -g yarn
 - cd backend/
-- go get ./...
+- go get -t ./...
 - cd ..
 before_script:
 - cd frontend/

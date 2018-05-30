@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 echo "" > coverage.txt
 export TESTMODE=true
