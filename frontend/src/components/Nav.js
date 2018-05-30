@@ -7,7 +7,7 @@ const Nav = ({ user }) => (
   <Menu fixed="top" inverted>
     <Container>
       <Menu.Item as={NavLink} to="/" exact header>
-       hyperion 
+        hyperion
       </Menu.Item>
       <Menu.Item as={NavLink} to="/lights">
         Lights

@@ -27,7 +27,7 @@ const App = () => (
       >
         <Switch>
           <Route exact path="/" component={Home} />
-          <Route path="/wstest" component={WSTest}/>
+          <Route path="/wstest" component={WSTest} />
           <Route path="/lights" component={LightList} />
         </Switch>
       </Container>

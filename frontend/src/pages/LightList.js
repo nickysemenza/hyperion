@@ -10,45 +10,45 @@ class LightList extends Component {
     this.props.fetchLightList();
   }
   render() {
-    let { config} = this.props;
-    let {lights} = config;
+    let { config } = this.props;
+    let { lights } = config;
 
-    let data = []
-    const types = ["hue","dmx","generic"];
-    for(let x in types) {
+    let data = [];
+    const types = ['hue', 'dmx', 'generic'];
+    for (let x in types) {
       let type = types[x];
-      let lightsOfType = lights[type]
+      let lightsOfType = lights[type];
 
-      for(let y in lightsOfType) {
-        let eachLight = lightsOfType[y]
-        let {name, ...meta} = eachLight
-        data.push({name, meta, type, key: name})
+      for (let y in lightsOfType) {
+        let eachLight = lightsOfType[y];
+        let { name, ...meta } = eachLight;
+        data.push({ name, meta, type, key: name });
       }
     }
-    const tableRows = data.map(x=><Table.Row key={x.name}>
-      <Table.Cell>{x.name}</Table.Cell>
-      <Table.Cell>{x.type}</Table.Cell>
-      <Table.Cell><pre>{JSON.stringify(x.meta, null, 2)}</pre></Table.Cell>
-    </Table.Row>)
-
+    const tableRows = data.map(x => (
+      <Table.Row key={x.name}>
+        <Table.Cell>{x.name}</Table.Cell>
+        <Table.Cell>{x.type}</Table.Cell>
+        <Table.Cell>
+          <pre>{JSON.stringify(x.meta, null, 2)}</pre>
+        </Table.Cell>
+      </Table.Row>
+    ));
 
     return (
       <div>
         <Table celled>
-    <Table.Header>
-      <Table.Row>
-        <Table.HeaderCell>Name</Table.HeaderCell>
-        <Table.HeaderCell>Type</Table.HeaderCell>
-        <Table.HeaderCell>Meta</Table.HeaderCell>
-      </Table.Row>
-    </Table.Header>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Name</Table.HeaderCell>
+              <Table.HeaderCell>Type</Table.HeaderCell>
+              <Table.HeaderCell>Meta</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
 
-    <Table.Body>
-     {tableRows} 
-    </Table.Body>
-    </Table>
-    </div>
-
+          <Table.Body>{tableRows}</Table.Body>
+        </Table>
+      </div>
     );
   }
 }
