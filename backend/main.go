@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/nickysemenza/hyperion/backend/api"
@@ -11,7 +14,7 @@ import (
 )
 
 func getTempCueStack(CueMaster *cue.Master) cue.Stack {
-	mainCueStack := cue.Stack{Priority: 2, Name: "main"}
+	mainCueStack := CueMaster.NewStack(2, "main")
 	for x := 1; x <= 2; x++ {
 		a := CueMaster.New([]cue.Frame{
 			CueMaster.NewFrame([]cue.FrameAction{
@@ -58,7 +61,18 @@ func main() {
 	go api.ServeHTTP()
 
 	//proceess cues forever
-	// CueMaster.ProcessForever()
+	CueMaster.ProcessForever()
+
+	//handle CTRL+C
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	go func() {
+		<-quit
+		log.Println("Shutdown hyperion ...")
+		os.Exit(0)
+	}()
+
+	//keep going
 	for {
 		time.Sleep(1 * time.Second)
 	}
