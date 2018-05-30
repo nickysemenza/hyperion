@@ -36,10 +36,11 @@ func Start() {
 	}
 
 	//add some handlers for the switches...
-	for i, s := range switches {
-		s.Switch.On.OnValueRemoteUpdate(func(on bool) {
+	for i := range switches {
+		eachSwitch := switches[i]
+		eachSwitch.Switch.On.OnValueRemoteUpdate(func(on bool) {
 			//TODO: call some code...
-			log.Printf("[homekit] changed: [%s] to %t", switches[i].Accessory.Info.Name.String.GetValue(), on)
+			log.Printf("[homekit] changed: [%s] to %t", eachSwitch.Accessory.Info.Name.String.GetValue(), on)
 		})
 	}
 
