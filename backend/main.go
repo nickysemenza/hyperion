@@ -7,7 +7,9 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/nickysemenza/hyperion/backend/api"
+	"github.com/nickysemenza/hyperion/backend/color"
 	"github.com/nickysemenza/hyperion/backend/cue"
 	"github.com/nickysemenza/hyperion/backend/homekit"
 	"github.com/nickysemenza/hyperion/backend/light"
@@ -15,27 +17,40 @@ import (
 
 func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 	mainCueStack := CueMaster.NewStack(2, "main")
-	for x := 1; x <= 2; x++ {
-		a := CueMaster.New([]cue.Frame{
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Millisecond*1500, light.RGBColor{R: 255}, "hue1"),
-				CueMaster.NewFrameAction(0, light.RGBColor{R: 255}, "hue2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Second*time.Duration(x), light.RGBColor{G: 255}, "hue1"),
-				CueMaster.NewFrameAction(0, light.RGBColor{B: 255}, "hue2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(0, light.RGBColor{B: 255}, "hue1"),
-				CueMaster.NewFrameAction(0, light.RGBColor{R: 255}, "hue2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Second*2, light.RGBColor{B: 255}, "hue1"),
-				CueMaster.NewFrameAction(time.Second*2, light.RGBColor{B: 255}, "hue2"),
-			}),
-		}, fmt.Sprintf("Cue #%d", x))
-		mainCueStack.Cues = append(mainCueStack.Cues, a)
-	}
+	// for x := 1; x <= 2; x++ {
+	// 	a := CueMaster.New([]cue.Frame{
+	// 		CueMaster.NewFrame([]cue.FrameAction{
+	// 			CueMaster.NewFrameAction(time.Millisecond*1500, color.RGBColor{R: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(0, color.RGBColor{R: 255}, "hue2"),
+	// 		}),
+	// 		CueMaster.NewFrame([]cue.FrameAction{
+	// 			CueMaster.NewFrameAction(time.Second*time.Duration(x), color.RGBColor{G: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(0, color.RGBColor{B: 255}, "hue2"),
+	// 		}),
+	// 		CueMaster.NewFrame([]cue.FrameAction{
+	// 			CueMaster.NewFrameAction(0, color.RGBColor{B: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(0, color.RGBColor{R: 255}, "hue2"),
+	// 		}),
+	// 		CueMaster.NewFrame([]cue.FrameAction{
+	// 			CueMaster.NewFrameAction(time.Second*2, color.RGBColor{B: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(time.Second*2, color.RGBColor{B: 255}, "hue2"),
+	// 		}),
+	// 	}, fmt.Sprintf("Cue #%d", x))
+	// 	mainCueStack.Cues = append(mainCueStack.Cues, a)
+	// }
+	a := CueMaster.New([]cue.Frame{
+		CueMaster.NewFrame([]cue.FrameAction{
+			CueMaster.NewFrameAction(time.Millisecond*2500, color.RGBColor{0, 255, 100}, "par1"),
+			CueMaster.NewFrameAction(time.Millisecond*2500, color.RGBColor{0, 255, 100}, "par2"),
+		}),
+		CueMaster.NewFrame([]cue.FrameAction{
+			CueMaster.NewFrameAction(time.Millisecond*8500, color.RGBColor{255, 111, 37}, "par1"),
+		}),
+		CueMaster.NewFrame([]cue.FrameAction{
+			CueMaster.NewFrameAction(time.Millisecond*8500, color.RGBColor{1, 1, 255}, "par1"),
+		}),
+	}, "Cue 1")
+	mainCueStack.Cues = append(mainCueStack.Cues, a)
 	return mainCueStack
 }
 func main() {
@@ -44,6 +59,8 @@ func main() {
 	//read light config
 	//TODO: other config like ports and addresses in another file?
 	light.ReadLightConfigFromFile("./light/testconfig.json")
+
+	spew.Dump(light.Config)
 
 	//Set up cue stacks
 	cue.CM = cue.Master{}
@@ -62,6 +79,8 @@ func main() {
 
 	//proceess cues forever
 	CueMaster.ProcessForever()
+
+	go light.SendDMXValuesToOLA()
 
 	//handle CTRL+C
 	quit := make(chan os.Signal)

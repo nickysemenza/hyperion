@@ -1,23 +1,11 @@
-package light
+package color
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/fatih/color"
 	colorful "github.com/lucasb-eyer/go-colorful"
 )
-
-//State represents the state of a light, is source of truth
-type State struct {
-	// On   bool
-	RGB      RGBColor      `json:"rgb"`      //RGB color
-	Duration time.Duration `json:"duration"` //time to transition to the new state
-}
-
-func (s *State) String() string {
-	return fmt.Sprintf("Duration: %s, RGB: %s", s.Duration, s.RGB.String())
-}
 
 //RGBColor holds RGB values (0-255, although they can be negative in the case of a delta)
 type RGBColor struct {
@@ -26,11 +14,11 @@ type RGBColor struct {
 	B int `json:"b"`
 }
 
-func (c *RGBColor) asColorful() colorful.Color {
+func (c *RGBColor) AsColorful() colorful.Color {
 	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
 }
 
-func getRGBFromColorful(c colorful.Color) RGBColor {
+func GetRGBFromColorful(c colorful.Color) RGBColor {
 	return RGBColor{
 		R: int(c.R * 255),
 		G: int(c.G * 255),

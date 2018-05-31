@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
+
+	"github.com/nickysemenza/hyperion/backend/color"
 )
 
 //Light is a light
@@ -25,6 +28,17 @@ const (
 	TypeDMX     = "DMX"
 	TypeGeneric = "generic"
 )
+
+//State represents the state of a light, is source of truth
+type State struct {
+	// On   bool
+	RGB      color.RGBColor `json:"rgb"`      //RGB color
+	Duration time.Duration  `json:"duration"` //time to transition to the new state
+}
+
+func (s *State) String() string {
+	return fmt.Sprintf("Duration: %s, RGB: %s", s.Duration, s.RGB.String())
+}
 
 //GetLightDebugString gives info
 func GetLightDebugString(l Light) string {

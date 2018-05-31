@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nickysemenza/gola"
+	"github.com/nickysemenza/hyperion/backend/color"
 )
 
 //Holds strings for the different channel types
@@ -54,7 +55,7 @@ func (d *DMXLight) GetType() string {
 }
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
-func (d *DMXLight) blindlySetRGBToStateAndDMX(color RGBColor) {
+func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGBColor) {
 	rChan, gChan, bChan := d.getRGBChannelIDs()
 	rVal, gVal, bVal := color.AsComponents()
 
@@ -75,12 +76,12 @@ func (d *DMXLight) SetState(target State) {
 
 	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.String(), target.String(), numSteps)
 
-	c1 := currentState.RGB.asColorful()
-	c2 := target.RGB.asColorful()
+	c1 := currentState.RGB.AsColorful()
+	c2 := target.RGB.AsColorful()
 
 	for x := 1; x <= numSteps; x++ {
 		interpolatedColor := c1.BlendHcl(c2, float64(x)/float64(numSteps)).Clamped()
-		interpolatedRGB := getRGBFromColorful(interpolatedColor)
+		interpolatedRGB := color.GetRGBFromColorful(interpolatedColor)
 
 		//keep state updated:
 		d.blindlySetRGBToStateAndDMX(interpolatedRGB)

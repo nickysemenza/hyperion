@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nickysemenza/hyperion/backend/color"
 	"github.com/nickysemenza/hyperion/backend/light"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,7 +17,7 @@ func TestCueFrameGetDuration(t *testing.T) {
 	}{
 		{Frame{
 			Actions: []FrameAction{
-				{NewState: light.State{Duration: time.Millisecond, RGB: light.RGBColor{}}},
+				{NewState: light.State{Duration: time.Millisecond, RGB: color.RGBColor{}}},
 			},
 		}, time.Millisecond},
 		{Frame{
@@ -47,7 +48,7 @@ func TestCueFrameGetDuration(t *testing.T) {
 func BenchmarkCueFrameProcessing(b *testing.B) {
 	actions := []FrameAction{}
 	for i := 0; i < b.N; i++ {
-		actions = append(actions, FrameAction{NewState: light.State{Duration: 0, RGB: light.RGBColor{}}})
+		actions = append(actions, FrameAction{NewState: light.State{Duration: 0, RGB: color.RGBColor{}}})
 	}
 	frame := Frame{Actions: actions}
 	frame.ProcessFrame()

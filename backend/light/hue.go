@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/heatxsink/go-hue/lights"
+	"github.com/nickysemenza/hyperion/backend/color"
 )
 
 //HueLight is a philips hue light.
@@ -41,7 +42,7 @@ type HueBridge struct {
 }
 
 //SetColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
-func (br *HueBridge) SetColor(lightID int, color RGBColor, timing time.Duration) {
+func (br *HueBridge) SetColor(lightID int, color color.RGBColor, timing time.Duration) {
 	x, y, _ := color.GetXyy()
 	state := &lights.State{
 		XY:             []float32{float32(x), float32(y)},
