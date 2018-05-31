@@ -4,6 +4,21 @@ import (
 	"testing"
 )
 
+func TestDMXAttributeChannels(t *testing.T) {
+	tt := []struct {
+		profile  dmxProfile
+		name     string
+		expected int
+	}{
+		{dmxProfile{Channels: []string{"red", "green"}}, "red", 0},
+	}
+	for _, tc := range tt {
+		res := tc.profile.getChannelIndexForAttribute(tc.name)
+		if res != tc.expected {
+			t.Errorf("got channel index %d, expected %d", res, tc.expected)
+		}
+	}
+}
 func TestDMX(t *testing.T) {
 	s1 := getDMXStateInstance()
 	s1.setDMXValue(2, 22, 40)

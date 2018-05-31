@@ -23,25 +23,21 @@ const (
 type DMXLight struct {
 	Name         string `json:"name"`
 	StartAddress int    `json:"start_address"`
-	NumChannels  int    `json:"num_channels"`
 	Universe     int    `json:"universe"`
 	Profile      string `json:"profile"`
 	State        State  `json:"state"`
 }
 
+func (d *DMXLight) getProfile() *dmxProfile {
+	return getDMXProfileByName(d.Profile)
+}
+
 func (d *DMXLight) getChannelIDForAttribute(attr string) int {
-	switch attr {
-	case ChannelRed:
-		return 1
-	case ChannelGreen:
-		return 2
-	case ChannelBlue:
-		return 3
-	}
-	return 0 //TODO: error
+	profile := d.getProfile()
+	channelIndex := profile.getChannelIndexForAttribute(attr)
+	return d.StartAddress + channelIndex
 }
 func (d *DMXLight) getRGBChannelIDs() (int, int, int) {
-	//TODO: get channels based on profile
 	return d.getChannelIDForAttribute(ChannelRed),
 		d.getChannelIDForAttribute(ChannelGreen),
 		d.getChannelIDForAttribute(ChannelBlue)
@@ -146,4 +142,29 @@ func SendDMXValuesToOLA() {
 		}
 		time.Sleep(tickIntervalSendToOLA)
 	}
+}
+
+type dmxProfile struct {
+	Name         string   `json:"name"`
+	Capabilities []string `json:"capabilities"`
+	Channels     []string `json:"channels"`
+}
+
+func (p *dmxProfile) getChannelIndexForAttribute(attrName string) int {
+
+	for i, x := range p.Channels {
+		if attrName == x {
+			return i
+		}
+	}
+	return -1
+}
+
+func getDMXProfileByName(name string) *dmxProfile {
+	for _, x := range dmxProfilesMap {
+		if x.Name == name {
+			return &x
+		}
+	}
+	return nil
 }

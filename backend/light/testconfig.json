@@ -14,14 +14,12 @@
       {
         "name": "par1",
         "start_address": 2,
-        "num_channels": 4,
         "universe": 1,
         "profile": "china-par-1"
       },
       {
         "name": "par2",
         "start_address": 8,
-        "num_channels": 4,
         "universe": 1,
         "profile": "china-par-1"
       }],
@@ -36,5 +34,19 @@
     },
     "ola": {
       "hostname": "localhost:9010"
+    },
+    "profiles": [
+    {
+      "name": "china-par-1",
+      "capabilities": [
+        "rgbw"
+      ],
+      "channels": [
+        "",
+        "red",
+        "green",
+        "blue"
+      ]
     }
+    ]
   }

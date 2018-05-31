@@ -43,6 +43,7 @@ type Inventory struct {
 	Ola       struct {
 		Hostname string `json:"hostname"`
 	} `json:"ola"`
+	Profiles []dmxProfile `json:"profiles"`
 }
 
 //Config is a global var containing the current lights
@@ -50,6 +51,8 @@ var Config Inventory
 
 //WrapperMap holds a name-keyed map of LightWrappers
 var WrapperMap map[string]Wrapper
+
+var dmxProfilesMap map[string]dmxProfile
 
 //ReadLightConfigFromFile reads a config.json
 func ReadLightConfigFromFile(file string) Inventory {
@@ -65,9 +68,17 @@ func ReadLightConfigFromFile(file string) Inventory {
 	}
 	lc.Loaded = true
 
+	//parse dmx profiles
+	dmxProfilesMap = make(map[string]dmxProfile)
+	for _, item := range lc.Profiles {
+		dmxProfilesMap[item.Name] = item
+	}
+
+	//parse lights
 	WrapperMap = make(map[string]Wrapper)
-	for i, x := range lc.Lights.Hue {
-		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Hue[i]}
+	for i := range lc.Lights.Hue {
+		h := &lc.Lights.Hue[i]
+		WrapperMap[h.GetName()] = Wrapper{h}
 	}
 	for i, x := range lc.Lights.Dmx {
 		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Dmx[i]}
