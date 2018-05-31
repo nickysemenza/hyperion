@@ -158,7 +158,7 @@ func (cf *Frame) ProcessFrame() {
 //ProcessFrameAction does job stuff
 func (cfa *FrameAction) ProcessFrameAction() {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	log.Printf("[FrameAction #%d] processing @ %d (delta=%s) (color=%v) (light=%s)\n", cfa.ID, now, cfa.NewState.Duration, cfa.NewState.RGB.FancyString(), cfa.LightName)
+	log.Printf("[FrameAction #%d] processing @ %d (delta=%s) (color=%v) (light=%s)\n", cfa.ID, now, cfa.NewState.Duration, cfa.NewState.RGB.String(), cfa.LightName)
 
 	if l := light.GetByName(cfa.LightName); l != nil {
 		go l.SetState(cfa.NewState)

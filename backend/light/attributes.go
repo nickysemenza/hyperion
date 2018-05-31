@@ -26,14 +26,21 @@ type RGBColor struct {
 	B int `json:"b"`
 }
 
-//DeltaTo returns a RGBColor that represents
-//	the transformation necessary for a color to become the target
-func (c *RGBColor) DeltaTo(target RGBColor) RGBColor {
+func (c *RGBColor) asColorful() colorful.Color {
+	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
+}
+
+func getRGBFromColorful(c colorful.Color) RGBColor {
 	return RGBColor{
-		R: target.R - c.R,
-		G: target.G - c.G,
-		B: target.B - c.B,
+		R: int(c.R * 255),
+		G: int(c.G * 255),
+		B: int(c.B * 255),
 	}
+}
+
+//AsComponents returns the seperate r, g, b
+func (c *RGBColor) AsComponents() (int, int, int) {
+	return c.R, c.G, c.B
 }
 
 //String returns a ANSI-color formatted r/g/b string
