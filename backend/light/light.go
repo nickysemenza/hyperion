@@ -32,8 +32,8 @@ const (
 //State represents the state of a light, is source of truth
 type State struct {
 	// On   bool
-	RGB      color.RGBColor `json:"rgb"`      //RGB color
-	Duration time.Duration  `json:"duration"` //time to transition to the new state
+	RGB      color.RGB     `json:"rgb"`      //RGB color
+	Duration time.Duration `json:"duration"` //time to transition to the new state
 }
 
 func (s *State) String() string {

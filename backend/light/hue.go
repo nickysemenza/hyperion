@@ -42,7 +42,7 @@ type HueBridge struct {
 }
 
 //SetColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
-func (br *HueBridge) SetColor(lightID int, color color.RGBColor, timing time.Duration) {
+func (br *HueBridge) SetColor(lightID int, color color.RGB, timing time.Duration) {
 	x, y, _ := color.GetXyy()
 	state := &lights.State{
 		XY:             []float32{float32(x), float32(y)},

@@ -20,34 +20,34 @@ func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 	// for x := 1; x <= 2; x++ {
 	// 	a := CueMaster.New([]cue.Frame{
 	// 		CueMaster.NewFrame([]cue.FrameAction{
-	// 			CueMaster.NewFrameAction(time.Millisecond*1500, color.RGBColor{R: 255}, "hue1"),
-	// 			CueMaster.NewFrameAction(0, color.RGBColor{R: 255}, "hue2"),
+	// 			CueMaster.NewFrameAction(time.Millisecond*1500, color.RGB{R: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(0, color.RGB{R: 255}, "hue2"),
 	// 		}),
 	// 		CueMaster.NewFrame([]cue.FrameAction{
-	// 			CueMaster.NewFrameAction(time.Second*time.Duration(x), color.RGBColor{G: 255}, "hue1"),
-	// 			CueMaster.NewFrameAction(0, color.RGBColor{B: 255}, "hue2"),
+	// 			CueMaster.NewFrameAction(time.Second*time.Duration(x), color.RGB{G: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(0, color.RGB{B: 255}, "hue2"),
 	// 		}),
 	// 		CueMaster.NewFrame([]cue.FrameAction{
-	// 			CueMaster.NewFrameAction(0, color.RGBColor{B: 255}, "hue1"),
-	// 			CueMaster.NewFrameAction(0, color.RGBColor{R: 255}, "hue2"),
+	// 			CueMaster.NewFrameAction(0, color.RGB{B: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(0, color.RGB{R: 255}, "hue2"),
 	// 		}),
 	// 		CueMaster.NewFrame([]cue.FrameAction{
-	// 			CueMaster.NewFrameAction(time.Second*2, color.RGBColor{B: 255}, "hue1"),
-	// 			CueMaster.NewFrameAction(time.Second*2, color.RGBColor{B: 255}, "hue2"),
+	// 			CueMaster.NewFrameAction(time.Second*2, color.RGB{B: 255}, "hue1"),
+	// 			CueMaster.NewFrameAction(time.Second*2, color.RGB{B: 255}, "hue2"),
 	// 		}),
 	// 	}, fmt.Sprintf("Cue #%d", x))
 	// 	mainCueStack.Cues = append(mainCueStack.Cues, a)
 	// }
 	a := CueMaster.New([]cue.Frame{
 		CueMaster.NewFrame([]cue.FrameAction{
-			CueMaster.NewFrameAction(time.Millisecond*2500, color.RGBColor{0, 255, 100}, "par1"),
-			CueMaster.NewFrameAction(time.Millisecond*2500, color.RGBColor{0, 255, 100}, "par2"),
+			CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{0, 255, 100}, "par1"),
+			CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{0, 255, 100}, "par2"),
 		}),
 		CueMaster.NewFrame([]cue.FrameAction{
-			CueMaster.NewFrameAction(time.Millisecond*8500, color.RGBColor{255, 111, 37}, "par1"),
+			CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{255, 111, 37}, "par1"),
 		}),
 		CueMaster.NewFrame([]cue.FrameAction{
-			CueMaster.NewFrameAction(time.Millisecond*8500, color.RGBColor{1, 1, 255}, "par1"),
+			CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{1, 1, 255}, "par1"),
 		}),
 	}, "Cue 1")
 	mainCueStack.Cues = append(mainCueStack.Cues, a)

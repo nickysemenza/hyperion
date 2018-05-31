@@ -57,7 +57,7 @@ type FrameAction struct {
 }
 
 //NewFrameAction creates a new instate with incr ID
-func (cm *Master) NewFrameAction(duration time.Duration, color color.RGBColor, lightName string) FrameAction {
+func (cm *Master) NewFrameAction(duration time.Duration, color color.RGB, lightName string) FrameAction {
 	return FrameAction{ID: cm.getNextIDForUse(), LightName: lightName, NewState: light.State{RGB: color, Duration: duration}}
 }
 

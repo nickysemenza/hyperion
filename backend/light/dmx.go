@@ -55,7 +55,7 @@ func (d *DMXLight) GetType() string {
 }
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
-func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGBColor) {
+func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGB) {
 	rChan, gChan, bChan := d.getRGBChannelIDs()
 	rVal, gVal, bVal := color.AsComponents()
 

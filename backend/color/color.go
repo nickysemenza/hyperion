@@ -7,19 +7,19 @@ import (
 	colorful "github.com/lucasb-eyer/go-colorful"
 )
 
-//RGBColor holds RGB values (0-255, although they can be negative in the case of a delta)
-type RGBColor struct {
+//RGB holds RGB values (0-255, although they can be negative in the case of a delta)
+type RGB struct {
 	R int `json:"r"`
 	G int `json:"g"`
 	B int `json:"b"`
 }
 
-func (c *RGBColor) AsColorful() colorful.Color {
+func (c *RGB) AsColorful() colorful.Color {
 	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
 }
 
-func GetRGBFromColorful(c colorful.Color) RGBColor {
-	return RGBColor{
+func GetRGBFromColorful(c colorful.Color) RGB {
+	return RGB{
 		R: int(c.R * 255),
 		G: int(c.G * 255),
 		B: int(c.B * 255),
@@ -27,12 +27,12 @@ func GetRGBFromColorful(c colorful.Color) RGBColor {
 }
 
 //AsComponents returns the seperate r, g, b
-func (c *RGBColor) AsComponents() (int, int, int) {
+func (c *RGB) AsComponents() (int, int, int) {
 	return c.R, c.G, c.B
 }
 
 //String returns a ANSI-color formatted r/g/b string
-func (c *RGBColor) String() string {
+func (c *RGB) String() string {
 
 	red := color.New(color.BgRed).SprintFunc()
 	green := color.New(color.BgGreen).SprintFunc()
@@ -41,7 +41,7 @@ func (c *RGBColor) String() string {
 }
 
 //GetXyy returns the RGB color in xyy color space
-func (c *RGBColor) GetXyy() (x, y, Yout float64) {
+func (c *RGB) GetXyy() (x, y, Yout float64) {
 	cc := colorful.Color{
 		R: float64(c.R / 255),
 		G: float64(c.G / 255),
