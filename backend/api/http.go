@@ -1,8 +1,12 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/jpeg"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +16,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	colorful "github.com/lucasb-eyer/go-colorful"
+	"github.com/nickysemenza/hyperion/backend/color"
 	"github.com/nickysemenza/hyperion/backend/cue"
 	"github.com/nickysemenza/hyperion/backend/light"
 )
@@ -22,6 +28,35 @@ func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
 		c.JSON(200, cue.CM)
 	}
+}
+
+//hexFade returns an image representing the fade from one hex val to another
+// NOTE: hex values must be given without the pound
+func hexFade(c *gin.Context) {
+
+	blocks := 20
+	blockw := 40
+	img := image.NewRGBA(image.Rect(0, 0, blocks*blockw, blockw))
+
+	c1, _ := colorful.Hex("#" + c.Param("from"))
+	c2, _ := colorful.Hex("#" + c.Param("to"))
+
+	rgb1 := color.GetRGBFromColorful(c1)
+	rgb2 := color.GetRGBFromColorful(c2)
+
+	for i := 0; i < blocks; i++ {
+		eachColor := rgb1.GetInterpolatedFade(rgb2, i, blocks)
+		draw.Draw(img, image.Rect(i*blockw, 0, (i+1)*blockw, blockw), &image.Uniform{eachColor}, image.ZP, draw.Src)
+	}
+
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, img, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+	c.Header("Content-Type", "image/jpeg")
+	c.Writer.Write(buffer.Bytes())
+
 }
 func getLightInventory(c *gin.Context) {
 	c.JSON(200, light.GetWrapperMap())
@@ -69,6 +104,7 @@ func ServeHTTP() {
 
 	router.GET("/ping", aa("ff"))
 	router.GET("/lights", getLightInventory)
+	router.GET("/hexfade/:from/:to", hexFade)
 	router.GET("/ws", func(c *gin.Context) {
 		wshandler(c.Writer, c.Request)
 	})
