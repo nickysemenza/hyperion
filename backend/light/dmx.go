@@ -97,6 +97,7 @@ func (d *DMXLight) SetState(target State) {
 //dmxState holds the DMX512 values for each channel
 type dmxState struct {
 	universes map[int][]byte
+	m         sync.Mutex
 }
 
 var dmxStateInstance *dmxState
@@ -116,6 +117,8 @@ func (s *dmxState) setDMXValue(universe, channel, value int) error {
 	if channel < 1 || channel > 255 {
 		return fmt.Errorf("dmx channel (%d) not in range", channel)
 	}
+	s.m.Lock()
+	defer s.m.Unlock()
 	s.initializeUniverse(universe)
 	s.universes[universe][channel-1] = byte(value)
 	return nil
@@ -132,7 +135,7 @@ func (s *dmxState) initializeUniverse(universe int) {
 //SendDMXValuesToOLA sends OLA the current dmxState across all universes
 func SendDMXValuesToOLA() {
 	//TODO: put this on a timer
-	client := gola.New(Config.Ola.Hostname)
+	client := gola.New(GetConfig().Ola.Hostname)
 	defer client.Close()
 
 	s := getDMXStateInstance()
@@ -162,7 +165,7 @@ func (p *dmxProfile) getChannelIndexForAttribute(attrName string) int {
 }
 
 func getDMXProfileByName(name string) *dmxProfile {
-	for _, x := range dmxProfilesMap {
+	for _, x := range DMXProfilesByName {
 		if x.Name == name {
 			return &x
 		}

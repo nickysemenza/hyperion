@@ -24,7 +24,7 @@ func aa(b string) func(*gin.Context) {
 	}
 }
 func getLightInventory(c *gin.Context) {
-	c.JSON(200, light.WrapperMap)
+	c.JSON(200, light.GetWrapperMap())
 }
 
 var wsupgrader = websocket.Upgrader{
@@ -38,13 +38,13 @@ var wsupgrader = websocket.Upgrader{
 func wshandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println("Failed to set websocket upgrade: %+v", err)
+		fmt.Println("Failed to set websocket upgrade ", err)
 		return
 	}
 
 	go func() {
 		for {
-			conn.WriteJSON(light.WrapperMap)
+			conn.WriteJSON(light.GetWrapperMap())
 			time.Sleep(wsInterval)
 		}
 	}()

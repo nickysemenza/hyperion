@@ -58,7 +58,7 @@ func main() {
 	//TODO: other config like ports and addresses in another file?
 	light.ReadLightConfigFromFile("./light/testconfig.json")
 
-	spew.Dump(light.Config)
+	spew.Dump(light.GetConfig())
 
 	//Set up cue stacks
 	cue.CM = cue.Master{}

@@ -32,7 +32,7 @@ func (hl *HueLight) SetState(s State) {
 	defer hl.m.Unlock()
 
 	hl.State = s
-	go Config.HueBridge.SetColor(hl.HueID, s.RGB, s.Duration)
+	go GetConfig().HueBridge.SetColor(hl.HueID, s.RGB, s.Duration)
 }
 
 //HueBridge holds credentials for communicating with hues.

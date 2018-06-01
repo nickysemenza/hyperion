@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
@@ -45,8 +46,8 @@ func GetLightDebugString(l Light) string {
 	return fmt.Sprintf("%s - %s", l.GetName(), l.GetType())
 }
 
-//Inventory holds config data
-type Inventory struct {
+//Config holds config data
+type Config struct {
 	Loaded bool `json:"is_loaded"`
 	Lights struct {
 		Hue     []HueLight     `json:"hue"`
@@ -60,55 +61,76 @@ type Inventory struct {
 	Profiles []dmxProfile `json:"profiles"`
 }
 
-//Config is a global var containing the current lights
-var Config Inventory
+//WrapperMap is a map
+type WrapperMap map[string]Wrapper
 
-//WrapperMap holds a name-keyed map of LightWrappers
-var WrapperMap map[string]Wrapper
+//DMXProfileMap is a map of profiles
+type DMXProfileMap map[string]dmxProfile
 
-var dmxProfilesMap map[string]dmxProfile
+//GetWrapperMap returns lights keyed by name
+func GetWrapperMap() WrapperMap {
+	return ByName
+}
+
+//config is a global var containing the current lights
+var config Config
+
+//ByName holds a name-keyed map of LightWrappers
+var ByName WrapperMap
+
+//DMXProfilesByName holds dmx profiles
+var DMXProfilesByName DMXProfileMap
 
 //ReadLightConfigFromFile reads a config.json
-func ReadLightConfigFromFile(file string) Inventory {
+func ReadLightConfigFromFile(file string) Config {
+	//read file
 	raw, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	lc := &Inventory{}
-	err = json.Unmarshal(raw, &lc)
+
+	//unmarshall json
+	err = json.Unmarshal(raw, &config)
 	if err != nil {
 		fmt.Println(err)
 	}
-	lc.Loaded = true
 
 	//parse dmx profiles
-	dmxProfilesMap = make(map[string]dmxProfile)
-	for _, item := range lc.Profiles {
-		dmxProfilesMap[item.Name] = item
+	DMXProfilesByName = make(map[string]dmxProfile)
+	for _, item := range config.Profiles {
+		DMXProfilesByName[item.Name] = item
 	}
 
 	//parse lights
-	WrapperMap = make(map[string]Wrapper)
-	for i := range lc.Lights.Hue {
-		h := &lc.Lights.Hue[i]
-		WrapperMap[h.GetName()] = Wrapper{h}
+	ByName = make(map[string]Wrapper)
+	for i := range config.Lights.Hue {
+		h := &config.Lights.Hue[i]
+		ByName[h.GetName()] = Wrapper{h}
 	}
-	for i, x := range lc.Lights.Dmx {
-		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Dmx[i]}
+	for i, x := range config.Lights.Dmx {
+		ByName[x.GetName()] = Wrapper{&config.Lights.Dmx[i]}
 	}
-	for i, x := range lc.Lights.Generic {
-		WrapperMap[x.GetName()] = Wrapper{&lc.Lights.Generic[i]}
+	for i, x := range config.Lights.Generic {
+		ByName[x.GetName()] = Wrapper{&config.Lights.Generic[i]}
 	}
 
-	Config = *lc
-	return *lc
+	//done
+	config.Loaded = true
+	return config
+}
 
+//GetConfig gives the current Configuration
+func GetConfig() *Config {
+	if !config.Loaded {
+		log.Fatal("light configuration isn't loaded!")
+	}
+	return &config
 }
 
 //GetByName looks up a light by name
 func GetByName(name string) Light {
-	for _, x := range WrapperMap {
+	for _, x := range ByName {
 		if x.Light.GetName() == name {
 			return x.Light
 		}
