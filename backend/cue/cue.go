@@ -1,16 +1,39 @@
 package cue
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/nickysemenza/hyperion/backend/color"
 	"github.com/nickysemenza/hyperion/backend/light"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	log.SetFormatter(&log.TextFormatter{})
+}
+
+type key int
+
+const (
+	keyStackName key = iota
+	keyCueID
+	keyFrameID
+	keyFrameActionID
+)
+
+func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
+	return log.Fields{
+		"action_id":  ctx.Value(keyFrameActionID),
+		"frame_id":   ctx.Value(keyFrameID),
+		"cue_id":     ctx.Value(keyCueID),
+		"stack_name": ctx.Value(keyStackName),
+	}
+}
 
 var CM Master
 
@@ -105,8 +128,9 @@ func (cs *Stack) ProcessStack() {
 	log.Printf("[CueStack: %s]\n", cs.Name)
 	for {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
+			ctx := context.WithValue(context.Background(), keyStackName, cs.Name)
 			cs.ActiveCue = nextCue
-			nextCue.ProcessCue()
+			nextCue.ProcessCue(ctx)
 			cs.ActiveCue = nil
 			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
 		} else {
@@ -127,10 +151,11 @@ func (cs *Stack) deQueueNextCue() *Cue {
 }
 
 //ProcessCue processes cue
-func (c *Cue) ProcessCue() {
-	log.Printf("[ProcessCue #%d]\n", c.ID)
+func (c *Cue) ProcessCue(ctx context.Context) {
+	ctx = context.WithValue(ctx, keyCueID, c.ID)
+	log.WithFields(getLogrusFieldsFromContext(ctx)).Info("ProcessCue")
 	for _, eachFrame := range c.Frames {
-		eachFrame.ProcessFrame()
+		eachFrame.ProcessFrame(ctx)
 	}
 }
 
@@ -146,20 +171,27 @@ func (cf *Frame) GetDuration() time.Duration {
 }
 
 //ProcessFrame processes the cueframe
-func (cf *Frame) ProcessFrame() {
-	log.Printf("[CF #%d] Has %d Actions, will take %s\n", cf.ID, len(cf.Actions), cf.GetDuration())
+func (cf *Frame) ProcessFrame(ctx context.Context) {
+	ctx = context.WithValue(ctx, keyFrameID, cf.ID)
+	log.WithFields(getLogrusFieldsFromContext(ctx)).
+		WithFields(log.Fields{"duration": cf.GetDuration(), "num_actions": len(cf.Actions)}).
+		Info("ProcessFrame")
+
 	// fmt.Println(cf.Actions)
 	for x := range cf.Actions {
-		go cf.Actions[x].ProcessFrameAction()
+		go cf.Actions[x].ProcessFrameAction(ctx)
 	}
 	//no blocking, so wait until all the child frames have theoretically finished
 	time.Sleep(cf.GetDuration())
 }
 
 //ProcessFrameAction does job stuff
-func (cfa *FrameAction) ProcessFrameAction() {
+func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
+	ctx = context.WithValue(ctx, keyFrameActionID, cfa.ID)
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	log.Printf("[FrameAction #%d] processing @ %d (delta=%s) (color=%v) (light=%s)\n", cfa.ID, now, cfa.NewState.Duration, cfa.NewState.RGB.String(), cfa.LightName)
+	log.WithFields(getLogrusFieldsFromContext(ctx)).
+		WithFields(log.Fields{"duration": cfa.NewState.Duration, "now_ms": now, "light": cfa.LightName}).
+		Infof("ProcessFrameAction (color=%v)", cfa.NewState.RGB.String())
 
 	if l := light.GetByName(cfa.LightName); l != nil {
 		go l.SetState(cfa.NewState)

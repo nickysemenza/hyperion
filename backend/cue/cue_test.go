@@ -1,6 +1,7 @@
 package cue
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -36,7 +37,7 @@ func TestCueFrameGetDuration(t *testing.T) {
 		}
 
 		t1 := time.Now()
-		x.cf.ProcessFrame()
+		x.cf.ProcessFrame(context.Background())
 		t2 := time.Now()
 		//5ms of padding/lenience
 		assert.WithinDuration(t, t1, t2, x.expectedDuration+(5*time.Millisecond))
@@ -51,5 +52,5 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 		actions = append(actions, FrameAction{NewState: light.State{Duration: 0, RGB: color.RGB{}}})
 	}
 	frame := Frame{Actions: actions}
-	frame.ProcessFrame()
+	frame.ProcessFrame(context.Background())
 }
