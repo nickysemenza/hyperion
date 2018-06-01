@@ -76,15 +76,10 @@ func (d *DMXLight) SetState(target State) {
 
 	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.String(), target.String(), numSteps)
 
-	c1 := currentState.RGB.AsColorful()
-	c2 := target.RGB.AsColorful()
-
-	for x := 1; x <= numSteps; x++ {
-		interpolatedColor := c1.BlendHcl(c2, float64(x)/float64(numSteps)).Clamped()
-		interpolatedRGB := color.GetRGBFromColorful(interpolatedColor)
-
+	for x := 0; x < numSteps; x++ {
+		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)
 		//keep state updated:
-		d.blindlySetRGBToStateAndDMX(interpolatedRGB)
+		d.blindlySetRGBToStateAndDMX(color.GetRGBFromColorful(interpolated))
 
 		time.Sleep(tickIntervalFadeInterpolation)
 	}

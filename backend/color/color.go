@@ -18,6 +18,14 @@ func (c *RGB) AsColorful() colorful.Color {
 	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
 }
 
+//GetInterpolatedFade returns fade from one color to another.
+func (c *RGB) GetInterpolatedFade(target RGB, step, numSteps int) colorful.Color {
+	c1 := c.AsColorful()
+	c2 := target.AsColorful()
+
+	return c1.BlendHcl(c2, float64(step)/float64(numSteps-1)).Clamped()
+}
+
 func GetRGBFromColorful(c colorful.Color) RGB {
 	return RGB{
 		R: int(c.R * 255),
