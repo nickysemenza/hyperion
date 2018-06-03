@@ -3,7 +3,6 @@ import { WS_URL } from '../config';
 import moment from 'moment';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import LightState from '../components/LightState';
 import Sockette from 'sockette';
 import LightTable from '../components/LightTable';
 
