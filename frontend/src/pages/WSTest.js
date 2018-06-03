@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import LightState from '../components/LightState';
 import Sockette from 'sockette';
+import LightTable from '../components/LightTable';
 
 class WSTest extends Component {
   state = {
@@ -41,16 +42,17 @@ class WSTest extends Component {
   }
   render() {
     let { lights } = this.state;
-    let lightDetail = Object.keys(lights).map((k, i) => {
-      let eachLight = lights[k];
-      return (
-        <LightState key={i} s={eachLight['state']} name={eachLight['name']} />
-      );
-    });
+    // let lightDetail = Object.keys(lights).map((k, i) => {
+    //   let eachLight = lights[k];
+    //   return (
+    //     <LightState key={i} s={eachLight['state']} name={eachLight['name']} />
+    //   );
+    // });
     return (
       <div>
         hello
-        {lightDetail}
+        <LightTable lights={lights} />
+        {/* {lightDetail} */}
         <pre>{JSON.stringify(this.state.curTime, null, 2)}</pre>
       </div>
     );

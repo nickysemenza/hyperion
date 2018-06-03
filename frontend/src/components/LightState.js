@@ -2,8 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { rgbToHex } from '../utils';
 
-const SampleBox = styled.div`
-  background-color: ${props => props.color};
+const SampleBox = styled.div.attrs({
+  style: ({ color }) => ({
+    backgroundColor: color
+  })
+})`
   width: 50px;
   padding: 50px;
 `;
