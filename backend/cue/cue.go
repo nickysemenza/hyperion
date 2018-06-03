@@ -32,7 +32,17 @@ func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
 }
 
 //CM is the cuemaster signleton
-var CM Master
+var cueMasterSingleton Master
+
+var once sync.Once
+
+//GetCueMaster makes a singleton for the cue master
+func GetCueMaster() *Master {
+	once.Do(func() {
+		cueMasterSingleton = Master{currentID: 1}
+	})
+	return &cueMasterSingleton
+}
 
 //Master is the parent of all CueStacks, is a singleton
 type Master struct {
@@ -57,9 +67,12 @@ type Cue struct {
 	Frames          []Frame `json:"frames"`
 	Name            string  `json:"name"`
 	shouldRepeat    bool
-	shouldHoldAfter bool //default false, will pause the CueStack after executing this cue, won't move on to next
-	waitBefore      time.Duration
-	waitAfter       time.Duration
+	shouldHoldAfter bool          //default false, will pause the CueStack after executing this cue, won't move on to next
+	WaitBefore      time.Duration `json:"wait_before"`
+	WaitAfter       time.Duration `json:"wait_after"`
+	StartedAt       time.Time     `json:"started_at"`
+	FinishedAt      time.Time     `json:"finished_at"`
+	RealDuration    time.Duration `json:"real_duration"`
 }
 
 //Frame is a single 'animation frame' of a Cue
@@ -101,6 +114,11 @@ func (cm *Master) getNextIDForUse() int64 {
 	return id
 }
 
+//GetDefaultCueStack gives the first cuestack
+func (cm *Master) GetDefaultCueStack() Stack {
+	return cm.CueStacks[0]
+}
+
 //NewStack makes a new cue stack
 func (cm *Master) NewStack(priority int, name string) Stack {
 	return Stack{Priority: 2, Name: "main"}
@@ -130,7 +148,10 @@ func (cs *Stack) ProcessStack() {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
 			ctx := context.WithValue(context.Background(), keyStackName, cs.Name)
 			cs.ActiveCue = nextCue
+			nextCue.StartedAt = time.Now()
 			nextCue.ProcessCue(ctx)
+			nextCue.FinishedAt = time.Now()
+			nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
 			cs.ActiveCue = nil
 			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
 		} else {

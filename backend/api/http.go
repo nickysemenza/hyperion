@@ -26,7 +26,7 @@ const wsInterval = 80 * time.Millisecond
 
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
-		c.JSON(200, cue.CM)
+		c.JSON(200, cue.GetCueMaster())
 	}
 }
 

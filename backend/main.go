@@ -17,30 +17,30 @@ import (
 
 func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 	mainCueStack := CueMaster.NewStack(2, "main")
-	for x := 1; x <= 2; x++ {
+	for x := 1; x <= 1; x++ {
 		eachQueue := CueMaster.New([]cue.Frame{
 			CueMaster.NewFrame([]cue.FrameAction{
 				CueMaster.NewFrameAction(time.Millisecond*1500, color.RGB{R: 255}, "hue1"),
 				CueMaster.NewFrameAction(0, color.RGB{R: 255}, "hue2"),
 			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Second*time.Duration(x), color.RGB{G: 255}, "hue1"),
-				CueMaster.NewFrameAction(0, color.RGB{B: 255}, "hue2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Second*2, color.RGB{B: 255}, "hue1"),
-				CueMaster.NewFrameAction(time.Second*2, color.RGB{R: 255, G: 255, B: 255}, "hue2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{R: 0, G: 255, B: 100}, "par1"),
-				CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{R: 0, G: 255, B: 100}, "par2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{R: 255, G: 111, B: 37}, "par1"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{R: 1, G: 1, B: 255}, "par1"),
-			}),
+			// CueMaster.NewFrame([]cue.FrameAction{
+			// 	CueMaster.NewFrameAction(time.Second*time.Duration(x), color.RGB{G: 255}, "hue1"),
+			// 	CueMaster.NewFrameAction(0, color.RGB{B: 255}, "hue2"),
+			// }),
+			// CueMaster.NewFrame([]cue.FrameAction{
+			// 	CueMaster.NewFrameAction(time.Second*2, color.RGB{B: 255}, "hue1"),
+			// 	CueMaster.NewFrameAction(time.Second*2, color.RGB{R: 255, G: 255, B: 255}, "hue2"),
+			// }),
+			// CueMaster.NewFrame([]cue.FrameAction{
+			// 	CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{R: 0, G: 255, B: 100}, "par1"),
+			// 	CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{R: 0, G: 255, B: 100}, "par2"),
+			// }),
+			// CueMaster.NewFrame([]cue.FrameAction{
+			// 	CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{R: 255, G: 111, B: 37}, "par1"),
+			// }),
+			// CueMaster.NewFrame([]cue.FrameAction{
+			// 	CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{R: 1, G: 1, B: 255}, "par1"),
+			// }),
 		}, fmt.Sprintf("Cue #%d", x))
 
 		mainCueStack.EnQueueCue(eachQueue)
@@ -58,11 +58,19 @@ func main() {
 	spew.Dump(light.GetConfig())
 
 	//Set up cue stacks
-	cue.CM = cue.Master{}
-	CueMaster := &cue.CM
-	mainCueStack := getTempCueStack(CueMaster)
-	CueMaster.CueStacks = append(CueMaster.CueStacks, mainCueStack)
+	cueMaster := cue.GetCueMaster()
+	mainCueStack := getTempCueStack(cueMaster)
+	cueMaster.CueStacks = append(cueMaster.CueStacks, mainCueStack)
 
+	go func() {
+		time.Sleep(4 * time.Second)
+
+		cueMaster.CueStacks[0].EnQueueCue(cueMaster.New([]cue.Frame{
+			cueMaster.NewFrame([]cue.FrameAction{
+				cueMaster.NewFrameAction(time.Millisecond*1500, color.RGB{R: 65, B: 120}, "hue1"),
+			})}, "aa"))
+
+	}()
 	//Set up Homekit Server
 	go homekit.Start()
 
@@ -73,7 +81,7 @@ func main() {
 	go api.ServeHTTP()
 
 	//proceess cues forever
-	CueMaster.ProcessForever()
+	cueMaster.ProcessForever()
 
 	go light.SendDMXValuesToOLA()
 
