@@ -38,6 +38,7 @@ var CM Master
 type Master struct {
 	CueStacks []Stack `json:"cue_stacks"`
 	currentID int64
+	m         sync.Mutex
 }
 
 //Stack is basically a precedence priority queue (really a CueQueue sigh)
@@ -92,7 +93,9 @@ func (cm *Master) DumpToFile(fileName string) error {
 }
 
 func (cm *Master) getNextIDForUse() int64 {
-	//todo:mutex?
+	cm.m.Lock()
+	defer cm.m.Unlock()
+
 	id := cm.currentID
 	cm.currentID++
 	return id
