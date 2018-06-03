@@ -12,12 +12,12 @@ class WSTest extends Component {
     curTime: null
   };
   componentDidMount() {
-    setInterval( () => {
-        this.setState({
-        //   curTime : moment().valueOf() 
-        curTime : moment().format("HH:mm:ss:SS (x)")
-        })
-      },10)
+    setInterval(() => {
+      this.setState({
+        //   curTime : moment().valueOf()
+        curTime: moment().format('HH:mm:ss:SS (x)')
+      });
+    }, 10);
 
     const ws = new Sockette(WS_URL, {
       timeout: 5e3,
@@ -42,8 +42,6 @@ class WSTest extends Component {
   render() {
     let { lights } = this.state;
     let lightDetail = Object.keys(lights).map((k, i) => {
-      // console.log(lights[k]["light"]["state"]["rgb"])
-
       let eachLight = lights[k];
       return (
         <LightState key={i} s={eachLight['state']} name={eachLight['name']} />

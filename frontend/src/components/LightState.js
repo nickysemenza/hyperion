@@ -1,19 +1,20 @@
 import React from 'react';
+import styled from 'styled-components';
+import { rgbToHex } from '../utils';
 
-const componentToHex = c => {
-  var hex = c.toString(16);
-  return hex.length === 1 ? '0' + hex : hex;
-};
-
-const rgbToHex = (r, g, b) => '#' + componentToHex(r) + componentToHex(g) + componentToHex(b)
+const SampleBox = styled.div`
+  background-color: ${props => props.color};
+  width: 50px;
+  padding: 50px;
+`;
 
 const LightState = ({ s, name }) => {
-  let c = s['rgb'];
+  if (s === undefined) return null;
+  let { rgb, ...others } = s;
   return (
     <div>
-    {name}
-    <div style={{ backgroundColor: rgbToHex(c.r, c.g, c.b), padding: "20px", width:"50px"}}/>
-      {/* <pre>{JSON.stringify(s, null, 2)}</pre> */}
+      <SampleBox color={rgbToHex(rgb.r, rgb.g, rgb.b)} />
+      <pre>{JSON.stringify(others)}</pre>
     </div>
   );
 };
