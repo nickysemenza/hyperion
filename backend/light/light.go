@@ -1,6 +1,7 @@
 package light
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -15,7 +16,7 @@ import (
 type Light interface {
 	GetName() string
 	GetType() string
-	SetState(State)
+	SetState(context.Context, State)
 }
 
 //Wrapper holds Lights

@@ -1,8 +1,11 @@
 package light
 
 import (
+	"context"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/heatxsink/go-hue/lights"
 	"github.com/nickysemenza/hyperion/backend/color"
@@ -27,12 +30,12 @@ func (hl *HueLight) GetType() string {
 }
 
 //SetState updates the Hue's state.
-func (hl *HueLight) SetState(s State) {
+func (hl *HueLight) SetState(ctx context.Context, s State) {
 	hl.m.Lock()
 	defer hl.m.Unlock()
 
 	hl.State = s
-	go GetConfig().HueBridge.SetColor(hl.HueID, s.RGB, s.Duration)
+	go GetConfig().HueBridge.SetColor(ctx, hl.HueID, s.RGB, s.Duration)
 }
 
 //HueBridge holds credentials for communicating with hues.
@@ -42,7 +45,7 @@ type HueBridge struct {
 }
 
 //SetColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
-func (br *HueBridge) SetColor(lightID int, color color.RGB, timing time.Duration) {
+func (br *HueBridge) SetColor(ctx context.Context, lightID int, color color.RGB, timing time.Duration) {
 	x, y, _ := color.GetXyy()
 	state := &lights.State{
 		XY:             []float32{float32(x), float32(y)},
@@ -51,6 +54,7 @@ func (br *HueBridge) SetColor(lightID int, color color.RGB, timing time.Duration
 		TransitionTime: getTransitionTimeAs100msMultiple(timing),
 	}
 
+	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now()}).Infof("HueLight SetColor: %s", color.String())
 	hueLights := lights.New(br.Hostname, br.Username)
 	hueLights.SetLightState(lightID, *state)
 }

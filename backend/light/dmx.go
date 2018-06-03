@@ -1,6 +1,7 @@
 package light
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -70,7 +71,7 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGB) {
 
 //SetState updates the light's state.
 //TODO: other properties? on/off?
-func (d *DMXLight) SetState(target State) {
+func (d *DMXLight) SetState(ctx context.Context, target State) {
 	currentState := d.State
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 

@@ -1,5 +1,7 @@
 package light
 
+import "context"
+
 //GenericLight is for testing
 type GenericLight struct {
 	Name  string `json:"name"`
@@ -17,6 +19,6 @@ func (gl *GenericLight) GetType() string {
 }
 
 //SetState updates the light's state.
-func (gl *GenericLight) SetState(s State) {
+func (gl *GenericLight) SetState(ctx context.Context, s State) {
 	gl.State = s
 }
