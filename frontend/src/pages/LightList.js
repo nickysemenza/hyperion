@@ -10,7 +10,7 @@ class LightList extends Component {
     this.props.fetchLightList();
   }
   render() {
-    return(<LightTable lights={this.props.lights}/>);
+    return <LightTable lights={this.props.lights} />;
   }
 }
 

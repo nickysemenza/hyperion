@@ -13,14 +13,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func init() {
-	log.SetFormatter(&log.TextFormatter{})
-}
-
-type key int
+type ctxKey int
 
 const (
-	keyStackName key = iota
+	keyStackName ctxKey = iota
 	keyCueID
 	keyFrameID
 	keyFrameActionID
@@ -35,6 +31,7 @@ func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
 	}
 }
 
+//CM is the cuemaster signleton
 var CM Master
 
 //Master is the parent of all CueStacks, is a singleton
@@ -49,7 +46,7 @@ type Stack struct {
 	Name          string `json:"name"`
 	Cues          []Cue  `json:"cues"`
 	ProcessedCues []Cue  `json:"processed_cues"`
-	Test          *sync.Mutex
+	m             sync.Mutex
 	ActiveCue     *Cue `json:"active_cue"`
 }
 
@@ -103,7 +100,7 @@ func (cm *Master) getNextIDForUse() int64 {
 
 //NewStack makes a new cue stack
 func (cm *Master) NewStack(priority int, name string) Stack {
-	return Stack{Priority: 2, Name: "main", Test: &sync.Mutex{}}
+	return Stack{Priority: 2, Name: "main"}
 }
 
 //NewFrame creates a new instate with incr ID
@@ -141,13 +138,20 @@ func (cs *Stack) ProcessStack() {
 
 func (cs *Stack) deQueueNextCue() *Cue {
 	if len(cs.Cues) > 0 {
-		cs.Test.Lock()
+		cs.m.Lock()
 		x := cs.Cues[0]
 		cs.Cues = cs.Cues[1:]
-		cs.Test.Unlock()
+		cs.m.Unlock()
 		return &x
 	}
 	return nil
+}
+
+//EnQueueCue puts a cue on the queue
+func (cs *Stack) EnQueueCue(c Cue) {
+	cs.m.Lock()
+	defer cs.m.Unlock()
+	cs.Cues = append(cs.Cues, c)
 }
 
 //ProcessCue processes cue
@@ -200,4 +204,16 @@ func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
 	}
 	//goroutine doesn't block, so hold until the SetState has (hopefully) finished timing-wise
 	time.Sleep(cfa.NewState.Duration)
+}
+
+//MarshalJSON override that injects the full Light object.
+func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
+	type Alias FrameAction
+	return json.Marshal(&struct {
+		Light light.Light `json:"light"`
+		*Alias
+	}{
+		Light: light.GetByName(cfa.LightName),
+		Alias: (*Alias)(cfa),
+	})
 }

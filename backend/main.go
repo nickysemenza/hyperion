@@ -18,7 +18,7 @@ import (
 func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 	mainCueStack := CueMaster.NewStack(2, "main")
 	for x := 1; x <= 2; x++ {
-		a := CueMaster.New([]cue.Frame{
+		eachQueue := CueMaster.New([]cue.Frame{
 			CueMaster.NewFrame([]cue.FrameAction{
 				CueMaster.NewFrameAction(time.Millisecond*1500, color.RGB{R: 255}, "hue1"),
 				CueMaster.NewFrameAction(0, color.RGB{R: 255}, "hue2"),
@@ -28,12 +28,8 @@ func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 				CueMaster.NewFrameAction(0, color.RGB{B: 255}, "hue2"),
 			}),
 			CueMaster.NewFrame([]cue.FrameAction{
-				CueMaster.NewFrameAction(0, color.RGB{B: 255}, "hue1"),
-				CueMaster.NewFrameAction(0, color.RGB{R: 255}, "hue2"),
-			}),
-			CueMaster.NewFrame([]cue.FrameAction{
 				CueMaster.NewFrameAction(time.Second*2, color.RGB{B: 255}, "hue1"),
-				CueMaster.NewFrameAction(time.Second*2, color.RGB{B: 255}, "hue2"),
+				CueMaster.NewFrameAction(time.Second*2, color.RGB{R: 255, G: 255, B: 255}, "hue2"),
 			}),
 			CueMaster.NewFrame([]cue.FrameAction{
 				CueMaster.NewFrameAction(time.Millisecond*2500, color.RGB{R: 0, G: 255, B: 100}, "par1"),
@@ -46,7 +42,8 @@ func getTempCueStack(CueMaster *cue.Master) cue.Stack {
 				CueMaster.NewFrameAction(time.Millisecond*8500, color.RGB{R: 1, G: 1, B: 255}, "par1"),
 			}),
 		}, fmt.Sprintf("Cue #%d", x))
-		mainCueStack.Cues = append(mainCueStack.Cues, a)
+
+		mainCueStack.EnQueueCue(eachQueue)
 	}
 
 	return mainCueStack

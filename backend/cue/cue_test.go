@@ -46,6 +46,27 @@ func TestCueFrameGetDuration(t *testing.T) {
 
 	}
 }
+
+func TestCueQueueing(t *testing.T) {
+	cs := Stack{}
+	assert.Nil(t, cs.deQueueNextCue(), "deque on empty should return nil")
+
+	cs.EnQueueCue(Cue{Name: "c1"})
+	cs.EnQueueCue(Cue{Name: "c2"})
+
+	assert.Equal(t, len(cs.Cues), 2)
+	pop := cs.deQueueNextCue()
+	assert.NotNil(t, pop)
+
+	assert.Equal(t, pop.Name, "c1", "queue should be FIFO")
+
+	cs.EnQueueCue(Cue{Name: "c3"})
+	assert.Equal(t, cs.deQueueNextCue().Name, "c2", "queue should be FIFO")
+	assert.Equal(t, cs.deQueueNextCue().Name, "c3", "queue should be FIFO")
+
+	assert.Nil(t, cs.deQueueNextCue())
+}
+
 func BenchmarkCueFrameProcessing(b *testing.B) {
 	actions := []FrameAction{}
 	for i := 0; i < b.N; i++ {
