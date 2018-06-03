@@ -59,7 +59,7 @@ func hexFade(c *gin.Context) {
 
 }
 func getLightInventory(c *gin.Context) {
-	c.JSON(200, light.GetWrapperMap())
+	c.JSON(200, light.GetLights())
 }
 
 var wsupgrader = websocket.Upgrader{
@@ -79,7 +79,7 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		for {
-			conn.WriteJSON(light.GetWrapperMap())
+			conn.WriteJSON(light.GetLights())
 			time.Sleep(wsInterval)
 		}
 	}()

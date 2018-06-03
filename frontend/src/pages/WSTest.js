@@ -44,7 +44,7 @@ class WSTest extends Component {
     let lightDetail = Object.keys(lights).map((k, i) => {
       // console.log(lights[k]["light"]["state"]["rgb"])
 
-      let eachLight = lights[k]['light'];
+      let eachLight = lights[k];
       return (
         <LightState key={i} s={eachLight['state']} name={eachLight['name']} />
       );

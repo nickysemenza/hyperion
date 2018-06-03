@@ -18,9 +18,9 @@ func TestFindLightByName(t *testing.T) {
 	dmx1 := &DMXLight{Name: "dmx1"}
 	hue1 := &HueLight{Name: "hue1"}
 
-	ByName = make(map[string]Wrapper)
-	ByName["hue1"] = Wrapper{hue1}
-	ByName["dmx1"] = Wrapper{dmx1}
+	ByName = make(StringMap)
+	ByName["hue1"] = hue1
+	ByName["dmx1"] = dmx1
 
 	tt := []struct {
 		nameToFind string

@@ -19,11 +19,6 @@ type Light interface {
 	SetState(context.Context, State)
 }
 
-//Wrapper holds Lights
-type Wrapper struct {
-	Light Light `json:"light"`
-}
-
 //constants for the different types of lights
 const (
 	TypeHue     = "hue"
@@ -62,22 +57,22 @@ type Config struct {
 	Profiles []dmxProfile `json:"profiles"`
 }
 
-//WrapperMap is a map
-type WrapperMap map[string]Wrapper
+//StringMap holds string-keyed Lights
+type StringMap map[string]Light
 
 //DMXProfileMap is a map of profiles
 type DMXProfileMap map[string]dmxProfile
 
-//GetWrapperMap returns lights keyed by name
-func GetWrapperMap() WrapperMap {
+//GetLights returns lights keyed by name
+func GetLights() StringMap {
 	return ByName
 }
 
 //config is a global var containing the current lights
 var config Config
 
-//ByName holds a name-keyed map of LightWrappers
-var ByName WrapperMap
+//ByName holds a name-keyed map of Lights
+var ByName StringMap
 
 //DMXProfilesByName holds dmx profiles
 var DMXProfilesByName DMXProfileMap
@@ -104,16 +99,18 @@ func ReadLightConfigFromFile(file string) Config {
 	}
 
 	//parse lights
-	ByName = make(map[string]Wrapper)
+	ByName = make(StringMap)
 	for i := range config.Lights.Hue {
-		h := &config.Lights.Hue[i]
-		ByName[h.GetName()] = Wrapper{h}
+		x := &config.Lights.Hue[i]
+		ByName[x.GetName()] = x
 	}
-	for i, x := range config.Lights.Dmx {
-		ByName[x.GetName()] = Wrapper{&config.Lights.Dmx[i]}
+	for i := range config.Lights.Dmx {
+		x := &config.Lights.Dmx[i]
+		ByName[x.GetName()] = x
 	}
-	for i, x := range config.Lights.Generic {
-		ByName[x.GetName()] = Wrapper{&config.Lights.Generic[i]}
+	for i := range config.Lights.Generic {
+		x := &config.Lights.Generic[i]
+		ByName[x.GetName()] = x
 	}
 
 	//done
@@ -132,8 +129,8 @@ func GetConfig() *Config {
 //GetByName looks up a light by name
 func GetByName(name string) Light {
 	for _, x := range ByName {
-		if x.Light.GetName() == name {
-			return x.Light
+		if x.GetName() == name {
+			return x
 		}
 	}
 	return nil
