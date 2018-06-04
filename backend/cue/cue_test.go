@@ -40,8 +40,8 @@ func TestCueFrameGetDuration(t *testing.T) {
 		t1 := time.Now()
 		x.cf.ProcessFrame(context.Background())
 		t2 := time.Now()
-		//5ms of padding/lenience
-		assert.WithinDuration(t, t1, t2, x.expectedDuration+(5*time.Millisecond))
+		//7ms of padding/lenience (travis is slow)
+		assert.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
 
 		// t.Error(diff)
 
