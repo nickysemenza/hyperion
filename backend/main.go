@@ -66,10 +66,9 @@ func main() {
 	go func() {
 		time.Sleep(4 * time.Second)
 
-		cueMaster.CueStacks[0].EnQueueCue(cueMaster.New([]cue.Frame{
-			cueMaster.NewFrame([]cue.FrameAction{
-				cueMaster.NewFrameAction(time.Millisecond*1500, color.RGB{R: 65, B: 120}, "hue1"),
-			})}, "aa"))
+		c, _ := cue.BuildCueFromCommand("hue1:#00FF00:1000")
+		cs := cueMaster.GetDefaultCueStack()
+		cs.EnQueueCue(*c)
 
 	}()
 	//Set up Homekit Server

@@ -2,6 +2,7 @@ package color
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/fatih/color"
 	colorful "github.com/lucasb-eyer/go-colorful"
@@ -16,6 +17,7 @@ type RGB struct {
 
 type colorNum int
 
+//different hardcoded colors
 const (
 	Red colorNum = iota
 	Green
@@ -23,6 +25,7 @@ const (
 	White
 )
 
+//FromString yields an RGB object based on a const
 func FromString(num colorNum) RGB {
 	switch num {
 	case Red:
@@ -38,10 +41,6 @@ func FromString(num colorNum) RGB {
 	}
 }
 
-func (c *RGB) AsColorful() colorful.Color {
-	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
-}
-
 //GetInterpolatedFade returns fade from one color to another.
 func (c *RGB) GetInterpolatedFade(target RGB, step, numSteps int) colorful.Color {
 	c1 := c.AsColorful()
@@ -50,12 +49,27 @@ func (c *RGB) GetInterpolatedFade(target RGB, step, numSteps int) colorful.Color
 	return c1.BlendHcl(c2, float64(step)/float64(numSteps-1)).Clamped()
 }
 
+//AsColorful turns a colorful.Color into an RGB
+func (c *RGB) AsColorful() colorful.Color {
+	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
+}
+
+//GetRGBFromColorful turns a colorful.Color struct into an RGB one
 func GetRGBFromColorful(c colorful.Color) RGB {
 	return RGB{
 		R: int(c.R * 255),
 		G: int(c.G * 255),
 		B: int(c.B * 255),
 	}
+}
+
+//GetRGBFromHex turns a hex string (#00FF00) into an RGB color
+func GetRGBFromHex(hex string) RGB {
+	c, err := colorful.Hex(hex)
+	if err != nil {
+		log.Println(err)
+	}
+	return GetRGBFromColorful(c)
 }
 
 //AsComponents returns the seperate r, g, b
