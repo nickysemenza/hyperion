@@ -27,6 +27,7 @@ var (
 func GetCueMaster() *Master {
 	once.Do(func() {
 		cueMasterSingleton = Master{currentID: 1}
+		cueMasterSingleton.CueStacks = append(cueMasterSingleton.CueStacks, cueMasterSingleton.NewStack(1, "main"))
 	})
 	return &cueMasterSingleton
 }
@@ -57,17 +58,12 @@ func (cm *Master) getNextIDForUse() int64 {
 
 //GetDefaultCueStack gives the first cuestack
 func (cm *Master) GetDefaultCueStack() *Stack {
-	cm.m.Lock()
-	defer cm.m.Unlock()
-	if len(cm.CueStacks) == 0 {
-		cm.CueStacks = append(cm.CueStacks, cm.NewStack(2, "main"))
-	}
 	return &cm.CueStacks[0]
 }
 
 //NewStack makes a new cue stack
 func (cm *Master) NewStack(priority int, name string) Stack {
-	return Stack{Priority: 2, Name: "main"}
+	return Stack{Priority: priority, Name: name}
 }
 
 //NewFrame creates a new instate with incr ID

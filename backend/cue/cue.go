@@ -32,7 +32,7 @@ func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
 
 //Stack is basically a precedence priority queue (really a CueQueue sigh)
 type Stack struct {
-	Priority      int64  `json:"priority"`
+	Priority      int    `json:"priority"`
 	Name          string `json:"name"`
 	Cues          []Cue  `json:"cues"`
 	ProcessedCues []Cue  `json:"processed_cues"`
