@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nickysemenza/hyperion/backend/color"
-	"github.com/nickysemenza/hyperion/backend/light"
+	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/light"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/nickysemenza/hyperion/backend/proto"
+	pb "github.com/nickysemenza/hyperion/proto"
 	"google.golang.org/grpc"
 )
 

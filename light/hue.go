@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/heatxsink/go-hue/lights"
-	"github.com/nickysemenza/hyperion/backend/color"
+	"github.com/nickysemenza/hyperion/color"
 )
 
 //HueLight is a philips hue light.

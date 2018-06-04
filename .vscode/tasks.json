@@ -6,7 +6,7 @@
         {
             "label": "Build and run backend",
             "type": "shell",
-            "command": "cd backend && go build && ./backend server",
+            "command": "go build && ./hyperion server",
             "group": {
                 "kind": "build",
                 "isDefault": true

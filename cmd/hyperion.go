@@ -1,4 +1,4 @@
-package hyperion
+package cmd
 
 import (
 	"log"
@@ -6,14 +6,14 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/nickysemenza/hyperion/backend/api"
-	"github.com/nickysemenza/hyperion/backend/cue"
-	"github.com/nickysemenza/hyperion/backend/homekit"
-	"github.com/nickysemenza/hyperion/backend/light"
-	"github.com/nickysemenza/hyperion/backend/trigger"
+	"github.com/nickysemenza/hyperion/api"
+	"github.com/nickysemenza/hyperion/cue"
+	"github.com/nickysemenza/hyperion/homekit"
+	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/trigger"
 )
 
-func RunServer() {
+func runServer() {
 	//Set up Homekit Server
 	go homekit.Start()
 
