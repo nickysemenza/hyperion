@@ -57,6 +57,11 @@ func (cm *Master) getNextIDForUse() int64 {
 
 //GetDefaultCueStack gives the first cuestack
 func (cm *Master) GetDefaultCueStack() *Stack {
+	cm.m.Lock()
+	defer cm.m.Unlock()
+	if len(cm.CueStacks) == 0 {
+		cm.CueStacks = append(cm.CueStacks, cm.NewStack(2, "main"))
+	}
 	return &cm.CueStacks[0]
 }
 
