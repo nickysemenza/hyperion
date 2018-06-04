@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nickysemenza/hyperion/client"
 	"github.com/nickysemenza/hyperion/cue"
 	"github.com/nickysemenza/hyperion/light"
 	"github.com/spf13/cobra"
@@ -37,7 +38,7 @@ var cmdClient = &cobra.Command{
 	Use:   "client",
 	Short: "Run the client",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("TODO: client")
+		client.Run()
 	},
 }
 
