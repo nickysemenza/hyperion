@@ -11,18 +11,18 @@ install:
 - npm install -g yarn
 - go get -t ./...
 before_script:
-- cd frontend/
+- cd ui/
 - yarn install
 # - cp src/config.example.js src/config.js
 - cd ..
 script:
 - ./test_cov.sh
-- cd frontend/
+- cd ui/
 - npm test -- --coverage
 - npm run build
 - cd ..
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-- cd frontend/
+- cd ui/
 - bash <(curl -s https://codecov.io/bash)
 - cd ..
