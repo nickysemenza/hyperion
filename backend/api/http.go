@@ -30,6 +30,20 @@ func aa(b string) func(*gin.Context) {
 	}
 }
 
+//createCue takes a JSON cue, and adds it to the default cuestack.
+func createCue(c *gin.Context) {
+	var newCue cue.Cue
+	if err := c.ShouldBindJSON(&newCue); err == nil {
+		newCue.AddIDsRecursively()
+		stack := cue.GetCueMaster().GetDefaultCueStack()
+		stack.EnQueueCue(newCue)
+
+		c.JSON(200, newCue)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
 //hexFade returns an image representing the fade from one hex val to another
 // NOTE: hex values must be given without the pound
 func hexFade(c *gin.Context) {
@@ -104,6 +118,7 @@ func ServeHTTP() {
 
 	router.GET("/ping", aa("ff"))
 	router.GET("/lights", getLightInventory)
+	router.POST("cues", createCue)
 	router.GET("/hexfade/:from/:to", hexFade)
 	router.GET("/ws", func(c *gin.Context) {
 		wshandler(c.Writer, c.Request)

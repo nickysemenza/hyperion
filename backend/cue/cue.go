@@ -115,8 +115,8 @@ func (cm *Master) getNextIDForUse() int64 {
 }
 
 //GetDefaultCueStack gives the first cuestack
-func (cm *Master) GetDefaultCueStack() Stack {
-	return cm.CueStacks[0]
+func (cm *Master) GetDefaultCueStack() *Stack {
+	return &cm.CueStacks[0]
 }
 
 //NewStack makes a new cue stack
@@ -175,6 +175,8 @@ func (cs *Stack) deQueueNextCue() *Cue {
 func (cs *Stack) EnQueueCue(c Cue) {
 	cs.m.Lock()
 	defer cs.m.Unlock()
+	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name}).Info("enqueued!")
+
 	cs.Cues = append(cs.Cues, c)
 }
 
@@ -184,6 +186,25 @@ func (c *Cue) ProcessCue(ctx context.Context) {
 	log.WithFields(getLogrusFieldsFromContext(ctx)).Info("ProcessCue")
 	for _, eachFrame := range c.Frames {
 		eachFrame.ProcessFrame(ctx)
+	}
+}
+
+func (c *Cue) AddIDsRecursively() {
+	cm := GetCueMaster()
+	if c.ID == 0 {
+		c.ID = cm.getNextIDForUse()
+	}
+	for x := range c.Frames {
+		eachFrame := &c.Frames[x]
+		if eachFrame.ID == 0 {
+			eachFrame.ID = cm.getNextIDForUse()
+		}
+		for y := range eachFrame.Actions {
+			eachAction := &eachFrame.Actions[y]
+			if eachAction.ID == 0 {
+				eachAction.ID = cm.getNextIDForUse()
+			}
+		}
 	}
 }
 

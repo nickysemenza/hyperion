@@ -2,6 +2,7 @@ package cue
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -74,4 +75,38 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 	}
 	frame := Frame{Actions: actions}
 	frame.ProcessFrame(context.Background())
+}
+
+func TestAddingIDsToUnmarshalledCue(t *testing.T) {
+	data := `{
+		"frames": [
+		  {
+			"actions": [
+			  {
+				"new_state": {
+				  "rgb": {
+					"r": 65,
+					"g": 0,
+					"b": 120
+				  },
+				  "duration": 1500000000
+				},
+				"light_name": "hue1"
+			  }
+			]
+		  }
+		],
+		"name": ""
+	  }`
+	cue := Cue{}
+	json.Unmarshal([]byte(data), &cue)
+
+	assert.Zero(t, cue.ID)
+
+	cue.AddIDsRecursively()
+
+	assert.NotZero(t, cue.ID)
+	assert.NotZero(t, cue.Frames[0].ID)
+	assert.NotZero(t, cue.Frames[0].Actions[0].ID)
+	assert.NotEqual(t, cue.ID, cue.Frames[0].ID)
 }
