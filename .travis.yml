@@ -9,26 +9,20 @@ before_install:
 - nvm use 6.9
 install:
 - npm install -g yarn
-- cd backend/
 - go get -t ./...
-- cd ..
 before_script:
 - cd frontend/
 - yarn install
 # - cp src/config.example.js src/config.js
 - cd ..
 script:
-- cd backend/
 - ./test_cov.sh
-- cd ..
 - cd frontend/
 - npm test -- --coverage
 - npm run build
 - cd ..
 after_success:
-- cd backend/
 - bash <(curl -s https://codecov.io/bash)
-- cd ..
 - cd frontend/
 - bash <(curl -s https://codecov.io/bash)
 - cd ..

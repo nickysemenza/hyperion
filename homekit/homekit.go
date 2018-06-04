@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nickysemenza/hyperion/backend/trigger"
+	"github.com/nickysemenza/hyperion/trigger"
 
 	"github.com/brutella/hc"
 	"github.com/brutella/hc/accessory"

@@ -17,9 +17,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	colorful "github.com/lucasb-eyer/go-colorful"
-	"github.com/nickysemenza/hyperion/backend/color"
-	"github.com/nickysemenza/hyperion/backend/cue"
-	"github.com/nickysemenza/hyperion/backend/light"
+	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/cue"
+	"github.com/nickysemenza/hyperion/light"
 )
 
 const wsInterval = 80 * time.Millisecond

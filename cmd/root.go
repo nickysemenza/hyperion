@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nickysemenza/hyperion/backend/cue"
-	"github.com/nickysemenza/hyperion/backend/hyperion"
-	"github.com/nickysemenza/hyperion/backend/light"
+	"github.com/nickysemenza/hyperion/cue"
+	"github.com/nickysemenza/hyperion/light"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +29,7 @@ var cmdServer = &cobra.Command{
 			cs.EnQueueCue(*c)
 		}()
 
-		hyperion.RunServer()
+		runServer()
 	},
 }
 

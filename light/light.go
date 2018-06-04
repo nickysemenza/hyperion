@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/nickysemenza/hyperion/backend/color"
+	"github.com/nickysemenza/hyperion/color"
 )
 
 //Light is a light

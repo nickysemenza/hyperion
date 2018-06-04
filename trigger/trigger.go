@@ -4,8 +4,8 @@ import (
 	"log"
 	"sync"
 
-	"github.com/nickysemenza/hyperion/backend/color"
-	"github.com/nickysemenza/hyperion/backend/cue"
+	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/cue"
 )
 
 type trigger struct {

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickysemenza/hyperion/backend/color"
-	"github.com/nickysemenza/hyperion/backend/light"
+	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/light"
 	log "github.com/sirupsen/logrus"
 )
 
