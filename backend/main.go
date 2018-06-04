@@ -13,6 +13,7 @@ import (
 	"github.com/nickysemenza/hyperion/backend/cue"
 	"github.com/nickysemenza/hyperion/backend/homekit"
 	"github.com/nickysemenza/hyperion/backend/light"
+	"github.com/nickysemenza/hyperion/backend/trigger"
 )
 
 func getTempCueStack(CueMaster *cue.Master) cue.Stack {
@@ -84,6 +85,9 @@ func main() {
 	cueMaster.ProcessForever()
 
 	go light.SendDMXValuesToOLA()
+
+	//process triggers
+	go trigger.ProcessTriggers()
 
 	//handle CTRL+C
 	quit := make(chan os.Signal)

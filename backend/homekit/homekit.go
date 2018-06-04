@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/nickysemenza/hyperion/backend/trigger"
+
 	"github.com/brutella/hc"
 	"github.com/brutella/hc/accessory"
 )
@@ -38,9 +40,14 @@ func Start() {
 	//add some handlers for the switches...
 	for i := range switches {
 		eachSwitch := switches[i]
+		ix := i
 		eachSwitch.Switch.On.OnValueRemoteUpdate(func(on bool) {
-			//TODO: call some code...
-			log.Printf("[homekit] changed: [%s] to %t", eachSwitch.Accessory.Info.Name.String.GetValue(), on)
+			//TODO: call some code...ID
+			if on == true {
+				trigger.Action("homekit-switch", ix+1)
+				eachSwitch.Switch.On.SetValue(false)
+			}
+			// log.Printf("[homekit] changed: [%s] to %t", eachSwitch.Accessory.Info.Name.String.GetValue(), on)
 		})
 	}
 

@@ -14,6 +14,30 @@ type RGB struct {
 	B int `json:"b"`
 }
 
+type colorNum int
+
+const (
+	Red colorNum = iota
+	Green
+	Blue
+	White
+)
+
+func FromString(num colorNum) RGB {
+	switch num {
+	case Red:
+		return RGB{R: 255}
+	case Green:
+		return RGB{G: 255}
+	case Blue:
+		return RGB{B: 255}
+	case White:
+		return RGB{R: 255, G: 255, B: 255}
+	default:
+		return RGB{}
+	}
+}
+
 func (c *RGB) AsColorful() colorful.Color {
 	return colorful.Color{R: float64(c.R) / 255, G: float64(c.G) / 255, B: float64(c.B) / 255}
 }

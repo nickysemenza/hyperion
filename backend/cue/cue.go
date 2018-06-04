@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nickysemenza/hyperion/backend/color"
 	"github.com/nickysemenza/hyperion/backend/light"
 	log "github.com/sirupsen/logrus"
 )
@@ -116,6 +117,7 @@ func (c *Cue) ProcessCue(ctx context.Context) {
 	}
 }
 
+//AddIDsRecursively populates the ID fields on a cue, its frames, and their actions
 func (c *Cue) AddIDsRecursively() {
 	cm := GetCueMaster()
 	if c.ID == 0 {
@@ -188,4 +190,14 @@ func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
 		Light: light.GetByName(cfa.LightName),
 		Alias: (*Alias)(cfa),
 	})
+}
+
+//NewSimple returns a Cue that transitions the given light to the given color
+func NewSimple(lightName string, c color.RGB) Cue {
+	cm := GetCueMaster()
+	return cm.New([]Frame{
+		cm.NewFrame([]FrameAction{
+			cm.NewFrameAction(time.Millisecond*500, c, lightName),
+		})}, "")
+
 }
