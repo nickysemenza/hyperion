@@ -2,8 +2,15 @@ syntax = "proto3";
 
 service API {
     rpc GetPing(Ping) returns (Ping) {}
+
+    rpc StreamCueMaster(Ping) returns (stream MarshalledJSON) {}
 }
 
 message Ping {
     string message = 1;
+}
+
+message MarshalledJSON {
+    string kind = 1;
+    bytes data = 2;
 }
