@@ -30,6 +30,10 @@ func aa(b string) func(*gin.Context) {
 	}
 }
 
+func getCueMaster(c *gin.Context) {
+	c.JSON(200, cue.GetCueMaster())
+}
+
 //createCue takes a JSON cue, and adds it to the default cuestack.
 func createCue(c *gin.Context) {
 	var newCue cue.Cue
@@ -116,9 +120,11 @@ func ServeHTTP() {
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "X-JWT"}
 	router.Use(cors.New(corsConfig))
 
-	router.GET("/ping", aa("ff"))
 	router.GET("/lights", getLightInventory)
 	router.POST("cues", createCue)
+	router.GET("cuemaster", getCueMaster)
+
+	router.GET("/ping", aa("ff"))
 	router.GET("/hexfade/:from/:to", hexFade)
 	router.GET("/ws", func(c *gin.Context) {
 		wshandler(c.Writer, c.Request)

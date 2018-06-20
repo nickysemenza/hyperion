@@ -1,12 +1,13 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-import Home from './pages/static/Home';
-import LightList from './pages/LightList';
-import WSTest from './pages/WSTest';
-import Nav from './components/Nav';
-import { Container } from 'semantic-ui-react';
-import ReduxToastr from 'react-redux-toastr';
+import Home from "./pages/static/Home";
+import LightList from "./pages/LightList";
+import CueList from "./pages/CueList";
+import WSTest from "./pages/WSTest";
+import Nav from "./components/Nav";
+import { Container } from "semantic-ui-react";
+import ReduxToastr from "react-redux-toastr";
 
 const App = () => (
   <Router>
@@ -23,12 +24,13 @@ const App = () => (
       <Nav />
       <Container
         fluid
-        style={{ marginTop: '7em', width: '95%', minHeight: '100vh' }}
+        style={{ marginTop: "7em", width: "95%", minHeight: "100vh" }}
       >
         <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/wstest" component={WSTest} />
           <Route path="/lights" component={LightList} />
+          <Route path="/cues" component={CueList} />
         </Switch>
       </Container>
     </div>
