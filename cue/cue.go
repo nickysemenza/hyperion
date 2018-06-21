@@ -150,12 +150,14 @@ func (c *Cue) GetDuration() time.Duration {
 func (c *Cue) MarshalJSON() ([]byte, error) {
 	type Alias Cue
 	return json.Marshal(&struct {
-		ExpectedDuration time.Duration `json:"expected_duration"`
-		DurationDrift    time.Duration `json:"duration_drift"`
+		ExpectedDuration time.Duration `json:"expected_duration_ms"`
+		DurationDrift    time.Duration `json:"duration_drift_ms"`
+		RealDurationMS   time.Duration `json:"real_duration_ms"`
 		*Alias
 	}{
-		ExpectedDuration: c.GetDuration(),
-		DurationDrift:    c.RealDuration - c.GetDuration(),
+		ExpectedDuration: c.GetDuration() / time.Millisecond,
+		DurationDrift:    (c.RealDuration - c.GetDuration()) / time.Millisecond,
+		RealDurationMS:   c.RealDuration / time.Millisecond,
 		Alias:            (*Alias)(c),
 	})
 }
@@ -175,10 +177,10 @@ func (cf *Frame) GetDuration() time.Duration {
 func (cf *Frame) MarshalJSON() ([]byte, error) {
 	type Alias Frame
 	return json.Marshal(&struct {
-		ExpectedDuration time.Duration `json:"expected_duration"`
+		ExpectedDuration time.Duration `json:"expected_duration_ms"`
 		*Alias
 	}{
-		ExpectedDuration: cf.GetDuration(),
+		ExpectedDuration: cf.GetDuration() / time.Millisecond,
 		Alias:            (*Alias)(cf),
 	})
 }
@@ -219,11 +221,13 @@ func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
 func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
 	type Alias FrameAction
 	return json.Marshal(&struct {
-		Light light.Light `json:"light"`
+		Light      light.Light   `json:"light"`
+		DurationMS time.Duration `json:"action_duration_ms"`
 		*Alias
 	}{
-		Light: light.GetByName(cfa.LightName),
-		Alias: (*Alias)(cfa),
+		Light:      light.GetByName(cfa.LightName),
+		DurationMS: cfa.NewState.Duration / time.Millisecond,
+		Alias:      (*Alias)(cfa),
 	})
 }
 
