@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { rgbToHex } from "../utils";
 export const CueFrameWrapper = styled.div`
   display: flex;
 `;
@@ -14,6 +15,17 @@ export const CueTableCol = styled.div`
 
 const TIME_SCALE = 0.3;
 
+const ColorPreview = styled.div.attrs({
+  style: ({ hex }) => ({
+    backgroundColor: hex
+  })
+})`
+  min-width: 15px;
+  width: 15px;
+  min-height: 15px;
+  height: 15px;
+`;
+
 const CueFrameInner = styled.div.attrs({
   style: ({ duration }) => ({
     width: `${duration * TIME_SCALE}px`,
@@ -25,12 +37,16 @@ const CueFrameInner = styled.div.attrs({
   padding: 5px;
 `;
 
-export const CueFrame = ({ ...props }) => (
-  <CueFrameInner {...props}>
-    {" "}
-    {props.duration} ms <br /> F:{props.frameId} | A:{props.actionId}
-  </CueFrameInner>
-);
+export const CueFrame = ({ ...props }) => {
+  let { rgb } = props.action.new_state;
+  let hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  return (
+    <CueFrameInner {...props}>
+      {props.duration} ms (F:{props.frameId} | A:{props.actionId}) <br />
+      {props.action.light_name} <ColorPreview hex={hex} />
+    </CueFrameInner>
+  );
+};
 
 const CueFrameWaitInner = styled.div.attrs({
   style: ({ duration }) => ({

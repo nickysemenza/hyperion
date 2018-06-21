@@ -49,6 +49,7 @@ class cueList extends Component {
           tmp["items"] = tmp["items"].slice();
           tmp["items"].push(
             <CueFrame
+              action={action}
               key={c.id + "-" + z + "-" + x}
               duration={action.action_duration_ms}
               frameId={f.id}
