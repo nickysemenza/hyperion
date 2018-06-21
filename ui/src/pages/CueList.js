@@ -33,15 +33,15 @@ class CueList extends Component {
     });
 
     mainStack.processed_cues.forEach(c =>
-      c.frames.forEach(f => {
+      c.frames.forEach((f, z) => {
         f.actions.forEach((action, x) => {
           let tmp = {};
           Object.assign(tmp, all[c.id][x]);
           tmp["length_ms"] += action.action_duration_ms;
           tmp["items"] = tmp["items"].slice();
           tmp["items"].push(
-            // "action" + action.id + "(" + action.action_duration_ms + "ms)"
             <CueFrame
+              key={c.id + "-" + z + "-" + x}
               duration={action.action_duration_ms}
               frameId={f.id}
               actionId={action.id}
@@ -60,11 +60,7 @@ class CueList extends Component {
             let tmp = {};
             Object.assign(tmp, all[c.id][x]);
             tmp["length_ms"] += padding;
-            tmp["items"].push(
-              // "padding:" + padding + "ms"
-
-              <CueFrameWait duration={padding} />
-            );
+            tmp["items"].push(<CueFrameWait key={x} duration={padding} />);
             all[c.id][x] = tmp;
           }
         });
@@ -84,6 +80,7 @@ class CueList extends Component {
               return (
                 <CueLabel
                   id={c.id}
+                  key={c.id}
                   numActions={maxActions}
                   duration={c.expected_duration_ms}
                 />
@@ -93,8 +90,8 @@ class CueList extends Component {
           <CueTableCol>
             {Object.keys(all).map(k => {
               let each = all[k];
-              return each.map(item => (
-                <CueFrameWrapper> {item.items}</CueFrameWrapper>
+              return each.map((item, x) => (
+                <CueFrameWrapper key={x}> {item.items}</CueFrameWrapper>
               ));
             })}
           </CueTableCol>
