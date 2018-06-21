@@ -137,6 +137,29 @@ func (c *Cue) AddIDsRecursively() {
 	}
 }
 
+//GetDuration returns the sum of frame in a cue
+func (c *Cue) GetDuration() time.Duration {
+	totalDuration := time.Duration(0)
+	for _, frame := range c.Frames {
+		totalDuration += frame.GetDuration()
+	}
+	return totalDuration
+}
+
+//MarshalJSON override that injects the expected duration.
+func (c *Cue) MarshalJSON() ([]byte, error) {
+	type Alias Cue
+	return json.Marshal(&struct {
+		ExpectedDuration time.Duration `json:"expected_duration"`
+		DurationDrift    time.Duration `json:"duration_drift"`
+		*Alias
+	}{
+		ExpectedDuration: c.GetDuration(),
+		DurationDrift:    c.RealDuration - c.GetDuration(),
+		Alias:            (*Alias)(c),
+	})
+}
+
 //GetDuration returns the longest lasting Action within a CueFrame
 func (cf *Frame) GetDuration() time.Duration {
 	longest := time.Duration(0)
@@ -146,6 +169,18 @@ func (cf *Frame) GetDuration() time.Duration {
 		}
 	}
 	return longest
+}
+
+//MarshalJSON override that injects the expected duration.
+func (cf *Frame) MarshalJSON() ([]byte, error) {
+	type Alias Frame
+	return json.Marshal(&struct {
+		ExpectedDuration time.Duration `json:"expected_duration"`
+		*Alias
+	}{
+		ExpectedDuration: cf.GetDuration(),
+		Alias:            (*Alias)(cf),
+	})
 }
 
 //ProcessFrame processes the cueframe
