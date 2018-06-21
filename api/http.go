@@ -30,6 +30,21 @@ func aa(b string) func(*gin.Context) {
 	}
 }
 
+func runCommands(c *gin.Context) {
+	var commands []string
+	if err := c.ShouldBindJSON(&commands); err == nil {
+		for _, eachCommand := range commands {
+			x, _ := cue.BuildCueFromCommand(eachCommand)
+			cs := cue.GetCueMaster().GetDefaultCueStack()
+			cs.EnQueueCue(*x)
+		}
+
+		c.JSON(200, "ok")
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+}
 func getCueMaster(c *gin.Context) {
 	c.JSON(200, cue.GetCueMaster())
 }
@@ -134,6 +149,7 @@ func ServeHTTP() {
 
 	router.GET("/lights", getLightInventory)
 	router.POST("cues", createCue)
+	router.POST("commands", runCommands)
 	router.GET("cuemaster", getCueMaster)
 
 	router.GET("/ping", aa("ff"))
