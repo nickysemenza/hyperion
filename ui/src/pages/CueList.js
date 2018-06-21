@@ -91,6 +91,7 @@ class cueList extends Component {
                   key={c.id}
                   numActions={maxActions}
                   status={c.status}
+                  cue={c}
                   duration={c.expected_duration_ms}
                   duration_drift_ms={c.duration_drift_ms}
                 />

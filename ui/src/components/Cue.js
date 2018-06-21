@@ -69,12 +69,15 @@ const CueLabelInner = styled.div.attrs({
 `;
 
 export const CueLabel = ({ ...props }) => {
-  let { id, duration, duration_drift_ms } = props;
+  let { id, duration, duration_drift_ms, cue } = props;
   return (
     <CueLabelInner {...props}>
       # {id} <br />
-      {`${duration} ms`}
-      <i>{(duration_drift_ms && `(+${duration_drift_ms} ms)`) || ""}</i>
+      {`${duration} ms`}{" "}
+      {cue.status === "active"
+        ? `${(cue.elpased_ms / cue.expected_duration_ms * 100).toFixed(1)} %`
+        : null}
+      <i>{(duration_drift_ms && `(+${duration_drift_ms} ms)`) || null}</i>
     </CueLabelInner>
   );
 };
