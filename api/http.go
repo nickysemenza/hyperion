@@ -88,6 +88,16 @@ var wsupgrader = websocket.Upgrader{
 	},
 }
 
+type wsWrapper struct {
+	Data interface{} `json:"data"`
+	Type string      `json:"type"`
+}
+
+const (
+	wsTypeLightList = "LIGHT_LIST"
+	wsTypeCueList   = "CUE_MASTER"
+)
+
 func wshandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -97,7 +107,9 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		for {
-			conn.WriteJSON(light.GetLights())
+
+			conn.WriteJSON(&wsWrapper{Data: light.GetLights(), Type: wsTypeLightList})
+			conn.WriteJSON(&wsWrapper{Data: cue.GetCueMaster(), Type: wsTypeCueList})
 			time.Sleep(wsInterval)
 		}
 	}()

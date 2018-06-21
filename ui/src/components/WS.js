@@ -4,12 +4,11 @@ import moment from "moment";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Sockette from "sockette";
-import LightTable from "../components/LightTable";
 import { Label } from "semantic-ui-react";
+import { receiveSocketData } from "../actions";
 
-class WSTest extends Component {
+class WS extends Component {
   state = {
-    lights: {},
     curTime: null,
     wsOpen: false
   };
@@ -31,8 +30,9 @@ class WSTest extends Component {
       onmessage: e => {
         // console.log('Received:', e);
         try {
-          let lights = JSON.parse(e.data);
-          this.setState({ lights });
+          let data = JSON.parse(e.data);
+          this.props.receiveSocketData(data);
+          //   console.log(data);
         } catch (error) {}
       },
       onreconnect: e => console.log("Reconnecting...", e),
@@ -45,14 +45,12 @@ class WSTest extends Component {
     });
   }
   render() {
-    let { lights, wsOpen } = this.state;
+    let { wsOpen } = this.state;
     return (
       <div>
         <Label color={wsOpen ? "green" : "red"} horizontal>
           WebSocket
         </Label>
-        <br />
-        <LightTable lights={lights} />
         <pre>{JSON.stringify(this.state.curTime, null, 2)}</pre>
       </div>
     );
@@ -60,13 +58,11 @@ class WSTest extends Component {
 }
 
 function mapStateToProps(state) {
-  return {
-    config: state.lights.lights
-  };
+  return {};
 }
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators({}, dispatch);
+  return bindActionCreators({ receiveSocketData }, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(WSTest);
+export default connect(mapStateToProps, mapDispatchToProps)(WS);

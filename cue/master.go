@@ -73,7 +73,7 @@ func (cm *Master) NewFrame(actions []FrameAction) Frame {
 
 //New creates a new instate with incr ID
 func (cm *Master) New(frames []Frame, name string) Cue {
-	return Cue{ID: cm.getNextIDForUse(), Frames: frames}
+	return Cue{ID: cm.getNextIDForUse(), Frames: frames, Status: statusEnqueued}
 }
 
 //ProcessForever runs all the cuestacks

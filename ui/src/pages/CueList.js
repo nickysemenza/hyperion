@@ -11,7 +11,7 @@ import {
 } from "../components/Cue";
 import { bindActionCreators } from "redux";
 import { Header } from "semantic-ui-react";
-class CueList extends Component {
+class cueList extends Component {
   componentDidMount() {
     this.props.fetchCueMaster();
   }
@@ -24,7 +24,15 @@ class CueList extends Component {
     const bare = { length_ms: 0, items: [] };
 
     let all = {};
-    mainStack.processed_cues.forEach(c => {
+
+    let cueList = mainStack.processed_cues.concat(
+      mainStack.cues,
+      mainStack.active_cue || []
+    );
+
+    cueList.sort((a, b) => a.id - b.id);
+
+    cueList.forEach(c => {
       let maxActions = 1;
       c.frames.forEach(
         f => (maxActions = Math.max(maxActions, f.actions.length))
@@ -32,7 +40,7 @@ class CueList extends Component {
       all[c.id] = Array.apply(null, Array(maxActions)).map(x => bare);
     });
 
-    mainStack.processed_cues.forEach(c =>
+    cueList.forEach(c =>
       c.frames.forEach((f, z) => {
         f.actions.forEach((action, x) => {
           let tmp = {};
@@ -72,7 +80,7 @@ class CueList extends Component {
         <Header content={"cues"} />
         <CueTable>
           <CueTableCol>
-            {mainStack.processed_cues.map(c => {
+            {cueList.map(c => {
               let maxActions = 1;
               c.frames.forEach(
                 f => (maxActions = Math.max(maxActions, f.actions.length))
@@ -82,7 +90,9 @@ class CueList extends Component {
                   id={c.id}
                   key={c.id}
                   numActions={maxActions}
+                  status={c.status}
                   duration={c.expected_duration_ms}
+                  duration_drift_ms={c.duration_drift_ms}
                 />
               );
             })}
@@ -109,4 +119,4 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators({ fetchCueMaster }, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(CueList);
+export default connect(mapStateToProps, mapDispatchToProps)(cueList);

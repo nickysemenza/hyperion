@@ -19,6 +19,10 @@ const (
 	keyCueID
 	keyFrameID
 	keyFrameActionID
+
+	statusEnqueued  string = "enqueued"
+	statusActive           = "active"
+	statusProcessed        = "processed"
 )
 
 func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
@@ -45,6 +49,7 @@ type Cue struct {
 	ID              int64   `json:"id"`
 	Frames          []Frame `json:"frames"`
 	Name            string  `json:"name"`
+	Status          string  `json:"status"`
 	shouldRepeat    bool
 	shouldHoldAfter bool          //default false, will pause the CueStack after executing this cue, won't move on to next
 	WaitBefore      time.Duration `json:"wait_before"`
@@ -76,9 +81,11 @@ func (cs *Stack) ProcessStack() {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
 			ctx := context.WithValue(context.Background(), keyStackName, cs.Name)
 			cs.ActiveCue = nextCue
+			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()
 			nextCue.ProcessCue(ctx)
 			nextCue.FinishedAt = time.Now()
+			nextCue.Status = statusProcessed
 			nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
 			cs.ActiveCue = nil
 			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
@@ -120,6 +127,7 @@ func (c *Cue) ProcessCue(ctx context.Context) {
 //AddIDsRecursively populates the ID fields on a cue, its frames, and their actions
 func (c *Cue) AddIDsRecursively() {
 	cm := GetCueMaster()
+	c.Status = statusEnqueued
 	if c.ID == 0 {
 		c.ID = cm.getNextIDForUse()
 	}

@@ -1,7 +1,7 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Container, Menu } from 'semantic-ui-react';
-import { connect } from 'react-redux';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { Container, Menu } from "semantic-ui-react";
+import { connect } from "react-redux";
 
 const Nav = ({ user }) => (
   <Menu fixed="top" inverted>
@@ -11,6 +11,9 @@ const Nav = ({ user }) => (
       </Menu.Item>
       <Menu.Item as={NavLink} to="/lights">
         Lights
+      </Menu.Item>
+      <Menu.Item as={NavLink} to="/cues">
+        Cues
       </Menu.Item>
     </Container>
   </Menu>

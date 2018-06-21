@@ -20,7 +20,7 @@ const CueFrameInner = styled.div.attrs({
     minWidth: `${duration * TIME_SCALE}px`
   })
 })`
-  height: 50px;
+  height: 70px;
   border: 1px solid #008aff;
   padding: 5px;
 `;
@@ -38,7 +38,7 @@ const CueFrameWaitInner = styled.div.attrs({
     minWidth: `${duration * TIME_SCALE}px`
   })
 })`
-  height: 50px;
+  height: 70px;
   border: 1px solid purple;
   background-color: #f96f3a;
   padding: 5px;
@@ -48,13 +48,18 @@ export const CueFrameWait = ({ ...props }) => (
 );
 
 const CueLabelInner = styled.div.attrs({
-  style: ({ numActions }) => ({
-    height: `${numActions * 50}px`
-  })
+  style: ({ numActions, status }) => {
+    let statusColor = "#008AFF";
+    if (status === "active") statusColor = "#56D868";
+    else if (status === "processed") statusColor = "#B360E4";
+    return {
+      height: `${numActions * 70}px`,
+      backgroundColor: statusColor
+    };
+  }
 })`
-  // border: 1px solid purple;
-  background-color: #20272b;
   width: 100px;
+  border: 1px solid black;
   color: white;
   display: flex;
   justify-content: center;
@@ -63,9 +68,13 @@ const CueLabelInner = styled.div.attrs({
   order: 0;
 `;
 
-export const CueLabel = ({ ...props }) => (
-  <CueLabelInner {...props}>
-    Cue # {props.id} <br />
-    {props.duration} ms
-  </CueLabelInner>
-);
+export const CueLabel = ({ ...props }) => {
+  let { id, duration, duration_drift_ms } = props;
+  return (
+    <CueLabelInner {...props}>
+      # {id} <br />
+      {`${duration} ms`}
+      <i>{(duration_drift_ms && `(+${duration_drift_ms} ms)`) || ""}</i>
+    </CueLabelInner>
+  );
+};
