@@ -1,14 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import { fetchLightList } from '../actions/lights';
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 
-import LightTable from '../components/LightTable';
+import LightTable from "../components/LightTable";
 class LightList extends Component {
-  componentDidMount() {
-    this.props.fetchLightList();
-  }
   render() {
     return <LightTable lights={this.props.lights} />;
   }
@@ -21,12 +17,7 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators(
-    {
-      fetchLightList
-    },
-    dispatch
-  );
+  return bindActionCreators({}, dispatch);
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(LightList);

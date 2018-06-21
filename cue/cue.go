@@ -161,7 +161,7 @@ func (c *Cue) MarshalJSON() ([]byte, error) {
 		ExpectedDuration time.Duration `json:"expected_duration_ms"`
 		DurationDrift    time.Duration `json:"duration_drift_ms"`
 		RealDurationMS   time.Duration `json:"real_duration_ms"`
-		ElapsedMS        time.Duration `json:"elpased_ms"`
+		ElapsedMS        time.Duration `json:"elapsed_ms"`
 		*Alias
 	}{
 		ExpectedDuration: c.GetDuration() / time.Millisecond,

@@ -1,6 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 import { rgbToHex } from "../utils";
+
+const COLOR_PROCESSED = "#B360E4";
+const COLOR_ENQUEUED = "#008AFF";
+const COLOR_ACTIVE = "#56D868";
 export const CueFrameWrapper = styled.div`
   display: flex;
 `;
@@ -65,11 +69,11 @@ export const CueFrameWait = ({ ...props }) => (
 
 const CueLabelInner = styled.div.attrs({
   style: ({ numActions, status }) => {
-    let statusColor = "#008AFF";
-    if (status === "active") statusColor = "#56D868";
-    else if (status === "processed") statusColor = "#B360E4";
+    let statusColor = COLOR_ENQUEUED;
+    if (status === "active") statusColor = COLOR_ACTIVE;
+    else if (status === "processed") statusColor = COLOR_PROCESSED;
     return {
-      height: `${numActions * 70}px`,
+      height: `${numActions * 70 + 20}px`,
       backgroundColor: statusColor
     };
   }
@@ -91,9 +95,33 @@ export const CueLabel = ({ ...props }) => {
       # {id} <br />
       {`${duration} ms`}{" "}
       {cue.status === "active"
-        ? `${(cue.elpased_ms / cue.expected_duration_ms * 100).toFixed(1)} %`
+        ? `${(cue.elapsed_ms / cue.expected_duration_ms * 100).toFixed(1)} %`
         : null}
       <i>{(duration_drift_ms && `(+${duration_drift_ms} ms)`) || null}</i>
     </CueLabelInner>
   );
+};
+
+const ProgressInner = styled.div.attrs({
+  style: ({ duration, color }) => ({
+    width: `${duration * TIME_SCALE}px`,
+    minWidth: `${duration * TIME_SCALE}px`,
+    backgroundColor: color
+  })
+})`
+  height: 20px;
+  border: 1px solid purple;
+`;
+export const Progress = ({ ...props }) => {
+  let { cue } = props;
+  let { elapsed_ms, expected_duration_ms, status } = cue;
+  let duration = 0;
+  let color = COLOR_PROCESSED;
+  if (status === "active") {
+    duration = Math.min(elapsed_ms, expected_duration_ms);
+    color = COLOR_ACTIVE;
+  }
+  if (status === "processed") duration = expected_duration_ms;
+
+  return <ProgressInner duration={duration} color={color} />;
 };

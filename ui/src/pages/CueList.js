@@ -7,7 +7,8 @@ import {
   CueLabel,
   CueFrame,
   CueFrameWait,
-  CueFrameWrapper
+  CueFrameWrapper,
+  Progress
 } from "../components/Cue";
 import { bindActionCreators } from "redux";
 import { Header } from "semantic-ui-react";
@@ -24,9 +25,10 @@ class cueList extends Component {
     const bare = { length_ms: 0, items: [] };
 
     let all = {};
+    let cuesById = {};
 
     let cueList = mainStack.processed_cues.concat(
-      mainStack.cues,
+      mainStack.cues || [],
       mainStack.active_cue || []
     );
 
@@ -38,6 +40,7 @@ class cueList extends Component {
         f => (maxActions = Math.max(maxActions, f.actions.length))
       );
       all[c.id] = Array.apply(null, Array(maxActions)).map(x => bare);
+      cuesById[c.id] = c;
     });
 
     cueList.forEach(c =>
@@ -101,10 +104,16 @@ class cueList extends Component {
           </CueTableCol>
           <CueTableCol>
             {Object.keys(all).map(k => {
-              let each = all[k];
-              return each.map((item, x) => (
-                <CueFrameWrapper key={x}> {item.items}</CueFrameWrapper>
-              ));
+              return (
+                <div>
+                  <CueFrameWrapper key={k + "-2"}>
+                    <Progress cue={cuesById[parseInt(k, 10)]} />
+                  </CueFrameWrapper>
+                  {all[k].map((item, x) => (
+                    <CueFrameWrapper key={x}> {item.items}</CueFrameWrapper>
+                  ))}
+                </div>
+              );
             })}
           </CueTableCol>
         </CueTable>
