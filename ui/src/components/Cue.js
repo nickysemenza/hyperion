@@ -37,7 +37,7 @@ const CueFrameInner = styled.div.attrs({
   })
 })`
   height: 70px;
-  border: 1px solid #008aff;
+  border: 1px solid black;
   padding: 5px;
 `;
 
@@ -59,7 +59,7 @@ const CueFrameWaitInner = styled.div.attrs({
   })
 })`
   height: 70px;
-  border: 1px solid purple;
+  border: 1px solid black;
   background-color: #f96f3a;
   padding: 5px;
 `;
@@ -110,7 +110,7 @@ const ProgressInner = styled.div.attrs({
   })
 })`
   height: 20px;
-  border: 1px solid purple;
+  border: 1px solid black;
 `;
 export const Progress = ({ ...props }) => {
   let { cue } = props;
