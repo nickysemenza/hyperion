@@ -23,6 +23,7 @@ const (
 	Green
 	Blue
 	White
+	Black
 )
 
 //FromString yields an RGB object based on a const
@@ -36,9 +37,15 @@ func FromString(num colorNum) RGB {
 		return RGB{B: 255}
 	case White:
 		return RGB{R: 255, G: 255, B: 255}
+	case Black:
+		return RGB{R: 0, G: 0, B: 0}
 	default:
 		return RGB{}
 	}
+}
+
+func (c *RGB) IsBlack() bool {
+	return *c == FromString(Black)
 }
 
 //GetInterpolatedFade returns fade from one color to another.

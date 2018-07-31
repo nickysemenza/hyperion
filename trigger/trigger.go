@@ -37,25 +37,27 @@ func Action(source string, id int) {
 func ProcessTriggers() {
 	c := getTriggerChan()
 	for t := range c {
+
+		var newCues []cue.Cue
 		log.Printf("new trigger! %v\n", t)
-		var newCue cue.Cue
-		sendCue := false
 		if t.id == 1 {
-			newCue = cue.NewSimple("hue1", color.FromString(color.Red))
-			sendCue = true
+			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Red)))
+			newCues = append(newCues, cue.NewSimple("hue2", color.FromString(color.Blue)))
 		}
 		if t.id == 2 {
-			newCue = cue.NewSimple("hue1", color.FromString(color.Green))
-			sendCue = true
+			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Green)))
 		}
 		if t.id == 3 {
-			newCue = cue.NewSimple("hue1", color.FromString(color.Blue))
-			sendCue = true
+			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Blue)))
+		}
+		if t.id == 4 {
+			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Black)))
+			newCues = append(newCues, cue.NewSimple("hue2", color.FromString(color.Black)))
 		}
 
-		if sendCue {
+		for _, x := range newCues {
 			stack := cue.GetCueMaster().GetDefaultCueStack()
-			stack.EnQueueCue(newCue)
+			stack.EnQueueCue(x)
 		}
 	}
 }

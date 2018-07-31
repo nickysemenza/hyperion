@@ -129,13 +129,13 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	for {
-		t, msg, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
-		conn.WriteMessage(t, msg)
-	}
+	// for {
+	// 	t, msg, err := conn.ReadMessage()
+	// 	if err != nil {
+	// 		break
+	// 	}
+	// 	conn.WriteMessage(t, msg)
+	// }
 }
 
 //ServeHTTP runs the gin server

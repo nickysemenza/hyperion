@@ -1,12 +1,12 @@
 {
-    "lights": {
-      "hue": [
+  "lights": {
+    "hue": [
       {
         "hue_id": 1,
         "name": "hue1"
       },
       {
-        "hue_id": 2,
+        "hue_id": 4,
         "name": "hue2"
       }
     ],
@@ -22,31 +22,26 @@
         "start_address": 8,
         "universe": 1,
         "profile": "china-par-1"
-      }],
-      "generic": [
-        {
-          "name": "generic1"
-        }]
-    },
-    "hue": {
-      "hostname": "10.0.1.55",
-      "username": "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
-    },
-    "ola": {
-      "hostname": "localhost:9010"
-    },
-    "profiles": [
+      }
+    ],
+    "generic": [
+      {
+        "name": "generic1"
+      }
+    ]
+  },
+  "hue": {
+    "hostname": "10.0.0.147",
+    "username": "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
+  },
+  "ola": {
+    "hostname": "localhost:9010"
+  },
+  "profiles": [
     {
       "name": "china-par-1",
-      "capabilities": [
-        "rgbw"
-      ],
-      "channels": [
-        "",
-        "red",
-        "green",
-        "blue"
-      ]
+      "capabilities": ["rgbw"],
+      "channels": ["", "red", "green", "blue"]
     }
-    ]
-  }
+  ]
+}

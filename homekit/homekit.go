@@ -10,12 +10,13 @@ import (
 	"github.com/brutella/hc/accessory"
 )
 
+const numSwitches = 5
+
 //Start starts the HomeKit services
 func Start() {
 	config := hc.Config{Pin: "10000000", StoragePath: "./_homekit_data"}
 
 	//for now let's have N switches
-	numSwitches := 5
 	var switches []accessory.Switch
 	for x := 1; x <= numSwitches; x++ {
 		switchName := fmt.Sprintf("Switch %d", x)
