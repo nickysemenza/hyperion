@@ -17,9 +17,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	colorful "github.com/lucasb-eyer/go-colorful"
+	ginprometheus "github.com/mcuadros/go-gin-prometheus"
 	"github.com/nickysemenza/hyperion/color"
 	"github.com/nickysemenza/hyperion/cue"
 	"github.com/nickysemenza/hyperion/light"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const wsInterval = 80 * time.Millisecond
@@ -140,24 +142,31 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 
 //ServeHTTP runs the gin server
 func ServeHTTP() {
-
 	router := gin.Default()
+
+	//setup CORS
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "X-JWT"}
 	router.Use(cors.New(corsConfig))
 
+	//register prometheus gin metrics middleware
+	p := ginprometheus.NewPrometheus("gin")
+	p.Use(router)
+
+	//setup routes
+	router.GET("/_metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/lights", getLightInventory)
 	router.POST("cues", createCue)
 	router.POST("commands", runCommands)
 	router.GET("cuemaster", getCueMaster)
-
 	router.GET("/ping", aa("ff"))
 	router.GET("/hexfade/:from/:to", hexFade)
 	router.GET("/ws", func(c *gin.Context) {
 		wshandler(c.Writer, c.Request)
 	})
 
+	//server
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: router,
@@ -170,6 +179,7 @@ func ServeHTTP() {
 		}
 	}()
 
+	//block until graceful shutdown signal
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
