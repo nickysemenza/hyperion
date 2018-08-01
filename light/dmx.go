@@ -9,6 +9,7 @@ import (
 
 	"github.com/nickysemenza/gola"
 	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/metrics"
 )
 
 //Holds strings for the different channel types
@@ -136,6 +137,7 @@ func SendDMXValuesToOLA() {
 
 	s := getDMXStateInstance()
 
+	metrics.SetGagueWithNsFromTime(time.Now(), metrics.ResponseTimeNsOLA)
 	for {
 		for k, v := range s.universes {
 			client.SendDmx(k, v)

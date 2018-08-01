@@ -9,6 +9,7 @@ import (
 
 	"github.com/nickysemenza/hyperion/color"
 	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/metrics"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -84,13 +85,17 @@ func (cs *Stack) ProcessStack() {
 			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()
 			nextCue.ProcessCue(ctx)
+			//post processing cleanup
 			nextCue.FinishedAt = time.Now()
 			nextCue.Status = statusProcessed
 			nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
 			cs.ActiveCue = nil
 			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
-		} else {
-			// fmt.Println("FINISHED PROCESSING CUESTACK, RESTARTING")
+
+			//update metrics
+			metrics.CueExecutionDriftNs.Set(float64(nextCue.getDurationDrift() / time.Nanosecond))
+			metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
+			metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
 		}
 	}
 }
@@ -154,6 +159,11 @@ func (c *Cue) GetDuration() time.Duration {
 	return totalDuration
 }
 
+//calcualte the difference between expected and real duration
+func (c *Cue) getDurationDrift() time.Duration {
+	return c.RealDuration - c.GetDuration()
+}
+
 //MarshalJSON override that injects the expected duration.
 func (c *Cue) MarshalJSON() ([]byte, error) {
 	type Alias Cue
@@ -165,7 +175,7 @@ func (c *Cue) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		ExpectedDuration: c.GetDuration() / time.Millisecond,
-		DurationDrift:    (c.RealDuration - c.GetDuration()) / time.Millisecond,
+		DurationDrift:    c.getDurationDrift() / time.Millisecond,
 		RealDurationMS:   c.RealDuration / time.Millisecond,
 		ElapsedMS:        time.Now().Sub(c.StartedAt) / time.Millisecond,
 		Alias:            (*Alias)(c),

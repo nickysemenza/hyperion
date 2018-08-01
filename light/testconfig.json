@@ -22,6 +22,12 @@
         "start_address": 8,
         "universe": 1,
         "profile": "china-par-1"
+      },
+      {
+        "name": "light1",
+        "start_address": 8,
+        "universe": 2,
+        "profile": "china-par-1"
       }
     ],
     "generic": [
@@ -31,7 +37,7 @@
     ]
   },
   "hue": {
-    "hostname": "10.0.0.147",
+    "hostname": "10.0.0.39",
     "username": "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
   },
   "ola": {

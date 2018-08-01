@@ -9,6 +9,7 @@ import (
 
 	"github.com/heatxsink/go-hue/lights"
 	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/metrics"
 )
 
 //HueLight is a philips hue light.
@@ -31,6 +32,7 @@ func (hl *HueLight) GetType() string {
 
 //SetState updates the Hue's state.
 func (hl *HueLight) SetState(ctx context.Context, s State) {
+	metrics.SetGagueWithNsFromTime(time.Now(), metrics.ResponseTimeNsHue)
 	hl.m.Lock()
 	defer hl.m.Unlock()
 

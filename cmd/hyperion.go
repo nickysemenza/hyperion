@@ -10,10 +10,12 @@ import (
 	"github.com/nickysemenza/hyperion/cue"
 	"github.com/nickysemenza/hyperion/homekit"
 	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/metrics"
 	"github.com/nickysemenza/hyperion/trigger"
 )
 
 func runServer() {
+	metrics.Register()
 	//Set up Homekit Server
 	go homekit.Start()
 
