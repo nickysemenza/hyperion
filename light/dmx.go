@@ -37,6 +37,9 @@ func (d *DMXLight) getProfile() *dmxProfile {
 
 func (d *DMXLight) getChannelIDForAttribute(attr string) int {
 	profile := d.getProfile()
+	if profile == nil {
+		log.Println("cannot find profile!")
+	}
 	channelIndex := profile.getChannelIndexForAttribute(attr)
 	return d.StartAddress + channelIndex
 }
@@ -108,6 +111,9 @@ func getDMXStateInstance() *dmxState {
 
 	})
 	return dmxStateInstance
+}
+func (s *dmxState) getDmxValue(universe, channel int) int {
+	return int(s.universes[universe][channel-1])
 }
 
 func (s *dmxState) setDMXValue(universe, channel, value int) error {

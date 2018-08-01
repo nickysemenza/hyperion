@@ -2,6 +2,9 @@ package light
 
 import (
 	"testing"
+
+	"github.com/nickysemenza/hyperion/color"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDMXAttributeChannels(t *testing.T) {
@@ -34,5 +37,37 @@ func TestDMX(t *testing.T) {
 
 	if s1 != s2 {
 		t.Error("should be singleton!")
+	}
+}
+
+func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
+	type fields struct {
+		StartAddress int
+		Universe     int
+		Profile      string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		color  color.RGB
+	}{
+		{"setLightToGreen", fields{Profile: "a", Universe: 4}, color.GetRGBFromHex("#00FF00")},
+		{"withOffsetStartAddress", fields{Profile: "a", Universe: 4, StartAddress: 10}, color.GetRGBFromHex("#00FF00")},
+	}
+
+	DMXProfilesByName = make(map[string]dmxProfile)
+	DMXProfilesByName["a"] = dmxProfile{Name: "a", Channels: []string{"noop", "red", "green", "blue"}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := &DMXLight{
+				StartAddress: tt.fields.StartAddress,
+				Universe:     tt.fields.Universe,
+				Profile:      tt.fields.Profile,
+			}
+			d.blindlySetRGBToStateAndDMX(tt.color)
+			ds := getDMXStateInstance()
+			assert.Equal(t, 255, ds.getDmxValue(tt.fields.Universe, 2+tt.fields.StartAddress))
+			assert.Equal(t, 0, ds.getDmxValue(tt.fields.Universe, 1+tt.fields.StartAddress))
+		})
 	}
 }

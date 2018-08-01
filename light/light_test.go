@@ -2,8 +2,23 @@ package light
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
+func TestGetType(t *testing.T) {
+	tests := []struct {
+		input    Light
+		expected string
+	}{
+		{&DMXLight{}, TypeDMX},
+		{&HueLight{}, TypeHue},
+		{&GenericLight{}, TypeGeneric},
+	}
+	for _, tt := range tests {
+		assert.Equal(t, tt.expected, tt.input.GetType())
+	}
+}
 func TestGenericLightInterface(t *testing.T) {
 	l := &GenericLight{Name: "a"}
 	s := GetLightDebugString(l)
