@@ -28,7 +28,7 @@ func runServer() {
 	//proceess cues forever
 	cue.GetCueMaster().ProcessForever()
 
-	go light.SendDMXValuesToOLA()
+	go light.SendDMXWorker()
 
 	//process triggers
 	go trigger.ProcessTriggers()

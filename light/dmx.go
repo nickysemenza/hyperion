@@ -135,8 +135,8 @@ func (s *dmxState) initializeUniverse(universe int) {
 	}
 }
 
-//SendDMXValuesToOLA sends OLA the current dmxState across all universes
-func SendDMXValuesToOLA() {
+//SendDMXWorker sends OLA the current dmxState across all universes
+func SendDMXWorker() {
 	//TODO: put this on a timer
 	client := gola.New(GetConfig().Ola.Hostname)
 	defer client.Close()
