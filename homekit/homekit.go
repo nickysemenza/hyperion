@@ -4,33 +4,66 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nickysemenza/hyperion/trigger"
-
 	"github.com/brutella/hc"
 	"github.com/brutella/hc/accessory"
+	"github.com/nickysemenza/hyperion/trigger"
 )
 
-const numSwitches = 5
+const numSwitches = 6
+
+type accessoryType string
+
+const (
+	button accessoryType = "button"
+)
+
+var allAccessories []Accessory
+
+//Accessory wraps a hc/accessory
+type Accessory struct {
+	RawAccessory *accessory.Accessory
+	Type         accessoryType
+	Name         string
+}
+
+func buildRawAccessoryList(accessoryList []Accessory) []*accessory.Accessory {
+	accessories := make([]*accessory.Accessory, len(accessoryList))
+	for i, a := range accessoryList {
+		accessories[i] = a.RawAccessory
+	}
+	return accessories
+}
+
+func buildSwitchList() {
+	//for now let's have N switches
+	for x := 1; x <= numSwitches; x++ {
+		id := x
+		switchName := fmt.Sprintf("Switch %d", id)
+		s := accessory.NewSwitch(accessory.Info{Name: switchName, Manufacturer: "hyperion"})
+		s.Switch.On.OnValueRemoteUpdate(func(on bool) {
+			if on {
+				trigger.Action("homekit-switch", id)
+				s.Switch.On.SetValue(false)
+			}
+			log.Printf("[homekit] changed: [%s] to %t", s.Accessory.Info.Name.String.GetValue(), on)
+		})
+		allAccessories = append(allAccessories, Accessory{
+			RawAccessory: s.Accessory,
+			Type:         button,
+			Name:         switchName,
+		})
+	}
+}
 
 //Start starts the HomeKit services
 func Start() {
+	//config
 	config := hc.Config{Pin: "10000000", StoragePath: "./_homekit_data"}
-
-	//for now let's have N switches
-	var switches []accessory.Switch
-	for x := 1; x <= numSwitches; x++ {
-		switchName := fmt.Sprintf("Switch %d", x)
-		s := accessory.NewSwitch(accessory.Info{Name: switchName, Manufacturer: "hyperion"})
-		switches = append(switches, *s)
-	}
-
-	//an array of their accessory attributes
-	accessories := make([]*accessory.Accessory, len(switches))
-	for i, s := range switches {
-		accessories[i] = s.Accessory
-	}
-
 	bridge := accessory.NewBridge(accessory.Info{Name: "bridge1", Manufacturer: "Hyperion"})
+
+	//accessory setup
+	buildSwitchList()
+	accessories := buildRawAccessoryList(allAccessories)
 
 	//start the server
 	t, err := hc.NewIPTransport(config, bridge.Accessory, accessories...)
@@ -38,20 +71,7 @@ func Start() {
 		log.Panic(err)
 	}
 
-	//add some handlers for the switches...
-	for i := range switches {
-		eachSwitch := switches[i]
-		ix := i
-		eachSwitch.Switch.On.OnValueRemoteUpdate(func(on bool) {
-			//TODO: call some code...ID
-			if on == true {
-				trigger.Action("homekit-switch", ix+1)
-				eachSwitch.Switch.On.SetValue(false)
-			}
-			// log.Printf("[homekit] changed: [%s] to %t", eachSwitch.Accessory.Info.Name.String.GetValue(), on)
-		})
-	}
-
+	//shutdown handler
 	hc.OnTermination(func() {
 		<-t.Stop()
 		log.Println("Homekit services stopped.")
