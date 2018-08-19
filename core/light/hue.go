@@ -14,9 +14,9 @@ import (
 
 //HueLight is a philips hue light.
 type HueLight struct {
-	HueID int    `json:"hue_id"`
-	Name  string `json:"name"`
-	State State  `json:"state"`
+	HueID int    `json:"hue_id" yaml:"hue_id"`
+	Name  string `json:"name" yaml:"name"`
+	State State  `json:"state" yaml:"state"`
 	m     sync.Mutex
 }
 

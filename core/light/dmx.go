@@ -24,11 +24,11 @@ const (
 
 //DMXLight is a DMX light
 type DMXLight struct {
-	Name         string `json:"name"`
-	StartAddress int    `json:"start_address"`
-	Universe     int    `json:"universe"`
-	Profile      string `json:"profile"`
-	State        State  `json:"state"`
+	Name         string `json:"name" yaml:"name"`
+	StartAddress int    `json:"start_address" yaml:"start_address"`
+	Universe     int    `json:"universe" yaml:"universe"`
+	Profile      string `json:"profile" yaml:"profile"`
+	State        State  `json:"state" yaml:"state"`
 }
 
 func (d *DMXLight) getProfile() *dmxProfile {
@@ -167,6 +167,12 @@ func (p *dmxProfile) getChannelIndexForAttribute(attrName string) int {
 	}
 	return -1
 }
+
+//DMXProfileMap is a map of profiles
+type DMXProfileMap map[string]dmxProfile
+
+//DMXProfilesByName holds dmx profiles
+var DMXProfilesByName DMXProfileMap
 
 func getDMXProfileByName(name string) *dmxProfile {
 	for _, x := range DMXProfilesByName {

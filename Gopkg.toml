@@ -100,3 +100,6 @@
 [[constraint]]
   name = "github.com/pkg/errors"
   version = "0.8.0"
+
+[[constraint]]
+  name = "gopkg.in/yaml.v2"

@@ -4,8 +4,8 @@ import "context"
 
 //GenericLight is for testing
 type GenericLight struct {
-	Name  string `json:"name"`
-	State State  `json:"state"`
+	Name  string `json:"name" yaml:"name"`
+	State State  `json:"state" yaml:"state"`
 }
 
 //GetName returns the light's name.

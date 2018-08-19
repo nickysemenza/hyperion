@@ -43,7 +43,7 @@ var cmdServer = &cobra.Command{
 	Short: "Run the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Running Server")
-		light.ReadLightConfigFromFile("./core/light/testconfig.json")
+		light.ReadLightConfigFromFile("./core/light/testconfig.yaml")
 
 		go func() {
 			c, _ := cue.BuildCueFromCommand("hue1:#00FF00:1000")

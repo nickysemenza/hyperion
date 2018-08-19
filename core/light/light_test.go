@@ -21,7 +21,7 @@ func TestGetType(t *testing.T) {
 }
 func TestGenericLightInterface(t *testing.T) {
 	l := &GenericLight{Name: "a"}
-	s := GetLightDebugString(l)
+	s := DebugString(l)
 	expected := "a - generic"
 	if s != expected {
 		t.Errorf("got %s, expected %s", s, expected)
@@ -33,7 +33,7 @@ func TestFindLightByName(t *testing.T) {
 	dmx1 := &DMXLight{Name: "dmx1"}
 	hue1 := &HueLight{Name: "hue1"}
 
-	ByName = make(StringMap)
+	ByName = make(NameMap)
 	ByName["hue1"] = hue1
 	ByName["dmx1"] = dmx1
 
