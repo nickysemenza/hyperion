@@ -10,11 +10,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type cliHandler interface {
+	startServer()
+	startClient()
+}
+
+type defaultHandler struct{}
+
+func (d defaultHandler) startServer() {
+	runServer()
+}
+func (d defaultHandler) startClient() {
+	client.Run("localhost:8888")
+}
+
+type cliConfig struct {
+	h cliHandler
+}
+
+var mainHandler = &cliConfig{h: &defaultHandler{}}
+
 var rootCmd = &cobra.Command{
 	Use:   "hyperion",
-	Short: "Hyperion is hype",
+	Short: "Hyperion lighting controller v0.1",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
+		cmd.Help()
 	},
 }
 var cmdServer = &cobra.Command{
@@ -30,7 +51,8 @@ var cmdServer = &cobra.Command{
 			cs.EnQueueCue(*c)
 		}()
 
-		runServer()
+		// runServer()
+		mainHandler.h.startServer()
 	},
 }
 
@@ -38,7 +60,7 @@ var cmdClient = &cobra.Command{
 	Use:   "client",
 	Short: "Run the client",
 	Run: func(cmd *cobra.Command, args []string) {
-		client.Run()
+		mainHandler.h.startServer()
 	},
 }
 

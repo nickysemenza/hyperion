@@ -15,8 +15,8 @@ import (
 )
 
 //Run runs the client
-func Run() {
-	conn, err := grpc.Dial("localhost:8888", grpc.WithInsecure())
+func Run(address string) {
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Println(err)
 	}
