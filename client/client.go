@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/nickysemenza/hyperion/cue"
+	"github.com/nickysemenza/hyperion/core/cue"
 
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"google.golang.org/grpc"

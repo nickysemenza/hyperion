@@ -8,3 +8,5 @@ test: test-backend test-ui
 
 proto:
 	protoc --go_out=plugins=grpc:api proto/*.proto
+godepgraph:
+	graphpkg -match 'nickysemenza/hyperion' github.com/nickysemenza/hyperion

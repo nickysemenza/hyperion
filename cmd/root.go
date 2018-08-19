@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/nickysemenza/hyperion/client"
-	"github.com/nickysemenza/hyperion/cue"
-	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/core/cue"
+	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +43,7 @@ var cmdServer = &cobra.Command{
 	Short: "Run the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Running Server")
-		light.ReadLightConfigFromFile("./light/testconfig.json")
+		light.ReadLightConfigFromFile("./core/light/testconfig.json")
 
 		go func() {
 			c, _ := cue.BuildCueFromCommand("hue1:#00FF00:1000")

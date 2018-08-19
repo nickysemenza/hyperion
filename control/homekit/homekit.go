@@ -6,7 +6,7 @@ import (
 
 	"github.com/brutella/hc"
 	"github.com/brutella/hc/accessory"
-	"github.com/nickysemenza/hyperion/trigger"
+	"github.com/nickysemenza/hyperion/control/trigger"
 )
 
 const numSwitches = 6

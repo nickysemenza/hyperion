@@ -18,9 +18,9 @@ import (
 	"github.com/gorilla/websocket"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	ginprometheus "github.com/mcuadros/go-gin-prometheus"
-	"github.com/nickysemenza/hyperion/color"
-	"github.com/nickysemenza/hyperion/cue"
-	"github.com/nickysemenza/hyperion/light"
+	"github.com/nickysemenza/hyperion/core/cue"
+	"github.com/nickysemenza/hyperion/core/light"
+	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

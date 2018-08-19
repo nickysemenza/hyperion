@@ -9,7 +9,7 @@ import (
 	"time"
 
 	pb "github.com/nickysemenza/hyperion/api/proto"
-	"github.com/nickysemenza/hyperion/cue"
+	"github.com/nickysemenza/hyperion/core/cue"
 	"google.golang.org/grpc"
 )
 

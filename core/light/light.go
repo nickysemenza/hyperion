@@ -9,7 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/util/color"
+	"github.com/pkg/errors"
 )
 
 //Light is a light
@@ -82,7 +83,7 @@ func ReadLightConfigFromFile(file string) Config {
 	//read file
 	raw, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(errors.Wrap(err, "could not read config file"))
 		os.Exit(1)
 	}
 

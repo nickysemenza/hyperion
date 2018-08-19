@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/nickysemenza/gola"
-	"github.com/nickysemenza/hyperion/color"
-	"github.com/nickysemenza/hyperion/metrics"
+	"github.com/nickysemenza/hyperion/util/color"
+	"github.com/nickysemenza/hyperion/util/metrics"
 )
 
 //Holds strings for the different channel types

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/nickysemenza/hyperion/api"
-	"github.com/nickysemenza/hyperion/cue"
-	"github.com/nickysemenza/hyperion/homekit"
-	"github.com/nickysemenza/hyperion/light"
-	"github.com/nickysemenza/hyperion/metrics"
-	"github.com/nickysemenza/hyperion/trigger"
+	"github.com/nickysemenza/hyperion/control/homekit"
+	"github.com/nickysemenza/hyperion/control/trigger"
+	"github.com/nickysemenza/hyperion/core/cue"
+	"github.com/nickysemenza/hyperion/core/light"
+	"github.com/nickysemenza/hyperion/util/metrics"
 )
 
 func runServer() {

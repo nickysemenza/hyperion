@@ -490,6 +490,8 @@
     "github.com/lucasb-eyer/go-colorful",
     "github.com/mcuadros/go-gin-prometheus",
     "github.com/nickysemenza/gola",
+    "github.com/pkg/errors",
+    "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",

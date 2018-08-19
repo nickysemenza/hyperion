@@ -3,7 +3,7 @@ package light
 import (
 	"testing"
 
-	"github.com/nickysemenza/hyperion/color"
+	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/assert"
 )
 
