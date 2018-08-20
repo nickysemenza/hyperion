@@ -59,6 +59,11 @@ func (d *DMXLight) GetType() string {
 	return TypeDMX
 }
 
+//GetState returns the light's state.
+func (d *DMXLight) GetState() *State {
+	return &d.State
+}
+
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
 func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGB) {
 	rChan, gChan, bChan := d.getRGBChannelIDs()
@@ -79,7 +84,7 @@ func (d *DMXLight) SetState(ctx context.Context, target State) {
 	currentState := d.State
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 
-	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.String(), target.String(), numSteps)
+	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.TermString(), target.String(), numSteps)
 
 	for x := 0; x < numSteps; x++ {
 		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)

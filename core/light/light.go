@@ -13,6 +13,7 @@ type Light interface {
 	GetName() string
 	GetType() string
 	SetState(context.Context, State)
+	GetState() *State
 }
 
 //constants for the different types of lights
@@ -30,7 +31,7 @@ type State struct {
 }
 
 func (s *State) String() string {
-	return fmt.Sprintf("Duration: %s, RGB: %s", s.Duration, s.RGB.String())
+	return fmt.Sprintf("Duration: %s, RGB: %s", s.Duration, s.RGB.TermString())
 }
 
 //DebugString gives info

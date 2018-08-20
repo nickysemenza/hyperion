@@ -4,6 +4,7 @@ service API {
     rpc GetPing(Ping) returns (Ping) {}
 
     rpc StreamCueMaster(Ping) returns (stream MarshalledJSON) {}
+    rpc StreamGetLights(Empty) returns (stream Lights) {}
 }
 
 message Ping {
@@ -13,4 +14,23 @@ message Ping {
 message MarshalledJSON {
     string kind = 1;
     bytes data = 2;
+}
+
+message Lights {
+    repeated Light lights =1;
+}
+message Light {
+    string type = 1;
+    string name = 2;
+    RGB currentColor = 3;
+}
+
+message RGB {
+    int32 R = 1;
+    int32 G = 2;
+    int32 B = 3;
+}
+
+message Empty {
+
 }

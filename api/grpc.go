@@ -10,6 +10,7 @@ import (
 
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/cue"
+	"github.com/nickysemenza/hyperion/core/light"
 	"google.golang.org/grpc"
 )
 
@@ -36,6 +37,32 @@ func (s *Server) StreamCueMaster(in *pb.Ping, stream pb.API_StreamCueMasterServe
 	}
 	return nil
 
+}
+
+func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServer) error {
+	for {
+		allLights := light.GetLights()
+		var pbLights []*pb.Light
+
+		for k, v := range allLights {
+			color := v.GetState().RGB.AsPB()
+			pbLights = append(pbLights, &pb.Light{
+				Name:         k,
+				Type:         v.GetType(),
+				CurrentColor: &color,
+			})
+		}
+
+		err := stream.Send(&pb.Lights{
+			Lights: pbLights,
+		})
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	return nil
 }
 
 //ServeRPC runs a RPC server

@@ -226,7 +226,7 @@ func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 	log.WithFields(getLogrusFieldsFromContext(ctx)).
 		WithFields(log.Fields{"duration": cfa.NewState.Duration, "now_ms": now, "light": cfa.LightName}).
-		Infof("ProcessFrameAction (color=%v)", cfa.NewState.RGB.String())
+		Infof("ProcessFrameAction (color=%v)", cfa.NewState.RGB.TermString())
 
 	if l := light.GetByName(cfa.LightName); l != nil {
 		go l.SetState(ctx, cfa.NewState)

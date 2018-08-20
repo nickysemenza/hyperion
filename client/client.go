@@ -2,35 +2,31 @@ package client
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"io"
 	"log"
-	"time"
+	"sort"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/nickysemenza/hyperion/core/cue"
-
+	"github.com/aybabtme/rgbterm"
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"google.golang.org/grpc"
 )
 
 //Run runs the client
 func Run(address string) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Println(err)
+	conn, cerr := grpc.Dial(address, grpc.WithInsecure())
+	if cerr != nil {
+		log.Println(cerr)
 	}
 	defer conn.Close()
 
 	client := pb.NewAPIClient(conn)
 
-	go func() {
-		time.Sleep(2 * time.Second)
-		res, err := client.GetPing(context.Background(), &pb.Ping{Message: "hi from client"})
-		log.Println(res, err)
-	}()
-
-	stream, err := client.StreamCueMaster(context.Background(), &pb.Ping{Message: "hi from client"})
+	lights := make(map[string]*pb.Light)
+	stream, err := client.StreamGetLights(context.Background(), &pb.Empty{})
+	if err != nil {
+		log.Fatal(client, err)
+	}
 	for {
 		received, err := stream.Recv()
 		if err == io.EOF {
@@ -40,11 +36,24 @@ func Run(address string) {
 			log.Fatal(client, err)
 		}
 
-		var cm cue.Master
+		// spew.Dump(received)
+		for _, l := range received.Lights {
+			lights[l.Name] = l
+		}
 
-		json.Unmarshal(received.Data, &cm)
+		var keys []string
+		for k := range lights {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
 
-		spew.Dump(cm)
+		for _, k := range keys {
+			rgb := lights[k].CurrentColor
+			colorBlock := rgbterm.Bytes([]byte("███"), uint8(rgb.R), uint8(rgb.G), uint8(rgb.B), 0, 0, 0)
+			// fmt.Printf("%s, %v, %s\n", k, lights[k])
+			fmt.Printf("%s %s\n", colorBlock, k)
+		}
+		fmt.Println("-----")
 	}
 
 }

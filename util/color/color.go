@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/fatih/color"
+	"github.com/aybabtme/rgbterm"
 	colorful "github.com/lucasb-eyer/go-colorful"
+	pb "github.com/nickysemenza/hyperion/api/proto"
 )
 
 //RGB holds RGB values (0-255, although they can be negative in the case of a delta)
@@ -70,6 +71,14 @@ func GetRGBFromColorful(c colorful.Color) RGB {
 	}
 }
 
+func (c *RGB) AsPB() pb.RGB {
+	return pb.RGB{
+		R: int32(c.R),
+		G: int32(c.G),
+		B: int32(c.B),
+	}
+}
+
 //GetRGBFromHex turns a hex string (#00FF00) into an RGB color
 func GetRGBFromHex(hex string) RGB {
 	c, err := colorful.Hex(hex)
@@ -84,13 +93,10 @@ func (c *RGB) AsComponents() (int, int, int) {
 	return c.R, c.G, c.B
 }
 
-//String returns a ANSI-color formatted r/g/b string
-func (c *RGB) String() string {
-
-	red := color.New(color.BgRed).SprintFunc()
-	green := color.New(color.BgGreen).SprintFunc()
-	blue := color.New(color.BgBlue).SprintFunc()
-	return fmt.Sprintf("%s %s %s", red(c.R), green(c.G), blue(c.B))
+//TermString returns a ANSI-color formatted r/g/b string
+func (c *RGB) TermString() string {
+	rgbstr := fmt.Sprintf("%d,%d,%d", c.R, c.G, c.B)
+	return string(rgbterm.Bytes([]byte("█"+rgbstr+"█"), uint8(c.R), uint8(c.G), uint8(c.B), 0, 0, 0))
 }
 
 //GetXyy returns the RGB color in xyy color space

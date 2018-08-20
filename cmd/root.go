@@ -60,7 +60,7 @@ var cmdClient = &cobra.Command{
 	Use:   "client",
 	Short: "Run the client",
 	Run: func(cmd *cobra.Command, args []string) {
-		mainHandler.h.startServer()
+		mainHandler.h.startClient()
 	},
 }
 

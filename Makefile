@@ -1,5 +1,7 @@
 dev:
 	go build && ./hyperion server
+dev-client:
+	go build && ./hyperion client
 test-backend: 
 	go test -cover  ./...
 test-ui:

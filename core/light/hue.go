@@ -30,6 +30,11 @@ func (hl *HueLight) GetType() string {
 	return TypeHue
 }
 
+//GetState returns the light's state.
+func (hl *HueLight) GetState() *State {
+	return &hl.State
+}
+
 //SetState updates the Hue's state.
 func (hl *HueLight) SetState(ctx context.Context, s State) {
 	metrics.SetGagueWithNsFromTime(time.Now(), metrics.ResponseTimeNsHue)
@@ -62,7 +67,7 @@ func (br *HueBridge) SetColor(ctx context.Context, lightID int, color color.RGB,
 		TransitionTime: getTransitionTimeAs100msMultiple(timing),
 	}
 
-	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now(), "brightness": brightness, "on": isOn}).Infof("HueLight SetColor: %s", color.String())
+	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now(), "brightness": brightness, "on": isOn}).Infof("HueLight SetColor: %s", color.TermString())
 	hueLights := lights.New(br.Hostname, br.Username)
 	hueLights.SetLightState(lightID, *state)
 }

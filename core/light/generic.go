@@ -22,3 +22,8 @@ func (gl *GenericLight) GetType() string {
 func (gl *GenericLight) SetState(ctx context.Context, s State) {
 	gl.State = s
 }
+
+//GetState returns the light's state.
+func (gl *GenericLight) GetState() *State {
+	return &gl.State
+}
