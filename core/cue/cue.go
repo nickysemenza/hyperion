@@ -96,16 +96,19 @@ func (cs *Stack) ProcessStack() {
 			metrics.CueExecutionDriftNs.Set(float64(nextCue.getDurationDrift() / time.Nanosecond))
 			metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
 			metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
+		} else {
+			//backoff?
+			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }
 
 func (cs *Stack) deQueueNextCue() *Cue {
+	cs.m.Lock()
+	defer cs.m.Unlock()
 	if len(cs.Cues) > 0 {
-		cs.m.Lock()
 		x := cs.Cues[0]
 		cs.Cues = cs.Cues[1:]
-		cs.m.Unlock()
 		return &x
 	}
 	return nil

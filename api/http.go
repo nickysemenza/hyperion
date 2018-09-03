@@ -24,7 +24,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const wsInterval = 80 * time.Millisecond
+const wsInterval = 30 * time.Millisecond
 
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
