@@ -13,7 +13,6 @@ install:
 before_script:
   - cd ui/
   - yarn install
-  # - cp src/config.example.js src/config.js
   - cd ..
 script:
   - ./test_cov.sh
