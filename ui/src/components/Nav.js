@@ -1,7 +1,7 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { Container, Menu } from "semantic-ui-react";
-import { connect } from "react-redux";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { Container, Menu } from 'semantic-ui-react';
+import { connect } from 'react-redux';
 
 const Nav = ({ user }) => (
   <Menu fixed="top" inverted>

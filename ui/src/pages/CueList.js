@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { fetchCueMaster } from "../actions/cues";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { fetchCueMaster } from '../actions/cues';
 import {
   CueTable,
   CueTableCol,
@@ -9,9 +9,9 @@ import {
   CueFrameWait,
   CueFrameWrapper,
   Progress
-} from "../components/Cue";
-import { bindActionCreators } from "redux";
-import { Header } from "semantic-ui-react";
+} from '../components/Cue';
+import { bindActionCreators } from 'redux';
+import { Header } from 'semantic-ui-react';
 class cueList extends Component {
   componentDidMount() {
     this.props.fetchCueMaster();
@@ -48,12 +48,12 @@ class cueList extends Component {
         f.actions.forEach((action, x) => {
           let tmp = {};
           Object.assign(tmp, all[c.id][x]);
-          tmp["length_ms"] += action.action_duration_ms;
-          tmp["items"] = tmp["items"].slice();
-          tmp["items"].push(
+          tmp['length_ms'] += action.action_duration_ms;
+          tmp['items'] = tmp['items'].slice();
+          tmp['items'].push(
             <CueFrame
               action={action}
-              key={c.id + "-" + z + "-" + x}
+              key={c.id + '-' + z + '-' + x}
               duration={action.action_duration_ms}
               frameId={f.id}
               actionId={action.id}
@@ -62,17 +62,17 @@ class cueList extends Component {
           all[c.id][x] = tmp;
         });
         //todo: add padding
-        let targetLen = all[c.id][0]["length_ms"];
+        let targetLen = all[c.id][0]['length_ms'];
         all[c.id].forEach(
-          x => (targetLen = Math.max(targetLen, x["length_ms"]))
+          x => (targetLen = Math.max(targetLen, x['length_ms']))
         );
         all[c.id].forEach((item, x) => {
-          let padding = targetLen - item["length_ms"];
+          let padding = targetLen - item['length_ms'];
           if (padding !== 0) {
             let tmp = {};
             Object.assign(tmp, all[c.id][x]);
-            tmp["length_ms"] += padding;
-            tmp["items"].push(<CueFrameWait key={x} duration={padding} />);
+            tmp['length_ms'] += padding;
+            tmp['items'].push(<CueFrameWait key={x} duration={padding} />);
             all[c.id][x] = tmp;
           }
         });
@@ -81,7 +81,7 @@ class cueList extends Component {
 
     return (
       <div>
-        <Header content={"cues"} />
+        <Header content={'cues'} />
         <CueTable>
           <CueTableCol>
             {cueList.map(c => {
@@ -106,7 +106,7 @@ class cueList extends Component {
             {Object.keys(all).map(k => {
               return (
                 <div>
-                  <CueFrameWrapper key={k + "-2"}>
+                  <CueFrameWrapper key={k + '-2'}>
                     <Progress cue={cuesById[parseInt(k, 10)]} />
                   </CueFrameWrapper>
                   {all[k].map((item, x) => (

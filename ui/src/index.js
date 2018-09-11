@@ -6,7 +6,7 @@ import registerServiceWorker from './registerServiceWorker';
 import configureStore from './store/configureStore';
 import { Provider } from 'react-redux';
 
-import 'react-redux-toastr/lib/css/react-redux-toastr.min.css'
+import 'react-redux-toastr/lib/css/react-redux-toastr.min.css';
 import 'semantic-ui-css/semantic.min.css';
 
 const store = configureStore();

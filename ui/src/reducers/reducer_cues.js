@@ -1,4 +1,4 @@
-import { RECEIVE_CUE_MASTER } from "../actions/cues";
+import { RECEIVE_CUE_MASTER } from '../actions/cues';
 const INITIAL_STATE = {
   cue_stacks: []
 };
