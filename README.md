@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/nickysemenza/hyperion.svg?branch=master)](https://travis-ci.org/nickysemenza/hyperion)
 [![codecov](https://codecov.io/gh/nickysemenza/hyperion/branch/master/graph/badge.svg)](https://codecov.io/gh/nickysemenza/hyperion)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nickysemenza/hyperion)](https://goreportcard.com/report/github.com/nickysemenza/hyperion)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/db58e2c26e57441190bbc44f1706d867)](https://www.codacy.com/app/nickysemenza/hyperion?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nickysemenza/hyperion&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/db58e2c26e57441190bbc44f1706d867)](https://www.codacy.com/app/nickysemenza/hyperion?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nickysemenza/hyperion&amp;utm_campaign=Badge_Grade) [![Greenkeeper badge](https://badges.greenkeeper.io/nickysemenza/hyperion.svg)](https://greenkeeper.io/)
 
 Hyperion is a lighting control solution. It is cue-based, heavily inspired by theatrical lighting consoles, such as those by ETC.
 
