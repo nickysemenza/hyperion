@@ -1,4 +1,4 @@
-package cmd
+package server
 
 import (
 	"context"
@@ -12,11 +12,10 @@ import (
 	"github.com/nickysemenza/hyperion/control/trigger"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
-	"github.com/nickysemenza/hyperion/util/metrics"
 )
 
-func runServer(ctx context.Context) {
-	metrics.Register()
+//Run starts the server
+func Run(ctx context.Context) {
 	//Set up Homekit Server
 	go homekit.Start(ctx)
 

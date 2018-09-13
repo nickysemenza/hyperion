@@ -104,6 +104,14 @@
   revision = "220e8d34538f5dfdcc299dda79bf83cf52e633f6"
 
 [[projects]]
+  digest = "1:bbadccf3d3317ea03c0dac0b45b673b4b397c8f91a1d2eff550a3c51c4ad770e"
+  name = "github.com/gogo/protobuf"
+  packages = ["proto"]
+  pruneopts = "UT"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:6942f8f9f72bc1a652d8c280591f9696698af2d76bbbf8d84e3d694bcd5b0d7c"
   name = "github.com/golang/protobuf"
@@ -245,15 +253,17 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:d14a5f4bfecf017cb780bdde1b6483e5deb87e12c332544d2c430eda58734bcb"
+  branch = "master"
+  digest = "1:9b83fd78682c33ded36902d802bd46992204addfc195fe877f4d331e41fe869e"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
+    "prometheus/internal",
+    "prometheus/promauto",
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "c5b7fccd204277076155f10851dad72b76a49317"
-  version = "v0.8.0"
+  revision = "b5bfa0eb2c8d46bd91dc58271e973c5f0bbebcfa"
 
 [[projects]]
   branch = "master"
@@ -473,6 +483,7 @@
     "github.com/aybabtme/rgbterm",
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
+    "github.com/davecgh/go-spew/spew",
     "github.com/gin-contrib/cors",
     "github.com/gin-gonic/gin",
     "github.com/golang/protobuf/proto",
@@ -483,6 +494,7 @@
     "github.com/nickysemenza/gola",
     "github.com/pkg/errors",
     "github.com/prometheus/client_golang/prometheus",
+    "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
