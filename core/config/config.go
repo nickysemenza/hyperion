@@ -1,6 +1,9 @@
 package config
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 type ctxKey int
 
@@ -38,4 +41,13 @@ func GetClientConfig(ctx context.Context) *Client {
 //Client represents client config
 type Client struct {
 	ServerAddress string
+}
+
+var (
+	//GitCommit is injected at build time with the commit hash
+	GitCommit = "0"
+)
+
+func GetVersion() string {
+	return fmt.Sprintf("git-%s", GitCommit)
 }

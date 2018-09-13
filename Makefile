@@ -1,7 +1,12 @@
-dev:
-	go build && ./hyperion server
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
+GOBUILD=go build -ldflags "-X github.com/nickysemenza/hyperion/core/config.GitCommit=${GIT_COMMIT}"
+
+build:
+	$(GOBUILD)
+dev: build
+	./hyperion server
 dev-client:
-	go build && ./hyperion client
+	./hyperion client
 dev-ui:
 	cd ui && yarn start
 test-backend: 
