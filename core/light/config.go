@@ -18,10 +18,6 @@ type Config struct {
 		Dmx     []DMXLight     `json:"dmx" yaml:"dmx"`
 		Generic []GenericLight `json:"generic" yaml:"generic"`
 	} `json:"lights" yaml:"lights"`
-	HueBridge HueBridge `json:"hue" yaml:"hue"`
-	Ola       struct {
-		Hostname string `json:"hostname" yaml:"hostname"`
-	} `json:"ola" yaml:"ola"`
 	Profiles []dmxProfile `json:"profiles" yaml:"profiles"`
 }
 

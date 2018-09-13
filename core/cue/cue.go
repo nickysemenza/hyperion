@@ -76,11 +76,11 @@ type FrameAction struct {
 }
 
 //ProcessStack processes cues
-func (cs *Stack) ProcessStack() {
+func (cs *Stack) ProcessStack(ctx context.Context) {
 	log.Printf("[CueStack: %s]\n", cs.Name)
 	for {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
-			ctx := context.WithValue(context.Background(), keyStackName, cs.Name)
+			ctx := context.WithValue(ctx, keyStackName, cs.Name)
 			cs.ActiveCue = nextCue
 			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()

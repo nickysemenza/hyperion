@@ -18,6 +18,7 @@ import (
 	"github.com/gorilla/websocket"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	ginprometheus "github.com/mcuadros/go-gin-prometheus"
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
@@ -141,7 +142,8 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //ServeHTTP runs the gin server
-func ServeHTTP() {
+func ServeHTTP(ctx context.Context) {
+	serverConfig := config.GetServerConfig(ctx)
 	router := gin.Default()
 
 	//setup CORS
@@ -168,7 +170,7 @@ func ServeHTTP() {
 
 	//server
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    serverConfig.HTTPAddress,
 		Handler: router,
 	}
 

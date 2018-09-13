@@ -9,12 +9,14 @@ import (
 
 	"github.com/aybabtme/rgbterm"
 	pb "github.com/nickysemenza/hyperion/api/proto"
+	"github.com/nickysemenza/hyperion/core/config"
 	"google.golang.org/grpc"
 )
 
 //Run runs the client
-func Run(address string) {
-	conn, cerr := grpc.Dial(address, grpc.WithInsecure())
+func Run(ctx context.Context) {
+	config := config.GetClientConfig(ctx)
+	conn, cerr := grpc.Dial(config.ServerAddress, grpc.WithInsecure())
 	if cerr != nil {
 		log.Println(cerr)
 	}

@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,5 +12,5 @@ func TestTrigger(t *testing.T) {
 	Action("aa", 1)
 	assert.Equal(t, getTriggerChan(), getTriggerChan())
 	Action("aa", 2)
-	go ProcessTriggers()
+	go ProcessTriggers(context.Background())
 }

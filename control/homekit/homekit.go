@@ -1,6 +1,7 @@
 package homekit
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -56,7 +57,7 @@ func buildSwitchList() {
 }
 
 //Start starts the HomeKit services
-func Start() {
+func Start(ctx context.Context) {
 	//config
 	config := hc.Config{Pin: "10000000", StoragePath: "./_homekit_data"}
 	bridge := accessory.NewBridge(accessory.Info{Name: "bridge1", Manufacturer: "Hyperion"})
