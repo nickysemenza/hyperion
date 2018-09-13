@@ -1,34 +1,18 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/nickysemenza/hyperion/core/config"
 
 	"github.com/nickysemenza/hyperion/client"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/spf13/cobra"
 )
-
-type cliHandler interface {
-	startServer()
-	startClient()
-}
-
-type defaultHandler struct{}
-
-func (d defaultHandler) startServer() {
-	runServer()
-}
-func (d defaultHandler) startClient() {
-	client.Run("localhost:8888")
-}
-
-type cliConfig struct {
-	h cliHandler
-}
-
-var mainHandler = &cliConfig{h: &defaultHandler{}}
 
 var rootCmd = &cobra.Command{
 	Use:   "hyperion",
@@ -51,8 +35,18 @@ var cmdServer = &cobra.Command{
 			cs.EnQueueCue(*c)
 		}()
 
-		// runServer()
-		mainHandler.h.startServer()
+		//TODO: read from file
+		c := config.Server{
+			RPCAddress:  ":8888",
+			HTTPAddress: ":8080",
+		}
+		c.Outputs.OLA.Address = "localhost:9010"
+		c.Outputs.Hue.Address = "10.0.0.39"
+		c.Outputs.Hue.Username = "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
+
+		ctx := context.WithValue(context.Background(), config.ContextKeyServer, &c)
+		spew.Dump(ctx)
+		runServer(ctx)
 	},
 }
 
@@ -60,7 +54,12 @@ var cmdClient = &cobra.Command{
 	Use:   "client",
 	Short: "Run the client",
 	Run: func(cmd *cobra.Command, args []string) {
-		mainHandler.h.startClient()
+		c := config.Client{
+			ServerAddress: "localhost:8888",
+		}
+
+		ctx := context.WithValue(context.Background(), config.ContextKeyClient, &c)
+		client.Run(ctx)
 	},
 }
 

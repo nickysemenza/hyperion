@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"context"
 	"log"
 	"sync"
 
@@ -34,7 +35,7 @@ func Action(source string, id int) {
 }
 
 //ProcessTriggers is a worker that processes triggers
-func ProcessTriggers() {
+func ProcessTriggers(ctx context.Context) {
 	c := getTriggerChan()
 	for t := range c {
 

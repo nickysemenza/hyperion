@@ -2,6 +2,8 @@ dev:
 	go build && ./hyperion server
 dev-client:
 	go build && ./hyperion client
+dev-ui:
+	cd ui && yarn start
 test-backend: 
 	go test -cover  ./...
 test-ui:

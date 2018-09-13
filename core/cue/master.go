@@ -1,6 +1,7 @@
 package cue
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"sync"
@@ -77,8 +78,8 @@ func (cm *Master) New(frames []Frame, name string) Cue {
 }
 
 //ProcessForever runs all the cuestacks
-func (cm *Master) ProcessForever() {
+func (cm *Master) ProcessForever(ctx context.Context) {
 	for x := range cm.CueStacks {
-		go cm.CueStacks[x].ProcessStack()
+		go cm.CueStacks[x].ProcessStack(ctx)
 	}
 }

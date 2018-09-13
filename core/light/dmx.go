@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/nickysemenza/gola"
+	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
 )
@@ -141,9 +142,10 @@ func (s *dmxState) initializeUniverse(universe int) {
 }
 
 //SendDMXWorker sends OLA the current dmxState across all universes
-func SendDMXWorker() {
+func SendDMXWorker(ctx context.Context) {
+	olaAddress := mainConfig.GetServerConfig(ctx).Outputs.OLA.Address
 	//TODO: put this on a timer
-	client := gola.New(GetConfig().Ola.Hostname)
+	client := gola.New(olaAddress)
 	defer client.Close()
 
 	s := getDMXStateInstance()

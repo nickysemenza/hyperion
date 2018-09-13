@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -14,24 +15,24 @@ import (
 	"github.com/nickysemenza/hyperion/util/metrics"
 )
 
-func runServer() {
+func runServer(ctx context.Context) {
 	metrics.Register()
 	//Set up Homekit Server
-	go homekit.Start()
+	go homekit.Start(ctx)
 
 	//Set up RPC server
-	go api.ServeRPC(8888)
+	go api.ServeRPC(ctx)
 
 	//Setup API server
-	go api.ServeHTTP()
+	go api.ServeHTTP(ctx)
 
 	//proceess cues forever
-	cue.GetCueMaster().ProcessForever()
+	cue.GetCueMaster().ProcessForever(ctx)
 
-	go light.SendDMXWorker()
+	go light.SendDMXWorker(ctx)
 
 	//process triggers
-	go trigger.ProcessTriggers()
+	go trigger.ProcessTriggers(ctx)
 
 	//handle CTRL+C
 	quit := make(chan os.Signal)

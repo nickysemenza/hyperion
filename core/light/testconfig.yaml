@@ -19,11 +19,6 @@ lights:
       profile: china-par-1
   generic:
     - name: generic1
-hue:
-  hostname: 10.0.0.39
-  username: alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF
-ola:
-  hostname: localhost:9010
 profiles:
   - name: china-par-1
     capabilities:
