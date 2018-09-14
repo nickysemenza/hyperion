@@ -55,6 +55,8 @@ var cmdServer = &cobra.Command{
 		c.Outputs.OLA.Address = "localhost:9010"
 		c.Outputs.Hue.Address = "10.0.0.39"
 		c.Outputs.Hue.Username = "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
+		c.Tracing.ServerAddress = "localhost:6831"
+		c.Tracing.ServiceName = "hyperion-server"
 
 		ctx := context.WithValue(context.Background(), config.ContextKeyServer, &c)
 		spew.Dump(ctx)

@@ -1,6 +1,7 @@
 package light
 
 import (
+	"context"
 	"testing"
 
 	"github.com/nickysemenza/hyperion/util/color"
@@ -24,14 +25,14 @@ func TestDMXAttributeChannels(t *testing.T) {
 }
 func TestDMX(t *testing.T) {
 	s1 := getDMXStateInstance()
-	s1.setDMXValue(2, 22, 40)
+	s1.setDMXValue(context.Background(), 2, 22, 40)
 
 	s2 := getDMXStateInstance()
 	if s2.universes[2][22-1] != 40 {
 		t.Error("didn't set DMX state instance properly")
 	}
 
-	if err := s2.setDMXValue(2, 0, 2); err == nil {
+	if err := s2.setDMXValue(context.Background(), 2, 0, 2); err == nil {
 		t.Error("should not allow channel 0")
 	}
 
@@ -64,7 +65,7 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 				Universe:     tt.fields.Universe,
 				Profile:      tt.fields.Profile,
 			}
-			d.blindlySetRGBToStateAndDMX(tt.color)
+			d.blindlySetRGBToStateAndDMX(context.Background(), tt.color)
 			ds := getDMXStateInstance()
 			assert.Equal(t, 255, ds.getDmxValue(tt.fields.Universe, 2+tt.fields.StartAddress))
 			assert.Equal(t, 0, ds.getDmxValue(tt.fields.Universe, 1+tt.fields.StartAddress))
