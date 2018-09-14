@@ -11,6 +11,7 @@ import (
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
 //Holds strings for the different channel types
@@ -66,14 +67,14 @@ func (d *DMXLight) GetState() *State {
 }
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
-func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGB) {
+func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.RGB) {
 	rChan, gChan, bChan := d.getRGBChannelIDs()
 	rVal, gVal, bVal := color.AsComponents()
 
 	ds := getDMXStateInstance()
-	ds.setDMXValue(d.Universe, rChan, rVal)
-	ds.setDMXValue(d.Universe, gChan, gVal)
-	ds.setDMXValue(d.Universe, bChan, bVal)
+	ds.setDMXValue(ctx, d.Universe, rChan, rVal)
+	ds.setDMXValue(ctx, d.Universe, gChan, gVal)
+	ds.setDMXValue(ctx, d.Universe, bChan, bVal)
 
 	d.State.RGB = color
 
@@ -84,18 +85,24 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(color color.RGB) {
 func (d *DMXLight) SetState(ctx context.Context, target State) {
 	currentState := d.State
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
+	defer span.Finish()
+	span.SetTag("dmx-name", d.Name)
+	span.SetTag("target-duration-ms", target.Duration)
 
 	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.TermString(), target.String(), numSteps)
 
+	span.LogKV("event", "begin fade interpolation")
 	for x := 0; x < numSteps; x++ {
 		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)
 		//keep state updated:
-		d.blindlySetRGBToStateAndDMX(color.GetRGBFromColorful(interpolated))
+		d.blindlySetRGBToStateAndDMX(ctx, color.GetRGBFromColorful(interpolated))
 
 		time.Sleep(tickIntervalFadeInterpolation)
 	}
 
-	d.blindlySetRGBToStateAndDMX(target.RGB)
+	d.blindlySetRGBToStateAndDMX(ctx, target.RGB)
+	span.LogKV("event", "finished fade interpolation")
 	d.State = target
 
 }
@@ -122,7 +129,12 @@ func (s *dmxState) getDmxValue(universe, channel int) int {
 	return int(s.universes[universe][channel-1])
 }
 
-func (s *dmxState) setDMXValue(universe, channel, value int) error {
+func (s *dmxState) setDMXValue(ctx context.Context, universe, channel, value int) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValue")
+	defer span.Finish()
+	span.SetTag("universe", universe)
+	span.SetTag("channel", channel)
+	span.SetTag("value", value)
 	if channel < 1 || channel > 255 {
 		return fmt.Errorf("dmx channel (%d) not in range", channel)
 	}

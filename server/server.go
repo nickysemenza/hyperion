@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/nickysemenza/hyperion/util/tracing"
+
 	"github.com/nickysemenza/hyperion/api"
 	"github.com/nickysemenza/hyperion/control/homekit"
 	"github.com/nickysemenza/hyperion/control/trigger"
@@ -16,6 +18,7 @@ import (
 
 //Run starts the server
 func Run(ctx context.Context) {
+	go tracing.InitTracer(ctx)
 	//Set up Homekit Server
 	go homekit.Start(ctx)
 

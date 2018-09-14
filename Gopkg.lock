@@ -67,6 +67,14 @@
   revision = "5b6df487276b6f329e632f0992274dec73a8b7b0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:4c4c33075b704791d6a7f09dfb55c66769e8a1dc6adf87026292d274fe8ad113"
+  name = "github.com/codahale/hdrhistogram"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -237,6 +245,18 @@
   revision = "9e33ab08e328cc40be0070bb1bfc36a5f3aadc90"
 
 [[projects]]
+  digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
+  name = "github.com/opentracing/opentracing-go"
+  packages = [
+    ".",
+    "ext",
+    "log",
+  ]
+  pruneopts = "UT"
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -337,6 +357,39 @@
   packages = ["crypto/srp"]
   pruneopts = "UT"
   revision = "1f86682992f1a784aa7592b2be0ae80f194b2479"
+
+[[projects]]
+  digest = "1:104a2d7446f4628e4663d7c029b18da1aad4313735de775f37b6e7720b1d0aa7"
+  name = "github.com/uber/jaeger-client-go"
+  packages = [
+    ".",
+    "config",
+    "internal/baggage",
+    "internal/baggage/remote",
+    "internal/spanlog",
+    "internal/throttler",
+    "internal/throttler/remote",
+    "log",
+    "rpcmetrics",
+    "thrift",
+    "thrift-gen/agent",
+    "thrift-gen/baggage",
+    "thrift-gen/jaeger",
+    "thrift-gen/sampling",
+    "thrift-gen/zipkincore",
+    "utils",
+  ]
+  pruneopts = "UT"
+  revision = "b043381d944715b469fd6b37addfd30145ca1758"
+  version = "v2.14.0"
+
+[[projects]]
+  digest = "1:0f09db8429e19d57c8346ad76fbbc679341fa86073d3b8fb5ac919f0357d8f4c"
+  name = "github.com/uber/jaeger-lib"
+  packages = ["metrics"]
+  pruneopts = "UT"
+  revision = "ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5"
+  version = "v1.5.0"
 
 [[projects]]
   digest = "1:c268acaa4a4d94a467980e5e91452eb61c460145765293dc0aed48e5e9919cc6"
@@ -492,6 +545,8 @@
     "github.com/lucasb-eyer/go-colorful",
     "github.com/mcuadros/go-gin-prometheus",
     "github.com/nickysemenza/gola",
+    "github.com/opentracing/opentracing-go",
+    "github.com/opentracing/opentracing-go/ext",
     "github.com/pkg/errors",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promauto",
@@ -499,6 +554,9 @@
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/stretchr/testify/assert",
+    "github.com/uber/jaeger-client-go",
+    "github.com/uber/jaeger-client-go/config",
+    "github.com/uber/jaeger-client-go/log",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
     "gopkg.in/yaml.v2",

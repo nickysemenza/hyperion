@@ -13,6 +13,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/nickysemenza/hyperion/util/tracing"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -151,6 +153,7 @@ func ServeHTTP(ctx context.Context) {
 	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "X-JWT"}
 	router.Use(cors.New(corsConfig))
+	router.Use(tracing.GinMiddleware())
 
 	//register prometheus gin metrics middleware
 	p := ginprometheus.NewPrometheus("gin")

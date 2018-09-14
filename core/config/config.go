@@ -31,6 +31,10 @@ type Server struct {
 			Username string
 		}
 	}
+	Tracing struct {
+		ServerAddress string
+		ServiceName   string
+	}
 }
 
 //GetClientConfig extracts Client config from context
