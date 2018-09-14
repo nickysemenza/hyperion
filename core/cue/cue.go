@@ -172,7 +172,18 @@ func (c *Cue) GetDuration() time.Duration {
 
 //calcualte the difference between expected and real duration
 func (c *Cue) getDurationDrift() time.Duration {
+	if c.Status != statusProcessed {
+		return 0
+	}
 	return c.RealDuration - c.GetDuration()
+}
+
+//figure out how long this cue has been running for
+func (c *Cue) getElapsedTime() time.Duration {
+	if c.Status != statusActive {
+		return 0
+	}
+	return time.Now().Sub(c.StartedAt)
 }
 
 //MarshalJSON override that injects the expected duration.
@@ -188,7 +199,7 @@ func (c *Cue) MarshalJSON() ([]byte, error) {
 		ExpectedDuration: c.GetDuration() / time.Millisecond,
 		DurationDrift:    c.getDurationDrift() / time.Millisecond,
 		RealDurationMS:   c.RealDuration / time.Millisecond,
-		ElapsedMS:        time.Now().Sub(c.StartedAt) / time.Millisecond,
+		ElapsedMS:        c.getElapsedTime() / time.Millisecond,
 		Alias:            (*Alias)(c),
 	})
 }

@@ -37,14 +37,16 @@ func aa(b string) func(*gin.Context) {
 
 func runCommands(c *gin.Context) {
 	var commands []string
+	var responses []cue.Cue
 	if err := c.ShouldBindJSON(&commands); err == nil {
 		for _, eachCommand := range commands {
 			x, _ := cue.BuildCueFromCommand(eachCommand)
 			cs := cue.GetCueMaster().GetDefaultCueStack()
 			cs.EnQueueCue(*x)
+			responses = append(responses, *x)
 		}
 
-		c.JSON(200, "ok")
+		c.JSON(200, responses)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
