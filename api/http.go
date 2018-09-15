@@ -181,7 +181,7 @@ func ServeHTTP(ctx context.Context) {
 
 	//server
 	srv := &http.Server{
-		Addr:    serverConfig.HTTPAddress,
+		Addr:    serverConfig.Inputs.HTTPAddress,
 		Handler: router,
 	}
 

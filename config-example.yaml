@@ -1,0 +1,14 @@
+inputs:
+  rpc:
+    address: ":8888"
+  http:
+    address: ":8080"
+outputs:
+  ola:
+    address: "localhost:9010"
+  hue:
+    address: "10.0.0.39"
+    username: "foo"
+tracing:
+  server: "localhost:6831"
+  servicename: "hyperion-server"

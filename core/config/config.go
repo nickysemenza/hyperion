@@ -20,18 +20,23 @@ func GetServerConfig(ctx context.Context) *Server {
 
 //Server represents server config
 type Server struct {
-	RPCAddress  string
-	HTTPAddress string
-	Outputs     struct {
+	Inputs struct {
+		RPCAddress  string
+		HTTPAddress string
+	}
+	Outputs struct {
 		OLA struct {
+			Enabled bool
 			Address string
 		}
 		Hue struct {
+			Enabled  bool
 			Address  string
 			Username string
 		}
 	}
 	Tracing struct {
+		Enabled       bool
 		ServerAddress string
 		ServiceName   string
 	}

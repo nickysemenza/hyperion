@@ -11,6 +11,7 @@ import (
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/server"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -46,16 +47,42 @@ var cmdServer = &cobra.Command{
 			cs.EnQueueCue(*c)
 		}()
 
-		//TODO: read from file
-		c := config.Server{
-			RPCAddress:  ":8888",
-			HTTPAddress: ":8080",
+		viper.SetConfigName("config")          // name of config file (without extension)
+		viper.AddConfigPath("$HOME/.hyperion") // call multiple times to add many search paths
+		viper.AddConfigPath(".")               // optionally look for config in the working directory
+		err := viper.ReadInConfig()            // Find and read the config file
+		if err != nil {                        // Handle errors reading the config file
+			panic(fmt.Errorf("fatal error config file: %s \n", err))
 		}
-		c.Outputs.OLA.Address = "localhost:9010"
-		c.Outputs.Hue.Address = "10.0.0.39"
-		c.Outputs.Hue.Username = "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
-		c.Tracing.ServerAddress = "localhost:6831"
-		c.Tracing.ServiceName = "hyperion-server"
+
+		viper.Debug()
+
+		c := config.Server{}
+		//inputs
+		if viper.IsSet("inputs.rpc") {
+			c.Inputs.RPCAddress = viper.GetString("inputs.rpc.address")
+		}
+		if viper.IsSet("inputs.http") {
+			c.Inputs.HTTPAddress = viper.GetString("inputs.http.address")
+		}
+
+		//outputs
+		if viper.IsSet("outputs.ola") {
+			c.Outputs.OLA.Enabled = true
+			c.Outputs.OLA.Address = viper.GetString("outputs.ola.address")
+		}
+		if viper.IsSet("outputs.hue") {
+			c.Outputs.Hue.Enabled = true
+			c.Outputs.Hue.Address = viper.GetString("outputs.hue.address")
+			c.Outputs.Hue.Username = viper.GetString("outputs.hue.username")
+		}
+
+		//other
+		if viper.IsSet("outputs.hue") {
+			c.Tracing.Enabled = true
+			c.Tracing.ServerAddress = viper.GetString("outputs.tracing.server")
+			c.Tracing.ServiceName = viper.GetString("outputs.tracing.servicename")
+		}
 
 		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, &c))
 	},
