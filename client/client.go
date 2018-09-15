@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"sort"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aybabtme/rgbterm"
 	pb "github.com/nickysemenza/hyperion/api/proto"

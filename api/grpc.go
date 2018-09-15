@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/config"

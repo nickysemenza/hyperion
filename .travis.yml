@@ -11,7 +11,6 @@ before_install:
 install:
   - npm install -g yarn
   - dep ensure
-before_script:
   - cd ui/
   - yarn install
   - cd ..

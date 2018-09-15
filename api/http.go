@@ -7,7 +7,7 @@ import (
 	"image"
 	"image/draw"
 	"image/jpeg"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"

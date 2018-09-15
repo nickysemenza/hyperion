@@ -536,7 +536,6 @@
     "github.com/aybabtme/rgbterm",
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
-    "github.com/davecgh/go-spew/spew",
     "github.com/gin-contrib/cors",
     "github.com/gin-gonic/gin",
     "github.com/golang/protobuf/proto",

@@ -3,17 +3,18 @@ GOBUILD=go build -ldflags "-X github.com/nickysemenza/hyperion/core/config.GitCo
 
 build:
 	$(GOBUILD)
-dev: build
+dev: dev-server
+dev-server: build
 	./hyperion server
 dev-client:
 	./hyperion client
 dev-ui:
 	cd ui && yarn start
-test-backend: 
+test-server: 
 	go test -cover  ./...
 test-ui:
 	cd ui && CI=true yarn test
-test: test-backend test-ui
+test: test-server test-ui
 
 proto:
 	protoc --go_out=plugins=grpc:api proto/*.proto

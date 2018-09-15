@@ -3,7 +3,6 @@ package cue
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
@@ -263,7 +262,7 @@ func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
 	if l := light.GetByName(cfa.LightName); l != nil {
 		go l.SetState(ctx, cfa.NewState)
 	} else {
-		fmt.Printf("Cannot find light by name: %s\n", cfa.LightName)
+		log.Errorf("Cannot find light by name: %s\n", cfa.LightName)
 	}
 	//goroutine doesn't block, so hold until the SetState has (hopefully) finished timing-wise
 	//TODO: why are we doing this?

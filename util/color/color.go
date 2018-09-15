@@ -2,7 +2,8 @@ package color
 
 import (
 	"fmt"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aybabtme/rgbterm"
 	colorful "github.com/lucasb-eyer/go-colorful"

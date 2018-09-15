@@ -2,8 +2,9 @@ package tracing
 
 import (
 	"context"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nickysemenza/hyperion/core/config"

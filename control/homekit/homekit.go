@@ -3,7 +3,8 @@ package homekit
 import (
 	"context"
 	"fmt"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/brutella/hc"
 	"github.com/brutella/hc/accessory"

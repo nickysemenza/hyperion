@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/nickysemenza/hyperion/client"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
@@ -58,9 +57,7 @@ var cmdServer = &cobra.Command{
 		c.Tracing.ServerAddress = "localhost:6831"
 		c.Tracing.ServiceName = "hyperion-server"
 
-		ctx := context.WithValue(context.Background(), config.ContextKeyServer, &c)
-		spew.Dump(ctx)
-		server.Run(ctx)
+		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, &c))
 	},
 }
 

@@ -3,8 +3,9 @@ package light
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 	yaml "gopkg.in/yaml.v2"

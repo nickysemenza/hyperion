@@ -3,9 +3,10 @@ package light
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/gola"
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
