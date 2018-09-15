@@ -1,8 +1,6 @@
 package metrics
 
 import (
-	"time"
-
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -22,23 +20,18 @@ var (
 		Help:      "Cue Size (Processed)",
 	}, []string{"cuestack_name"})
 
-	CueExecutionDriftNs = promauto.NewGauge(prometheus.GaugeOpts{
+	CueExecutionDrift = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "hyperion",
-		Name:      "cue_execution_drift_ns",
-		Help:      "Drift in ns of cue eecution",
+		Name:      "cue_execution_drift",
+		Help:      "Drift in seconds of cue eecution",
 	})
 
-	ResponseTimeNsOLA = promauto.NewGauge(prometheus.GaugeOpts{
+	ExternalResponseTime = promauto.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace: "hyperion",
-		Name:      "external_response_time_ola",
-		Help:      "Speed of making requests to ola (ns)",
-	})
+		Name:      "external_response_time",
+		Help:      "Speed of making requests to external sources (s)",
+	}, []string{"target"})
 
-	ResponseTimeNsHue = promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "hyperion",
-		Name:      "external_response_time_hue",
-		Help:      "Speed of making requests to hue (ns)",
-	})
 	serverVersion = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "hyperion",
 		Name:      "server_version",
@@ -49,9 +42,4 @@ var (
 // Register inits prometheus registration
 func init() {
 	serverVersion.WithLabelValues(config.GetVersion()).Set(1)
-}
-
-//SetGagueWithNsFromTime is used for updating prometheus gague with time elapsed
-func SetGagueWithNsFromTime(start time.Time, metric prometheus.Gauge) {
-	metric.Set(float64(time.Since(start) / time.Nanosecond))
 }

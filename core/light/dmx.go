@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/gola"
@@ -32,6 +33,10 @@ type DMXLight struct {
 	Universe     int    `json:"universe" yaml:"universe"`
 	Profile      string `json:"profile" yaml:"profile"`
 	State        State  `json:"state" yaml:"state"`
+}
+
+type dmxOperation struct {
+	universe, channel, value int
 }
 
 func (d *DMXLight) getProfile() *dmxProfile {
@@ -69,13 +74,20 @@ func (d *DMXLight) GetState() *State {
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
 func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.RGB) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
+	span.SetTag("dmx-name", d.Name)
+	defer span.Finish()
+	span.LogKV("event", "getting channel ids")
 	rChan, gChan, bChan := d.getRGBChannelIDs()
+	span.LogKV("event", "getting channel valyes")
 	rVal, gVal, bVal := color.AsComponents()
 
+	span.LogKV("event", "begin getDMXStateInstance")
 	ds := getDMXStateInstance()
-	ds.setDMXValue(ctx, d.Universe, rChan, rVal)
-	ds.setDMXValue(ctx, d.Universe, gChan, gVal)
-	ds.setDMXValue(ctx, d.Universe, bChan, bVal)
+	span.LogKV("event", "now setting values")
+	ds.setDMXValues(ctx, dmxOperation{universe: d.Universe, channel: rChan, value: rVal},
+		dmxOperation{universe: d.Universe, channel: gChan, value: gVal},
+		dmxOperation{universe: d.Universe, channel: bChan, value: bVal})
 
 	d.State.RGB = color
 
@@ -130,25 +142,29 @@ func (s *dmxState) getDmxValue(universe, channel int) int {
 	return int(s.universes[universe][channel-1])
 }
 
-func (s *dmxState) setDMXValue(ctx context.Context, universe, channel, value int) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValue")
+func (s *dmxState) setDMXValues(ctx context.Context, ops ...dmxOperation) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValues")
 	defer span.Finish()
-	span.SetTag("universe", universe)
-	span.SetTag("channel", channel)
-	span.SetTag("value", value)
-	if channel < 1 || channel > 255 {
-		return fmt.Errorf("dmx channel (%d) not in range", channel)
-	}
+	span.SetTag("operations", ops)
 	s.m.Lock()
 	defer s.m.Unlock()
-	s.initializeUniverse(universe)
-	s.universes[universe][channel-1] = byte(value)
+	for _, op := range ops {
+		channel := op.channel
+		universe := op.universe
+		value := op.value
+		if channel < 1 || channel > 255 {
+			return fmt.Errorf("dmx channel (%d) not in range, op=%v", channel, op)
+		}
+
+		s.initializeUniverse(universe)
+		s.universes[universe][channel-1] = byte(value)
+	}
+
 	return nil
 }
 
 func (s *dmxState) initializeUniverse(universe int) {
-	u := s.universes[universe]
-	if u == nil {
+	if s.universes[universe] == nil {
 		chans := make([]byte, 255)
 		s.universes[universe] = chans
 	}
@@ -163,10 +179,11 @@ func SendDMXWorker(ctx context.Context) {
 
 	s := getDMXStateInstance()
 
-	metrics.SetGagueWithNsFromTime(time.Now(), metrics.ResponseTimeNsOLA)
 	for {
 		for k, v := range s.universes {
+			timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
 			client.SendDmx(k, v)
+			timer.ObserveDuration()
 		}
 		time.Sleep(tickIntervalSendToOLA)
 	}

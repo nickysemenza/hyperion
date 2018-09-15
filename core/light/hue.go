@@ -6,6 +6,7 @@ import (
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/heatxsink/go-hue/lights"
@@ -44,11 +45,9 @@ func (hl *HueLight) SetState(ctx context.Context, s State) {
 	span.SetTag("hue-id", hl.HueID)
 	span.SetTag("hue-name", hl.GetName())
 	span.LogKV("event", "acquiring lock")
-	metrics.SetGagueWithNsFromTime(time.Now(), metrics.ResponseTimeNsHue)
 	hl.m.Lock()
 	defer hl.m.Unlock()
 	span.LogKV("event", "acquired lock")
-
 	hl.State = s
 	go hl.SetColor(ctx, s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
 }
@@ -79,7 +78,9 @@ func (hl *HueLight) SetColor(ctx context.Context, color color.RGB, timing time.D
 	hueConfig := mainConfig.GetServerConfig(ctx).Outputs.Hue
 	hueLights := lights.New(hueConfig.Address, hueConfig.Username)
 	span.LogEventWithPayload("sending hue light change to bridge", state)
+	timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("hue"))
 	hueLights.SetLightState(lightID, *state) //TODO: use response
+	timer.ObserveDuration()
 	span.LogKV("event", "done")
 }
 

@@ -7,11 +7,13 @@ import (
 	"image"
 	"image/draw"
 	"image/jpeg"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	opentracing "github.com/opentracing/opentracing-go"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/hyperion/util/tracing"
 
@@ -58,11 +60,15 @@ func getCueMaster(c *gin.Context) {
 
 //createCue takes a JSON cue, and adds it to the default cuestack.
 func createCue(c *gin.Context) {
+	ctx := c.MustGet("ctx").(context.Context)
+	span, ctx := opentracing.StartSpanFromContext(ctx, "createCue")
+	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
 		newCue.AddIDsRecursively()
 		stack := cue.GetCueMaster().GetDefaultCueStack()
 		stack.EnQueueCue(newCue)
+		span.SetTag("cue-id", newCue.ID)
 
 		c.JSON(200, newCue)
 	} else {

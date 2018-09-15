@@ -25,14 +25,14 @@ func TestDMXAttributeChannels(t *testing.T) {
 }
 func TestDMX(t *testing.T) {
 	s1 := getDMXStateInstance()
-	s1.setDMXValue(context.Background(), 2, 22, 40)
+	s1.setDMXValues(context.Background(), dmxOperation{2, 22, 40})
 
 	s2 := getDMXStateInstance()
 	if s2.universes[2][22-1] != 40 {
 		t.Error("didn't set DMX state instance properly")
 	}
 
-	if err := s2.setDMXValue(context.Background(), 2, 0, 2); err == nil {
+	if err := s2.setDMXValues(context.Background(), dmxOperation{2, 0, 2}); err == nil {
 		t.Error("should not allow channel 0")
 	}
 

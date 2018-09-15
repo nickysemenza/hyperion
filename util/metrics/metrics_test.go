@@ -2,9 +2,11 @@ package metrics
 
 import (
 	"testing"
-	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestMetricsSimple(t *testing.T) {
-	SetGagueWithNsFromTime(time.Now(), ResponseTimeNsHue) //no idea how to test this...
+	_, err := serverVersion.GetMetricWithLabelValues("version")
+	require.NoError(t, err)
 }

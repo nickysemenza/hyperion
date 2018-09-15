@@ -85,6 +85,7 @@ func (cs *Stack) ProcessStack(ctx context.Context) {
 			span.LogKV("event", "popped from stack")
 			span.SetTag("cuestack-name", cs.Name)
 			span.SetTag("cue-id", nextCue.ID)
+			span.SetBaggageItem("cue-id", string(nextCue.ID))
 			cs.ActiveCue = nextCue
 			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()
@@ -97,7 +98,7 @@ func (cs *Stack) ProcessStack(ctx context.Context) {
 			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
 
 			//update metrics
-			metrics.CueExecutionDriftNs.Set(float64(nextCue.getDurationDrift() / time.Nanosecond))
+			metrics.CueExecutionDrift.Set(nextCue.getDurationDrift().Seconds())
 			metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
 			metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
 			span.Finish()
