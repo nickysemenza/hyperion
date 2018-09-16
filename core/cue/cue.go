@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
@@ -78,6 +79,7 @@ type FrameAction struct {
 //ProcessStack processes cues
 func (cs *Stack) ProcessStack(ctx context.Context) {
 	log.Printf("[CueStack: %s]\n", cs.Name)
+	cueBackoff := config.GetServerConfig(ctx).Timings.CueBackoff
 	for {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
 			ctx := context.WithValue(ctx, keyStackName, cs.Name)
@@ -104,7 +106,7 @@ func (cs *Stack) ProcessStack(ctx context.Context) {
 			span.Finish()
 		} else {
 			//backoff?
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(cueBackoff)
 		}
 	}
 }

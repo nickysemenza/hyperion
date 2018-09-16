@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/nickysemenza/hyperion/client"
 	"github.com/nickysemenza/hyperion/core/config"
@@ -52,7 +53,7 @@ var cmdServer = &cobra.Command{
 		viper.AddConfigPath(".")               // optionally look for config in the working directory
 		err := viper.ReadInConfig()            // Find and read the config file
 		if err != nil {                        // Handle errors reading the config file
-			panic(fmt.Errorf("fatal error config file: %s \n", err))
+			panic(fmt.Errorf("fatal error config file: %s", err))
 		}
 
 		viper.Debug()
@@ -60,16 +61,22 @@ var cmdServer = &cobra.Command{
 		c := config.Server{}
 		//inputs
 		if viper.IsSet("inputs.rpc") {
-			c.Inputs.RPCAddress = viper.GetString("inputs.rpc.address")
+			c.Inputs.RPC.Enabled = true
+			c.Inputs.RPC.Address = viper.GetString("inputs.rpc.address")
 		}
 		if viper.IsSet("inputs.http") {
-			c.Inputs.HTTPAddress = viper.GetString("inputs.http.address")
+			c.Inputs.HTTP.Enabled = true
+			c.Inputs.HTTP.Address = viper.GetString("inputs.http.address")
+			viper.SetDefault("inputs.http.ws-tick", time.Millisecond*50)
+			c.Outputs.OLA.Tick = viper.GetDuration("inputs.http.ws-tick")
 		}
 
 		//outputs
 		if viper.IsSet("outputs.ola") {
 			c.Outputs.OLA.Enabled = true
 			c.Outputs.OLA.Address = viper.GetString("outputs.ola.address")
+			viper.SetDefault("outputs.ola.tick", time.Millisecond*50)
+			c.Outputs.OLA.Tick = viper.GetDuration("outputs.ola.tick")
 		}
 		if viper.IsSet("outputs.hue") {
 			c.Outputs.Hue.Enabled = true
@@ -78,12 +85,19 @@ var cmdServer = &cobra.Command{
 		}
 
 		//other
-		if viper.IsSet("outputs.hue") {
+		if viper.IsSet("tracing") {
 			c.Tracing.Enabled = true
-			c.Tracing.ServerAddress = viper.GetString("outputs.tracing.server")
-			c.Tracing.ServiceName = viper.GetString("outputs.tracing.servicename")
+			c.Tracing.ServerAddress = viper.GetString("tracing.server")
+			c.Tracing.ServiceName = viper.GetString("tracing.servicename")
 		}
 
+		//timings
+		viper.SetDefault("timings.fade-interpolation-tick", time.Millisecond*25)
+		c.Timings.FadeInterpolationTick = viper.GetDuration("timings.fade-interpolation-tick")
+		viper.SetDefault("timings.fade-cue-backoff", time.Millisecond*25)
+		c.Timings.CueBackoff = viper.GetDuration("timings.fade-cue-backoff")
+
+		// spew.Dump(c)
 		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, &c))
 	},
 }

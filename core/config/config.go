@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 type ctxKey int
@@ -21,13 +22,21 @@ func GetServerConfig(ctx context.Context) *Server {
 //Server represents server config
 type Server struct {
 	Inputs struct {
-		RPCAddress  string
-		HTTPAddress string
+		RPC struct {
+			Enabled bool
+			Address string
+		}
+		HTTP struct {
+			Enabled        bool
+			Address        string
+			WSTickInterval time.Duration
+		}
 	}
 	Outputs struct {
 		OLA struct {
 			Enabled bool
 			Address string
+			Tick    time.Duration
 		}
 		Hue struct {
 			Enabled  bool
@@ -39,6 +48,11 @@ type Server struct {
 		Enabled       bool
 		ServerAddress string
 		ServiceName   string
+	}
+
+	Timings struct {
+		FadeInterpolationTick time.Duration
+		CueBackoff            time.Duration
 	}
 }
 
