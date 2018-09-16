@@ -40,7 +40,7 @@ func runCommands(c *gin.Context) {
 	var responses []cue.Cue
 	if err := c.ShouldBindJSON(&commands); err == nil {
 		for _, eachCommand := range commands {
-			x, _ := cue.BuildCueFromCommand(eachCommand)
+			x, _ := cue.NewFromCommand(eachCommand)
 			cs := cue.GetCueMaster().GetDefaultCueStack()
 			cs.EnQueueCue(*x)
 			responses = append(responses, *x)

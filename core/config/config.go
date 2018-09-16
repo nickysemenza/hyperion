@@ -102,7 +102,7 @@ func LoadServer() *Server {
 		c.Inputs.HTTP.Enabled = true
 		c.Inputs.HTTP.Address = viper.GetString("inputs.http.address")
 		viper.SetDefault("inputs.http.ws-tick", time.Millisecond*50)
-		c.Outputs.OLA.Tick = viper.GetDuration("inputs.http.ws-tick")
+		c.Inputs.HTTP.WSTickInterval = viper.GetDuration("inputs.http.ws-tick")
 	}
 	if viper.IsSet("inputs.homekit") {
 		c.Inputs.HomeKit.Enabled = true

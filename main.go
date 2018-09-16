@@ -42,7 +42,7 @@ var cmdServer = &cobra.Command{
 
 		//TODO: remove this
 		go func() {
-			c, _ := cue.BuildCueFromCommand("hue1:#00FF00:1000")
+			c, _ := cue.NewFromCommand("hue1:#00FF00:1000")
 			cs := cue.GetCueMaster().GetDefaultCueStack()
 			cs.EnQueueCue(*c)
 		}()

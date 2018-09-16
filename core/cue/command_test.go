@@ -7,7 +7,7 @@ import (
 
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommand(t *testing.T) {
@@ -28,6 +28,25 @@ func TestCommand(t *testing.T) {
 					NewState: light.State{
 						Duration: time.Duration(time.Second),
 						RGB:      color.RGB{G: 255},
+					}},
+			}},
+		},
+		}, nil},
+		{"light1:#00FF00:1000|light1:#0000FF:1000", &Cue{Frames: []Frame{
+			{Actions: []FrameAction{
+				FrameAction{
+					LightName: "light1",
+					NewState: light.State{
+						Duration: time.Duration(time.Second),
+						RGB:      color.RGB{G: 255},
+					}},
+			}},
+			{Actions: []FrameAction{
+				FrameAction{
+					LightName: "light1",
+					NewState: light.State{
+						Duration: time.Duration(time.Second),
+						RGB:      color.RGB{B: 255},
 					}},
 			}},
 		},
@@ -55,9 +74,24 @@ func TestCommand(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.cmd, func(t *testing.T) {
-			cue, err := buildCueFromCommand(tc.cmd)
-			assert.Equal(t, cue, tc.expectedCue)
-			assert.Equal(t, err, tc.expectedErr)
+			require := require.New(t)
+			cue, err := NewFromCommand(tc.cmd)
+			if tc.expectedCue == nil {
+				require.Nil(cue)
+			} else {
+				cue.ID = 0
+				cue.Status = "" //todo:fix
+				for x := range cue.Frames {
+					cue.Frames[x].ID = 0
+					for y := range cue.Frames[x].Actions {
+						cue.Frames[x].Actions[y].ID = 0
+						// require.Equal(tc.expectedCue.Frames[x].Actions[y], action)
+					}
+				}
+				require.EqualValues(tc.expectedCue, cue)
+			}
+			// assert.EqualValues(t, cue, tc.expectedCue)
+			require.Equal(err, tc.expectedErr)
 		})
 	}
 }

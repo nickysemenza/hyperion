@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 )
@@ -18,20 +16,8 @@ const (
 	commandErrorInvalidTime      = "command: invalid time"
 )
 
-//BuildCueFromCommand returns a cue based on a command.
-func BuildCueFromCommand(cmd string) (*Cue, error) {
-	cue, err := buildCueFromCommand(cmd)
-	if err != nil {
-		log.Printf("error building cue from command: %s (%s)", cmd, err)
-		return nil, err
-	}
-	cue.AddIDsRecursively()
-	return cue, nil
-
-}
-
-func buildCueFromCommand(cmd string) (*Cue, error) {
-
+//NewFromCommand returns a cue based on a command.
+func NewFromCommand(cmd string) (*Cue, error) {
 	cmd = strings.Replace(cmd, " ", "", -1)
 
 	cue := Cue{}
@@ -71,6 +57,7 @@ func buildCueFromCommand(cmd string) (*Cue, error) {
 		cue.Frames = append(cue.Frames, frame)
 	}
 
+	cue.AddIDsRecursively()
 	return &cue, nil
 
 }
