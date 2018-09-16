@@ -4,6 +4,8 @@ inputs:
   http:
     address: ":8080"
     ws-tick: 50ms
+  homekit:
+    pin: "10000000"
 outputs:
   ola:
     address: "localhost:9010"
