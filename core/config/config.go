@@ -31,6 +31,10 @@ type Server struct {
 			Address        string
 			WSTickInterval time.Duration
 		}
+		HomeKit struct {
+			Enabled bool
+			Pin     string
+		}
 	}
 	Outputs struct {
 		OLA struct {

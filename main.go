@@ -70,6 +70,11 @@ var cmdServer = &cobra.Command{
 			viper.SetDefault("inputs.http.ws-tick", time.Millisecond*50)
 			c.Outputs.OLA.Tick = viper.GetDuration("inputs.http.ws-tick")
 		}
+		if viper.IsSet("inputs.homekit") {
+			c.Inputs.HomeKit.Enabled = true
+			viper.SetDefault("inputs.homekit.pin", "10000000")
+			c.Inputs.HomeKit.Pin = viper.GetString("inputs.homekit.pin")
+		}
 
 		//outputs
 		if viper.IsSet("outputs.ola") {

@@ -9,6 +9,7 @@ import (
 	"github.com/brutella/hc"
 	"github.com/brutella/hc/accessory"
 	"github.com/nickysemenza/hyperion/control/trigger"
+	"github.com/nickysemenza/hyperion/core/config"
 )
 
 const numSwitches = 6
@@ -59,8 +60,13 @@ func buildSwitchList() {
 
 //Start starts the HomeKit services
 func Start(ctx context.Context) {
+	hkConfig := config.GetServerConfig(ctx).Inputs.HomeKit
+	if !hkConfig.Enabled {
+		log.Info("homekit is not enabled")
+		return
+	}
 	//config
-	config := hc.Config{Pin: "10000000", StoragePath: "./_homekit_data"}
+	config := hc.Config{Pin: hkConfig.Pin, StoragePath: "./_homekit_data"}
 	bridge := accessory.NewBridge(accessory.Info{Name: "bridge1", Manufacturer: "Hyperion"})
 
 	//accessory setup
