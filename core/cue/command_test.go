@@ -16,12 +16,12 @@ func TestCommand(t *testing.T) {
 		expectedCue *Cue
 		expectedErr error
 	}{
-		{"", nil, errors.New(commandErrorWrongPartCount)},
-		{"a:b", nil, errors.New(commandErrorWrongPartCount)},
-		{"a:b:", nil, errors.New(commandErrorWrongPartCount)},
-		{"light1:#00FF00,#0000FF:1000", nil, errors.New(commandErrorPartSizeMismatch)},
-		{"light1:#00FF00:1 second", nil, errors.New(commandErrorInvalidTime)},
-		{"light1:#00FF00:1000", &Cue{Frames: []Frame{
+		{"set()", nil, errors.New(commandErrorWrongPartCount)},
+		{"set(a:b)", nil, errors.New(commandErrorWrongPartCount)},
+		{"set(a:b:)", nil, errors.New(commandErrorWrongPartCount)},
+		{"set(light1:#00FF00,#0000FF:1000)", nil, errors.New(commandErrorPartSizeMismatch)},
+		{"set(light1:#00FF00:1 second)", nil, errors.New(commandErrorInvalidTime)},
+		{"set(light1:#00FF00:1000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
@@ -32,7 +32,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"light1:#00FF00:1000|light1:#0000FF:1000", &Cue{Frames: []Frame{
+		{"set(light1:#00FF00:1000|light1:#0000FF:1000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
@@ -51,7 +51,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"light1,light2:#00FF00,#FF0000:1000,2000", &Cue{Frames: []Frame{
+		{"set(light1,light2:#00FF00,#FF0000:1000,2000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				{
 					LightName: "light1",
