@@ -2,6 +2,7 @@ package cue
 
 import (
 	"errors"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,32 @@ const (
 func NewFromCommand(cmd string) (*Cue, error) {
 	cmd = strings.Replace(cmd, " ", "", -1)
 
+	re := regexp.MustCompile(`(?m)(.*?)\((.*?)\)`)
+	groups := re.FindAllStringSubmatch(cmd, -1)
+	if len(groups) != 1 {
+		return nil, errors.New("bad # of groups")
+	}
+	commandType := groups[0][1]
+	subCommand := groups[0][2]
+
+	var cue *Cue
+	var err error
+	switch commandType {
+	case "set":
+		cue, err = processSetCommand(subCommand)
+	default:
+		err = errors.New("bad cmd")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	cue.AddIDsRecursively()
+	return cue, nil
+
+}
+
+func processSetCommand(cmd string) (*Cue, error) {
 	cue := Cue{}
 	for _, cueFrameString := range strings.Split(cmd, "|") {
 		frame := Frame{}
@@ -56,8 +83,5 @@ func NewFromCommand(cmd string) (*Cue, error) {
 		}
 		cue.Frames = append(cue.Frames, frame)
 	}
-
-	cue.AddIDsRecursively()
 	return &cue, nil
-
 }
