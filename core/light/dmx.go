@@ -171,6 +171,10 @@ func (s *dmxState) initializeUniverse(universe int) {
 //SendDMXWorker sends OLA the current dmxState across all universes
 func SendDMXWorker(ctx context.Context) {
 	olaConfig := mainConfig.GetServerConfig(ctx).Outputs.OLA
+	if !olaConfig.Enabled {
+		log.Info("ola output is not enabled")
+		return
+	}
 	//TODO: put this on a timer
 	client := gola.New(olaConfig.Address)
 	defer client.Close()

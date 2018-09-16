@@ -152,6 +152,10 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 //ServeHTTP runs the gin server
 func ServeHTTP(ctx context.Context) {
 	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
+	if !httpConfig.Enabled {
+		log.Info("http is not enabled")
+		return
+	}
 	router := gin.Default()
 
 	//setup CORS

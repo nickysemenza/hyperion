@@ -48,11 +48,11 @@ var cmdServer = &cobra.Command{
 			cs.EnQueueCue(*c)
 		}()
 
-		viper.SetConfigName("config")          // name of config file (without extension)
-		viper.AddConfigPath("$HOME/.hyperion") // call multiple times to add many search paths
-		viper.AddConfigPath(".")               // optionally look for config in the working directory
-		err := viper.ReadInConfig()            // Find and read the config file
-		if err != nil {                        // Handle errors reading the config file
+		viper.SetConfigName("config")
+		viper.AddConfigPath("$HOME/.hyperion")
+		viper.AddConfigPath(".")
+		err := viper.ReadInConfig()
+		if err != nil {
 			panic(fmt.Errorf("fatal error config file: %s", err))
 		}
 

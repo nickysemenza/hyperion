@@ -69,8 +69,12 @@ func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServ
 
 //ServeRPC runs a RPC server
 func ServeRPC(ctx context.Context) {
-	serverConfig := config.GetServerConfig(ctx)
-	lis, err := net.Listen("tcp", serverConfig.Inputs.RPC.Address)
+	RPCConfig := config.GetServerConfig(ctx).Inputs.RPC
+	if !RPCConfig.Enabled {
+		log.Info("rpc is not enabled")
+		return
+	}
+	lis, err := net.Listen("tcp", RPCConfig.Address)
 	// lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
