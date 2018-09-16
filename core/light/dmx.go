@@ -21,9 +21,6 @@ const (
 	ChannelRed   = "red"
 	ChannelGreen = "green"
 	ChannelBlue  = "blue"
-
-	tickIntervalFadeInterpolation = time.Millisecond * 30
-	tickIntervalSendToOLA         = time.Millisecond * 50
 )
 
 //DMXLight is a DMX light
@@ -96,6 +93,7 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.R
 //SetState updates the light's state.
 //TODO: other properties? on/off?
 func (d *DMXLight) SetState(ctx context.Context, target State) {
+	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
 	currentState := d.State
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
@@ -172,9 +170,13 @@ func (s *dmxState) initializeUniverse(universe int) {
 
 //SendDMXWorker sends OLA the current dmxState across all universes
 func SendDMXWorker(ctx context.Context) {
-	olaAddress := mainConfig.GetServerConfig(ctx).Outputs.OLA.Address
+	olaConfig := mainConfig.GetServerConfig(ctx).Outputs.OLA
+	if !olaConfig.Enabled {
+		log.Info("ola output is not enabled")
+		return
+	}
 	//TODO: put this on a timer
-	client := gola.New(olaAddress)
+	client := gola.New(olaConfig.Address)
 	defer client.Close()
 
 	s := getDMXStateInstance()
@@ -185,7 +187,7 @@ func SendDMXWorker(ctx context.Context) {
 			client.SendDmx(k, v)
 			timer.ObserveDuration()
 		}
-		time.Sleep(tickIntervalSendToOLA)
+		time.Sleep(olaConfig.Tick)
 	}
 }
 

@@ -18,6 +18,11 @@ import (
 //InitTracer starts a global jaeger tracer
 func InitTracer(ctx context.Context) {
 	config := config.GetServerConfig(ctx).Tracing
+	if !config.Enabled {
+		log.Info("tracing is not enabled")
+		opentracing.SetGlobalTracer(opentracing.NoopTracer{})
+		return
+	}
 	// sender := transport.NewHTTPTransport(
 	// 	"localhost:6831",
 	// 	transport.HTTPBatchSize(1),

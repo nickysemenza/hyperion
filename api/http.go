@@ -29,8 +29,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const wsInterval = 30 * time.Millisecond
-
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
 		c.JSON(200, cue.GetCueMaster())
@@ -126,7 +124,7 @@ const (
 	wsTypeCueList   = "CUE_MASTER"
 )
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
+func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duration) {
 	conn, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("Failed to set websocket upgrade ", err)
@@ -138,7 +136,7 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 
 			conn.WriteJSON(&wsWrapper{Data: light.GetLights(), Type: wsTypeLightList})
 			conn.WriteJSON(&wsWrapper{Data: cue.GetCueMaster(), Type: wsTypeCueList})
-			time.Sleep(wsInterval)
+			time.Sleep(tickInterval)
 		}
 	}()
 
@@ -153,7 +151,11 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 
 //ServeHTTP runs the gin server
 func ServeHTTP(ctx context.Context) {
-	serverConfig := config.GetServerConfig(ctx)
+	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
+	if !httpConfig.Enabled {
+		log.Info("http is not enabled")
+		return
+	}
 	router := gin.Default()
 
 	//setup CORS
@@ -176,12 +178,12 @@ func ServeHTTP(ctx context.Context) {
 	router.GET("/ping", aa("ff"))
 	router.GET("/hexfade/:from/:to", hexFade)
 	router.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
+		wshandler(c.Writer, c.Request, httpConfig.WSTickInterval)
 	})
 
 	//server
 	srv := &http.Server{
-		Addr:    serverConfig.HTTPAddress,
+		Addr:    httpConfig.Address,
 		Handler: router,
 	}
 

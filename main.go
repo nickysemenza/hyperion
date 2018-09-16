@@ -38,26 +38,16 @@ var cmdServer = &cobra.Command{
 	Short: "Run the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Running Server, version:" + config.GetVersion())
-		light.ReadLightConfigFromFile("./core/light/testconfig.yaml")
+		light.ReadLightConfigFromFile("./core/light/testconfig.yaml") //TODO: move to viper setup
 
+		//TODO: remove this
 		go func() {
 			c, _ := cue.BuildCueFromCommand("hue1:#00FF00:1000")
 			cs := cue.GetCueMaster().GetDefaultCueStack()
 			cs.EnQueueCue(*c)
 		}()
 
-		//TODO: read from file
-		c := config.Server{
-			RPCAddress:  ":8888",
-			HTTPAddress: ":8080",
-		}
-		c.Outputs.OLA.Address = "localhost:9010"
-		c.Outputs.Hue.Address = "10.0.0.39"
-		c.Outputs.Hue.Username = "alW0LsA1mnXB28T4txGs01BeHi1WBr661VZ1eqEF"
-		c.Tracing.ServerAddress = "localhost:6831"
-		c.Tracing.ServiceName = "hyperion-server"
-
-		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, &c))
+		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, config.LoadServer()))
 	},
 }
 
