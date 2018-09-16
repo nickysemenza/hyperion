@@ -53,9 +53,9 @@ func InitTracer(ctx context.Context) {
 }
 
 //GinMiddleware is a gin middleware for initializing a trace via a HTTP request
-func GinMiddleware() gin.HandlerFunc {
+func GinMiddleware(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		span, ctx := opentracing.StartSpanFromContext(context.Background(), "request: "+c.Request.Method+" "+c.Request.URL.Path)
+		span, ctx := opentracing.StartSpanFromContext(ctx, "request: "+c.Request.Method+" "+c.Request.URL.Path)
 		span.SetTag(string(ext.HTTPMethod), c.Request.Method)
 		span.SetTag(string(ext.HTTPUrl), c.Request.URL.Path)
 		span.LogKV("event", "begin")

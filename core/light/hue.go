@@ -88,3 +88,25 @@ func getTransitionTimeAs100msMultiple(t time.Duration) uint16 {
 	timingMs := uint16(t / time.Millisecond)
 	return timingMs / 100
 }
+
+//DiscoveredHues is for wrapping hue info
+type DiscoveredHues struct {
+	AllLights []lights.Light `json:"all_lights"`
+	ByName    map[string]int `json:"by_name"`
+}
+
+//GetDiscoveredHues finds all the hues on the network
+func GetDiscoveredHues(ctx context.Context) DiscoveredHues {
+
+	hueConfig := mainConfig.GetServerConfig(ctx).Outputs.Hue
+	hueLights := lights.New(hueConfig.Address, hueConfig.Username)
+
+	lights, _ := hueLights.GetAllLights()
+
+	byName := make(map[string]int)
+	for _, x := range lights {
+		byName[x.Name] = x.ID
+	}
+
+	return DiscoveredHues{lights, byName}
+}

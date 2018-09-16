@@ -35,15 +35,32 @@ func aa(b string) func(*gin.Context) {
 	}
 }
 
+func debug(c *gin.Context) {
+	ctx := c.MustGet("ctx").(context.Context)
+	debugData := struct {
+		Config *config.Server       `json:"config"`
+		Hues   light.DiscoveredHues `json:"discovered_hues"`
+	}{
+		Config: config.GetServerConfig(ctx),
+		Hues:   light.GetDiscoveredHues(ctx),
+	}
+
+	c.JSON(200, debugData)
+}
+
 func runCommands(c *gin.Context) {
 	var commands []string
 	var responses []cue.Cue
 	if err := c.ShouldBindJSON(&commands); err == nil {
+		cs := cue.GetCueMaster().GetDefaultCueStack()
 		for _, eachCommand := range commands {
-			x, _ := cue.NewFromCommand(eachCommand)
-			cs := cue.GetCueMaster().GetDefaultCueStack()
-			cs.EnQueueCue(*x)
-			responses = append(responses, *x)
+
+			if x, err := cue.NewFromCommand(eachCommand); err != nil {
+				log.Println(err)
+			} else {
+				cs.EnQueueCue(*x)
+				responses = append(responses, *x)
+			}
 		}
 
 		c.JSON(200, responses)
@@ -163,7 +180,7 @@ func ServeHTTP(ctx context.Context) {
 	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "X-JWT"}
 	router.Use(cors.New(corsConfig))
-	router.Use(tracing.GinMiddleware())
+	router.Use(tracing.GinMiddleware(ctx))
 
 	//register prometheus gin metrics middleware
 	p := ginprometheus.NewPrometheus("gin")
@@ -180,6 +197,7 @@ func ServeHTTP(ctx context.Context) {
 	router.GET("/ws", func(c *gin.Context) {
 		wshandler(c.Writer, c.Request, httpConfig.WSTickInterval)
 	})
+	router.GET("debug", debug)
 
 	//server
 	srv := &http.Server{
