@@ -12,9 +12,11 @@ import (
 )
 
 const (
-	commandErrorWrongPartCount   = "command: wrong number of parts, should be lights:colors:timings"
-	commandErrorPartSizeMismatch = "command: number of lights, colors, and timings must be the same"
-	commandErrorInvalidTime      = "command: invalid time"
+	commandErrorWrongPartCount    = "command: wrong number of parts, should be lights:colors:timings"
+	commandErrorPartSizeMismatch  = "command: number of lights, colors, and timings must be the same"
+	commandErrorInvalidTime       = "command: invalid time"
+	commandErrorMissingFunction   = "command: fn(?) is missing"
+	commandErrorUndefinedFunction = "command: function is not defined"
 )
 
 //NewFromCommand returns a cue based on a command.
@@ -24,7 +26,7 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	re := regexp.MustCompile(`(?m)(.*?)\((.*?)\)`)
 	groups := re.FindAllStringSubmatch(cmd, -1)
 	if len(groups) != 1 {
-		return nil, errors.New("bad # of groups")
+		return nil, errors.New(commandErrorMissingFunction)
 	}
 	commandType := groups[0][1]
 	subCommand := groups[0][2]
@@ -34,8 +36,10 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	switch commandType {
 	case "set":
 		cue, err = processSetCommand(subCommand)
+	case "cycle":
+		cue, err = processCycleCommand(subCommand)
 	default:
-		err = errors.New("bad cmd")
+		err = errors.New(commandErrorUndefinedFunction)
 	}
 
 	if err != nil {
@@ -44,6 +48,39 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	cue.AddIDsRecursively()
 	return cue, nil
 
+}
+
+func processCycleCommand(cmd string) (*Cue, error) {
+	cue := Cue{}
+	parts := strings.Split(cmd, ":")
+	lightList := strings.Split(parts[0], ",")
+	duration, err := time.ParseDuration(parts[1])
+	if err != nil {
+		return nil, err
+	}
+	for x := range lightList {
+		frame := Frame{}
+		for y := 0; y < len(lightList); y++ {
+			action := FrameAction{}
+			action.LightName = lightList[y]
+
+			action.NewState = light.State{
+				RGB:      color.GetRGBFromString("#00FF00"),
+				Duration: duration,
+			}
+			if x == y {
+				action.NewState = light.State{
+					RGB:      color.GetRGBFromString("#00FF00"),
+					Duration: duration,
+				}
+			}
+
+			frame.Actions = append(frame.Actions, action)
+		}
+		cue.Frames = append(cue.Frames, frame)
+	}
+
+	return &cue, nil
 }
 
 func processSetCommand(cmd string) (*Cue, error) {
