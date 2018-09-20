@@ -16,6 +16,9 @@ func TestCommand(t *testing.T) {
 		expectedCue *Cue
 		expectedErr error
 	}{
+		{"", nil, errors.New(commandErrorMissingFunction)},
+		{"a", nil, errors.New(commandErrorMissingFunction)},
+		{"foo(bar)", nil, errors.New(commandErrorUndefinedFunction)},
 		{"set()", nil, errors.New(commandErrorWrongPartCount)},
 		{"set(a:b)", nil, errors.New(commandErrorWrongPartCount)},
 		{"set(a:b:)", nil, errors.New(commandErrorWrongPartCount)},
@@ -67,6 +70,17 @@ func TestCommand(t *testing.T) {
 						RGB:      color.RGB{R: 255},
 					},
 				},
+			}},
+		},
+		}, nil},
+		{"cycle(light1:2s)", &Cue{Frames: []Frame{
+			{Actions: []FrameAction{
+				FrameAction{
+					LightName: "light1",
+					NewState: light.State{
+						Duration: time.Duration(time.Second) * 2,
+						RGB:      color.RGB{G: 255},
+					}},
 			}},
 		},
 		}, nil},
