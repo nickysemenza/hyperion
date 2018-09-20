@@ -12,8 +12,17 @@ jobs:
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: dep ensure
       - run: go test -v ./...
+  test-ui:
+    docker:
+      - image: node:9.3.0
+    working_directory: ~/hyperion
+    steps:
+      - checkout
+      - run: cd ui && yarn install
+      - run: cd ui && yarn test
 workflows:
   version: 2
   test-all:
     jobs:
       - test-server
+      - test-ui
