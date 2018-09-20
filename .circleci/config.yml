@@ -12,3 +12,8 @@ jobs:
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: dep ensure
       - run: go test -v ./...
+workflows:
+  version: 2
+  test-all:
+    jobs:
+      - test-server
