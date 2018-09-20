@@ -37,7 +37,7 @@ func buildRawAccessoryList(accessoryList []Accessory) []*accessory.Accessory {
 	return accessories
 }
 
-func buildSwitchList() {
+func buildSwitchList(ctx context.Context) {
 	//for now let's have N switches
 	for x := 1; x <= numSwitches; x++ {
 		id := x
@@ -45,7 +45,7 @@ func buildSwitchList() {
 		s := accessory.NewSwitch(accessory.Info{Name: switchName, Manufacturer: "hyperion"})
 		s.Switch.On.OnValueRemoteUpdate(func(on bool) {
 			if on {
-				trigger.Action("homekit-switch", id)
+				trigger.Action(ctx, "homekit-switch", id)
 				s.Switch.On.SetValue(false)
 			}
 			log.Printf("[homekit] changed: [%s] to %t", s.Accessory.Info.Name.String.GetValue(), on)
@@ -70,7 +70,7 @@ func Start(ctx context.Context) {
 	bridge := accessory.NewBridge(accessory.Info{Name: "bridge1", Manufacturer: "Hyperion"})
 
 	//accessory setup
-	buildSwitchList()
+	buildSwitchList(ctx)
 	accessories := buildRawAccessoryList(allAccessories)
 
 	//start the server

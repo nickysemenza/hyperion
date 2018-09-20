@@ -8,7 +8,6 @@ import (
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
-	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
 	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
@@ -123,12 +122,15 @@ func (cs *Stack) deQueueNextCue() *Cue {
 }
 
 //EnQueueCue puts a cue on the queue
-func (cs *Stack) EnQueueCue(c Cue) {
+//it also assigns the cue (and subcomponents) an ID
+func (cs *Stack) EnQueueCue(c Cue) *Cue {
 	cs.m.Lock()
 	defer cs.m.Unlock()
+	c.AddIDsRecursively()
 	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name}).Info("enqueued!")
 
 	cs.Cues = append(cs.Cues, c)
+	return &c
 }
 
 //ProcessCue processes cue
@@ -286,14 +288,4 @@ func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
 		DurationMS: cfa.NewState.Duration / time.Millisecond,
 		Alias:      (*Alias)(cfa),
 	})
-}
-
-//NewSimple returns a Cue that transitions the given light to the given color
-func NewSimple(lightName string, c color.RGB) Cue {
-	cm := GetCueMaster()
-	return cm.New([]Frame{
-		cm.NewFrame([]FrameAction{
-			cm.NewFrameAction(time.Millisecond*500, c, lightName),
-		})}, "")
-
 }

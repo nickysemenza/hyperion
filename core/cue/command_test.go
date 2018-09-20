@@ -1,7 +1,6 @@
 package cue
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -16,12 +15,15 @@ func TestCommand(t *testing.T) {
 		expectedCue *Cue
 		expectedErr error
 	}{
-		{"", nil, errors.New(commandErrorWrongPartCount)},
-		{"a:b", nil, errors.New(commandErrorWrongPartCount)},
-		{"a:b:", nil, errors.New(commandErrorWrongPartCount)},
-		{"light1:#00FF00,#0000FF:1000", nil, errors.New(commandErrorPartSizeMismatch)},
-		{"light1:#00FF00:1 second", nil, errors.New(commandErrorInvalidTime)},
-		{"light1:#00FF00:1000", &Cue{Frames: []Frame{
+		{"", nil, errorMissingFunction},
+		{"a", nil, errorMissingFunction},
+		{"foo(bar)", nil, errorUndefinedFunction},
+		{"set()", nil, errorWrongPartCount},
+		{"set(a:b)", nil, errorWrongPartCount},
+		{"set(a:b:)", nil, errorWrongPartCount},
+		{"set(light1:#00FF00,#0000FF:1000)", nil, errorPartSizeMismatch},
+		{"set(light1:#00FF00:1 second)", nil, errorInvalidTime},
+		{"set(light1:#00FF00:1000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
@@ -32,7 +34,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"light1:#00FF00:1000|light1:#0000FF:1000", &Cue{Frames: []Frame{
+		{"set(light1:#00FF00:1000|light1:#0000FF:1000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
@@ -51,7 +53,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"light1,light2:#00FF00,#FF0000:1000,2000", &Cue{Frames: []Frame{
+		{"set(light1,light2:#00FF00,#FF0000:1000,2000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				{
 					LightName: "light1",
@@ -67,6 +69,17 @@ func TestCommand(t *testing.T) {
 						RGB:      color.RGB{R: 255},
 					},
 				},
+			}},
+		},
+		}, nil},
+		{"cycle(light1:2s)", &Cue{Frames: []Frame{
+			{Actions: []FrameAction{
+				FrameAction{
+					LightName: "light1",
+					NewState: light.State{
+						Duration: time.Duration(time.Second) * 2,
+						RGB:      color.RGB{G: 255},
+					}},
 			}},
 		},
 		}, nil},
