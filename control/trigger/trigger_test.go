@@ -3,7 +3,6 @@ package trigger
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/stretchr/testify/assert"
@@ -11,14 +10,12 @@ import (
 
 func TestTrigger(t *testing.T) {
 	//just smoke test for now, make sure channels don't cause deadlock or anything
-	go ProcessTriggers(context.Background())
-	Action("aa", 1)
-	time.Sleep(time.Millisecond * 200) //TODO: make this better
+	ctx := context.Background()
 	stack := cue.GetCueMaster().GetDefaultCueStack()
 
+	Action(ctx, "aa", 1)
+
 	assert.Len(t, stack.Cues, 2)
-	assert.Equal(t, getTriggerChan(), getTriggerChan())
-	Action("aa", 2)
-	time.Sleep(time.Millisecond * 200)
+	Action(ctx, "aa", 2)
 	assert.Len(t, stack.Cues, 3)
 }

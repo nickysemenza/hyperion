@@ -12,7 +12,6 @@ import (
 
 	"github.com/nickysemenza/hyperion/api"
 	"github.com/nickysemenza/hyperion/control/homekit"
-	"github.com/nickysemenza/hyperion/control/trigger"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
 )
@@ -33,9 +32,6 @@ func Run(ctx context.Context) {
 	cue.GetCueMaster().ProcessForever(ctx)
 
 	go light.SendDMXWorker(ctx)
-
-	//process triggers
-	go trigger.ProcessTriggers(ctx)
 
 	//handle CTRL+C
 	quit := make(chan os.Signal)
