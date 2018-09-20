@@ -20,8 +20,8 @@ jobs:
       - image: node:9.3.0
     working_directory: ~/hyperion/ui
     steps:
-      - checkout
-        path: ~/hyperion
+      - checkout:
+          path: ~/hyperion
       - run: yarn install
       - run: yarn test -- --coverage
       - run: bash <(curl -s https://codecov.io/bash)
