@@ -80,12 +80,10 @@ func createCue(c *gin.Context) {
 	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
-		newCue.AddIDsRecursively()
 		stack := cue.GetCueMaster().GetDefaultCueStack()
-		stack.EnQueueCue(newCue)
-		span.SetTag("cue-id", newCue.ID)
-
-		c.JSON(200, newCue)
+		cue := stack.EnQueueCue(newCue)
+		span.SetTag("cue-id", cue.ID)
+		c.JSON(200, cue)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}

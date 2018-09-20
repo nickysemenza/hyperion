@@ -23,6 +23,7 @@ const (
 func NewFromCommand(cmd string) (*Cue, error) {
 	cmd = strings.Replace(cmd, " ", "", -1)
 
+	//extracts: `match1(match2)`
 	re := regexp.MustCompile(`(?m)(.*?)\((.*?)\)`)
 	groups := re.FindAllStringSubmatch(cmd, -1)
 	if len(groups) != 1 {
@@ -45,7 +46,6 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	if err != nil {
 		return nil, err
 	}
-	cue.AddIDsRecursively()
 	return cue, nil
 
 }

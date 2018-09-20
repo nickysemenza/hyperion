@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/assert"
@@ -52,8 +54,9 @@ func TestCueQueueing(t *testing.T) {
 	cs := Stack{}
 	assert.Nil(t, cs.deQueueNextCue(), "deque on empty should return nil")
 
-	cs.EnQueueCue(Cue{Name: "c1"})
-	cs.EnQueueCue(Cue{Name: "c2"})
+	c1 := cs.EnQueueCue(Cue{Name: "c1"})
+	c2 := cs.EnQueueCue(Cue{Name: "c2"})
+	require.NotEqual(t, c1.ID, c2.ID)
 
 	assert.Equal(t, len(cs.Cues), 2)
 	pop := cs.deQueueNextCue()

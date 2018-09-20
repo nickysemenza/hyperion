@@ -123,12 +123,15 @@ func (cs *Stack) deQueueNextCue() *Cue {
 }
 
 //EnQueueCue puts a cue on the queue
-func (cs *Stack) EnQueueCue(c Cue) {
+//it also assigns the cue (and subcomponents) an ID
+func (cs *Stack) EnQueueCue(c Cue) *Cue {
 	cs.m.Lock()
 	defer cs.m.Unlock()
+	c.AddIDsRecursively()
 	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name}).Info("enqueued!")
 
 	cs.Cues = append(cs.Cues, c)
+	return &c
 }
 
 //ProcessCue processes cue
