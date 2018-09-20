@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/hyperion/core/cue"
-	"github.com/nickysemenza/hyperion/util/color"
 )
 
 type trigger struct {
@@ -43,18 +42,22 @@ func ProcessTriggers(ctx context.Context) {
 		var newCues []cue.Cue
 		log.Printf("new trigger! %v\n", t)
 		if t.id == 1 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("red")))
-			newCues = append(newCues, cue.NewSimple("hue2", color.GetRGBFromString("blue")))
+			c1, _ := cue.NewFromCommand("set(hue1:red:1000)")
+			c2, _ := cue.NewFromCommand("set(hue2:blue:1000)")
+			newCues = append(newCues, *c1, *c2)
 		}
 		if t.id == 2 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("green")))
+			c1, _ := cue.NewFromCommand("set(hue1:green:1000)")
+			newCues = append(newCues, *c1)
 		}
 		if t.id == 3 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("blue")))
+			c1, _ := cue.NewFromCommand("set(hue1:blue:1000)")
+			newCues = append(newCues, *c1)
 		}
 		if t.id == 4 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("black")))
-			newCues = append(newCues, cue.NewSimple("hue2", color.GetRGBFromString("black")))
+			c1, _ := cue.NewFromCommand("set(hue1:black:1000)")
+			c2, _ := cue.NewFromCommand("set(hue2:black:1000)")
+			newCues = append(newCues, *c1, *c2)
 		}
 
 		for _, x := range newCues {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/nickysemenza/hyperion/client"
 	"github.com/nickysemenza/hyperion/core/config"
-	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/server"
 	"github.com/spf13/cobra"
@@ -39,13 +38,6 @@ var cmdServer = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Running Server, version:" + config.GetVersion())
 		light.ReadLightConfigFromFile("./core/light/testconfig.yaml") //TODO: move to viper setup
-
-		//TODO: remove this
-		go func() {
-			c, _ := cue.NewFromCommand("set(hue1:#00FF00:1000)")
-			cs := cue.GetCueMaster().GetDefaultCueStack()
-			cs.EnQueueCue(*c)
-		}()
 
 		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, config.LoadServer()))
 	},

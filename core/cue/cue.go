@@ -8,7 +8,6 @@ import (
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
-	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
 	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
@@ -289,14 +288,4 @@ func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
 		DurationMS: cfa.NewState.Duration / time.Millisecond,
 		Alias:      (*Alias)(cfa),
 	})
-}
-
-//NewSimple returns a Cue that transitions the given light to the given color
-func NewSimple(lightName string, c color.RGB) Cue {
-	cm := GetCueMaster()
-	return cm.New([]Frame{
-		cm.NewFrame([]FrameAction{
-			cm.NewFrameAction(time.Millisecond*500, c, lightName),
-		})}, "")
-
 }
