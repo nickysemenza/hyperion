@@ -1,15 +1,32 @@
-# Golang CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  test-server:
     docker:
-      # specify the version
       - image: circleci/golang:1.9
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/nickysemenza/hyperion
     steps:
       - checkout
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: dep ensure
-      - run: go test -v ./...
+      - run: ./test_cov.sh
+      - run: bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: .
+  test-ui:
+    docker:
+      - image: node:9.3.0
+    working_directory: ~/hyperion/ui
+    steps:
+      - checkout:
+          path: ~/hyperion
+      - run: yarn install
+      - run: yarn test -- --coverage
+      - run: bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: ~/hyperion/ui
+workflows:
+  version: 2
+  test-all:
+    jobs:
+      - test-server
+      - test-ui
