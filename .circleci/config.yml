@@ -11,7 +11,8 @@ jobs:
       - checkout
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: dep ensure
-      - run: go test -v ./...
+      - run: ./test_cov.sh
+      - run: bash <(curl -s https://codecov.io/bash)
   test-ui:
     docker:
       - image: node:9.3.0
