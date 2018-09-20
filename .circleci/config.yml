@@ -13,14 +13,20 @@ jobs:
       - run: dep ensure
       - run: ./test_cov.sh
       - run: bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: .
   test-ui:
     docker:
       - image: node:9.3.0
-    working_directory: ~/hyperion
+    working_directory: ~/hyperion/ui
     steps:
       - checkout
-      - run: cd ui && yarn install
-      - run: cd ui && yarn test
+        path: ~/hyperion
+      - run: yarn install
+      - run: yarn test -- --coverage
+      - run: bash <(curl -s https://codecov.io/bash)
+    - store_test_results:
+          path: .
 workflows:
   version: 2
   test-all:
