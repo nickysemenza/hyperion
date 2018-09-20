@@ -1,7 +1,6 @@
 package cue
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -16,14 +15,14 @@ func TestCommand(t *testing.T) {
 		expectedCue *Cue
 		expectedErr error
 	}{
-		{"", nil, errors.New(commandErrorMissingFunction)},
-		{"a", nil, errors.New(commandErrorMissingFunction)},
-		{"foo(bar)", nil, errors.New(commandErrorUndefinedFunction)},
-		{"set()", nil, errors.New(commandErrorWrongPartCount)},
-		{"set(a:b)", nil, errors.New(commandErrorWrongPartCount)},
-		{"set(a:b:)", nil, errors.New(commandErrorWrongPartCount)},
-		{"set(light1:#00FF00,#0000FF:1000)", nil, errors.New(commandErrorPartSizeMismatch)},
-		{"set(light1:#00FF00:1 second)", nil, errors.New(commandErrorInvalidTime)},
+		{"", nil, errorMissingFunction},
+		{"a", nil, errorMissingFunction},
+		{"foo(bar)", nil, errorUndefinedFunction},
+		{"set()", nil, errorWrongPartCount},
+		{"set(a:b)", nil, errorWrongPartCount},
+		{"set(a:b:)", nil, errorWrongPartCount},
+		{"set(light1:#00FF00,#0000FF:1000)", nil, errorPartSizeMismatch},
+		{"set(light1:#00FF00:1 second)", nil, errorInvalidTime},
 		{"set(light1:#00FF00:1000)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{

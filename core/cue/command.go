@@ -11,12 +11,12 @@ import (
 	"github.com/nickysemenza/hyperion/util/color"
 )
 
-const (
-	commandErrorWrongPartCount    = "command: wrong number of parts, should be lights:colors:timings"
-	commandErrorPartSizeMismatch  = "command: number of lights, colors, and timings must be the same"
-	commandErrorInvalidTime       = "command: invalid time"
-	commandErrorMissingFunction   = "command: fn(?) is missing"
-	commandErrorUndefinedFunction = "command: function is not defined"
+var (
+	errorWrongPartCount    = errors.New("command: wrong number of parts, should be lights:colors:timings")
+	errorPartSizeMismatch  = errors.New("command: number of lights, colors, and timings must be the same")
+	errorInvalidTime       = errors.New("command: invalid time")
+	errorMissingFunction   = errors.New("command: fn(?) is missing")
+	errorUndefinedFunction = errors.New("command: function is not defined")
 )
 
 //NewFromCommand returns a cue based on a command.
@@ -27,7 +27,7 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	re := regexp.MustCompile(`(?m)(.*?)\((.*?)\)`)
 	groups := re.FindAllStringSubmatch(cmd, -1)
 	if len(groups) != 1 {
-		return nil, errors.New(commandErrorMissingFunction)
+		return nil, errorMissingFunction
 	}
 	commandType := groups[0][1]
 	subCommand := groups[0][2]
@@ -40,7 +40,7 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	case "cycle":
 		cue, err = processCycleCommand(subCommand)
 	default:
-		err = errors.New(commandErrorUndefinedFunction)
+		err = errorUndefinedFunction
 	}
 
 	if err != nil {
@@ -89,10 +89,10 @@ func processSetCommand(cmd string) (*Cue, error) {
 		frame := Frame{}
 		parts := strings.Split(cueFrameString, ":")
 		if len(parts) != 3 {
-			return nil, errors.New(commandErrorWrongPartCount)
+			return nil, errorWrongPartCount
 		}
 		if len(parts[0]) == 0 || len(parts[1]) == 0 || len(parts[2]) == 0 {
-			return nil, errors.New(commandErrorWrongPartCount)
+			return nil, errorWrongPartCount
 		}
 		lightList := strings.Split(parts[0], ",")
 		colorList := strings.Split(parts[1], ",")
@@ -103,14 +103,14 @@ func processSetCommand(cmd string) (*Cue, error) {
 		numLights := len(lightList)
 
 		if !(numTimes == numColors && numColors == numLights) {
-			return nil, errors.New(commandErrorPartSizeMismatch)
+			return nil, errorPartSizeMismatch
 		}
 		for x := 0; x < numLights; x++ {
 			action := FrameAction{}
 			action.LightName = lightList[x]
 			timeAsInt, err := strconv.Atoi(timeList[x])
 			if err != nil {
-				return nil, errors.New(commandErrorInvalidTime)
+				return nil, errorInvalidTime
 			}
 			action.NewState = light.State{
 				RGB:      color.GetRGBFromString(colorList[x]),
