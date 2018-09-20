@@ -3,11 +3,10 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  test-server:
     docker:
-      # specify the version
       - image: circleci/golang:1.9
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/nickysemenza/hyperion
     steps:
       - checkout
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
