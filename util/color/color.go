@@ -24,11 +24,15 @@ func (c *RGB) IsBlack() bool {
 }
 
 //GetInterpolatedFade returns fade from one color to another.
-func (c *RGB) GetInterpolatedFade(target RGB, step, numSteps int) colorful.Color {
+func (c *RGB) GetInterpolatedFade(target RGB, step, numSteps int) RGB {
 	c1 := c.AsColorful()
 	c2 := target.AsColorful()
+	progress := float64(step) / float64(numSteps-1)
+	if progress == 1 {
+		return target
+	}
 
-	return c1.BlendHcl(c2, float64(step)/float64(numSteps-1)).Clamped()
+	return GetRGBFromColorful(c1.BlendHcl(c2, progress).Clamped())
 }
 
 //AsColorful turns a colorful.Color into an RGB
@@ -45,7 +49,7 @@ func GetRGBFromColorful(c colorful.Color) RGB {
 	}
 }
 
-//AsPb returns the RGB color as a protobuf RGB
+//AsPB returns the RGB color as a protobuf RGB
 func (c *RGB) AsPB() pb.RGB {
 	return pb.RGB{
 		R: int32(c.R),
@@ -98,11 +102,6 @@ func (c *RGB) TermString() string {
 
 //GetXyy returns the RGB color in xyy color space
 func (c *RGB) GetXyy() (x, y, Yout float64) {
-	cc := colorful.Color{
-		R: float64(c.R / 255),
-		G: float64(c.G / 255),
-		B: float64(c.B / 255),
-	}
-	//OLD:  x, y, _ := cc.Xyz()
-	return colorful.XyzToXyy(colorful.LinearRgbToXyz(cc.LinearRgb()))
+	//OLD:  x, y, _ := colorful.Xyz()
+	return colorful.XyzToXyy(colorful.LinearRgbToXyz(c.AsColorful().LinearRgb()))
 }
