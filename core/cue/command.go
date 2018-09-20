@@ -49,7 +49,7 @@ func NewFromCommand(cmd string) (*Cue, error) {
 				return nil, errors.New(commandErrorInvalidTime)
 			}
 			action.NewState = light.State{
-				RGB:      color.GetRGBFromHex(colorList[x]),
+				RGB:      color.GetRGBFromString(colorList[x]),
 				Duration: time.Millisecond * time.Duration(timeAsInt),
 			}
 			frame.Actions = append(frame.Actions, action)

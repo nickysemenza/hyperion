@@ -2,6 +2,7 @@ package color
 
 import (
 	"fmt"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -17,37 +18,9 @@ type RGB struct {
 	B int `json:"b"`
 }
 
-type colorNum int
-
-//different hardcoded colors
-const (
-	Red colorNum = iota
-	Green
-	Blue
-	White
-	Black
-)
-
-//FromString yields an RGB object based on a const
-func FromString(num colorNum) RGB {
-	switch num {
-	case Red:
-		return RGB{R: 255}
-	case Green:
-		return RGB{G: 255}
-	case Blue:
-		return RGB{B: 255}
-	case White:
-		return RGB{R: 255, G: 255, B: 255}
-	case Black:
-		return RGB{R: 0, G: 0, B: 0}
-	default:
-		return RGB{}
-	}
-}
-
+//IsBlack determines if a color is black
 func (c *RGB) IsBlack() bool {
-	return *c == FromString(Black)
+	return *c == GetRGBFromString("black")
 }
 
 //GetInterpolatedFade returns fade from one color to another.
@@ -72,6 +45,7 @@ func GetRGBFromColorful(c colorful.Color) RGB {
 	}
 }
 
+//AsPb returns the RGB color as a protobuf RGB
 func (c *RGB) AsPB() pb.RGB {
 	return pb.RGB{
 		R: int32(c.R),
@@ -80,13 +54,35 @@ func (c *RGB) AsPB() pb.RGB {
 	}
 }
 
-//GetRGBFromHex turns a hex string (#00FF00) into an RGB color
-func GetRGBFromHex(hex string) RGB {
-	c, err := colorful.Hex(hex)
-	if err != nil {
-		log.Println(err)
+//GetRGBFromString turns a string into an RGB color
+//The input can either be hex (#00FF00) or a string (green)
+func GetRGBFromString(s string) RGB {
+	if strings.HasPrefix(s, "#") {
+		//parse hex
+		c, err := colorful.Hex(s)
+		if err != nil {
+			log.Errorf("error getting RGB from string: %s, %v", s, err)
+			return RGB{}
+		}
+		return GetRGBFromColorful(c)
 	}
-	return GetRGBFromColorful(c)
+
+	//fallback to string matching
+	switch s {
+	case "red":
+		return RGB{R: 255}
+	case "green":
+		return RGB{G: 255}
+	case "blue":
+		return RGB{B: 255}
+	case "white":
+		return RGB{R: 255, G: 255, B: 255}
+	case "black":
+		return RGB{R: 0, G: 0, B: 0}
+	default:
+		return RGB{}
+	}
+
 }
 
 //AsComponents returns the seperate r, g, b

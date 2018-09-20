@@ -43,18 +43,18 @@ func ProcessTriggers(ctx context.Context) {
 		var newCues []cue.Cue
 		log.Printf("new trigger! %v\n", t)
 		if t.id == 1 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Red)))
-			newCues = append(newCues, cue.NewSimple("hue2", color.FromString(color.Blue)))
+			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("red")))
+			newCues = append(newCues, cue.NewSimple("hue2", color.GetRGBFromString("blue")))
 		}
 		if t.id == 2 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Green)))
+			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("green")))
 		}
 		if t.id == 3 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Blue)))
+			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("blue")))
 		}
 		if t.id == 4 {
-			newCues = append(newCues, cue.NewSimple("hue1", color.FromString(color.Black)))
-			newCues = append(newCues, cue.NewSimple("hue2", color.FromString(color.Black)))
+			newCues = append(newCues, cue.NewSimple("hue1", color.GetRGBFromString("black")))
+			newCues = append(newCues, cue.NewSimple("hue2", color.GetRGBFromString("black")))
 		}
 
 		for _, x := range newCues {

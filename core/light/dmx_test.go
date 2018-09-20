@@ -52,8 +52,8 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 		fields fields
 		color  color.RGB
 	}{
-		{"setLightToGreen", fields{Profile: "a", Universe: 4}, color.GetRGBFromHex("#00FF00")},
-		{"withOffsetStartAddress", fields{Profile: "a", Universe: 4, StartAddress: 10}, color.GetRGBFromHex("#00FF00")},
+		{"setLightToGreen", fields{Profile: "a", Universe: 4}, color.GetRGBFromString("#00FF00")},
+		{"withOffsetStartAddress", fields{Profile: "a", Universe: 4, StartAddress: 10}, color.GetRGBFromString("#00FF00")},
 	}
 
 	DMXProfilesByName = make(map[string]dmxProfile)
