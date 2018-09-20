@@ -107,7 +107,7 @@ func (d *DMXLight) SetState(ctx context.Context, target State) {
 	for x := 0; x < numSteps; x++ {
 		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)
 		//keep state updated:
-		d.blindlySetRGBToStateAndDMX(ctx, color.GetRGBFromColorful(interpolated))
+		d.blindlySetRGBToStateAndDMX(ctx, interpolated)
 
 		time.Sleep(tickIntervalFadeInterpolation)
 	}

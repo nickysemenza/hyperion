@@ -105,7 +105,7 @@ func hexFade(c *gin.Context) {
 
 	for i := 0; i < blocks; i++ {
 		eachColor := rgb1.GetInterpolatedFade(rgb2, i, blocks)
-		draw.Draw(img, image.Rect(i*blockw, 0, (i+1)*blockw, blockw), &image.Uniform{eachColor}, image.ZP, draw.Src)
+		draw.Draw(img, image.Rect(i*blockw, 0, (i+1)*blockw, blockw), &image.Uniform{eachColor.AsColorful()}, image.ZP, draw.Src)
 	}
 
 	buffer := new(bytes.Buffer)
