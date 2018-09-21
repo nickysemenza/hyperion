@@ -39,7 +39,7 @@ var cmdServer = &cobra.Command{
 		fmt.Println("Running Server, version:" + config.GetVersion())
 		light.ReadLightConfigFromFile("./core/light/testconfig.yaml") //TODO: move to viper setup
 
-		server.Run(context.WithValue(context.Background(), config.ContextKeyServer, config.LoadServer()))
+		server.Run(config.LoadServer().InjectIntoContext(context.Background()))
 	},
 }
 

@@ -21,6 +21,11 @@ func GetServerConfig(ctx context.Context) *Server {
 	return ctx.Value(ContextKeyServer).(*Server)
 }
 
+//InjectIntoContext injects Server config into a provided ctx
+func (s *Server) InjectIntoContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ContextKeyServer, s)
+}
+
 //Server represents server config
 type Server struct {
 	Inputs struct {
@@ -60,6 +65,14 @@ type Server struct {
 		FadeInterpolationTick time.Duration
 		CueBackoff            time.Duration
 	}
+	Triggers []Trigger
+}
+
+//Trigger holds configuration for a trigger
+type Trigger struct {
+	ID      int
+	Source  string
+	Command string
 }
 
 //GetClientConfig extracts Client config from context
@@ -136,5 +149,7 @@ func LoadServer() *Server {
 	viper.SetDefault("timings.fade-cue-backoff", time.Millisecond*25)
 	c.Timings.CueBackoff = viper.GetDuration("timings.fade-cue-backoff")
 
+	//triggers
+	err = viper.UnmarshalKey("triggers", &c.Triggers)
 	return &c
 }

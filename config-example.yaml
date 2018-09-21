@@ -1,9 +1,10 @@
+# system config and tuning
 inputs:
   rpc:
     address: ":8888"
   http:
     address: ":8080"
-    ws-tick: 50ms
+    ws-tick: 200ms
   homekit:
     pin: "10000000"
 outputs:
@@ -19,3 +20,12 @@ tracing:
 timings:
   fade-interpolation-tick: 30ms
   cue-backoff: 50ms
+
+# more user specific config - things that will change more frequently
+triggers:
+  - command: set(hue2:blue:1000)
+    source: "homekit-switch"
+    id: 4
+  - command: set(hue1:red:1000)
+    source: "homekit-switch"
+    id: 4

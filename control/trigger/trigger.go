@@ -3,8 +3,11 @@ package trigger
 import (
 	"context"
 
+	opentracing "github.com/opentracing/opentracing-go"
+
 	log "github.com/sirupsen/logrus"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
 )
 
@@ -20,29 +23,20 @@ func Action(ctx context.Context, source string, id int) {
 
 func process(ctx context.Context, t trigger) {
 
-	var newCues []cue.Cue
+	span, ctx := opentracing.StartSpanFromContext(ctx, "process trigger")
+	defer span.Finish()
+	span.LogKV("trigger", t)
+	triggerConf := config.GetServerConfig(ctx).Triggers
 	log.Printf("new trigger! %v\n", t)
-	if t.id == 1 {
-		c1, _ := cue.NewFromCommand("set(hue1:red:1000)")
-		c2, _ := cue.NewFromCommand("set(hue2:blue:1000)")
-		newCues = append(newCues, *c1, *c2)
-	}
-	if t.id == 2 {
-		c1, _ := cue.NewFromCommand("set(hue1:green:1000)")
-		newCues = append(newCues, *c1)
-	}
-	if t.id == 3 {
-		c1, _ := cue.NewFromCommand("set(hue1:blue:1000)")
-		newCues = append(newCues, *c1)
-	}
-	if t.id == 4 {
-		c1, _ := cue.NewFromCommand("set(hue1:black:1000)")
-		c2, _ := cue.NewFromCommand("set(hue2:black:1000)")
-		newCues = append(newCues, *c1, *c2)
-	}
-
-	for _, x := range newCues {
-		stack := cue.GetCueMaster().GetDefaultCueStack()
-		stack.EnQueueCue(x)
+	for _, each := range triggerConf {
+		if each.ID == t.id && each.Source == t.source {
+			if c, err := cue.NewFromCommand(each.Command); err != nil {
+				log.Errorf("failed to build command from trigger, trigger=%v, command=%v", t, each.Command)
+			} else {
+				stack := cue.GetCueMaster().GetDefaultCueStack()
+				stack.EnQueueCue(*c)
+			}
+			// TODO: require one command per trigger, return here
+		}
 	}
 }
