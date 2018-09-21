@@ -10,6 +10,7 @@ export default function apiFetch(endpoint, options = {}) {
 
 const WS_TYPE_LIGHT_LIST = 'LIGHT_LIST';
 const WS_TYPE_CUEMASTER = 'CUE_MASTER';
+export const WS_META_OPEN = 'META_OPEN';
 export const receiveSocketData = json => {
   // console.log("received socket data", json);
   let { data, type } = json;
@@ -23,6 +24,11 @@ export const receiveSocketData = json => {
       return {
         type: RECEIVE_CUE_MASTER,
         cuemaster: data
+      };
+    case WS_META_OPEN:
+      return {
+        type: WS_META_OPEN,
+        open: data
       };
     default:
       return { type: null };

@@ -7,18 +7,23 @@ const SampleBox = styled.div.attrs({
     backgroundColor: color
   })
 })`
-  width: 50px;
-  padding: 50px;
+  width: 20px;
+  padding: 20px;
 `;
 
-const LightState = ({ s, name }) => {
+export const ColorBox = ({ state }) => {
+  if (state === undefined) return null;
+  let { rgb } = state;
+  return <SampleBox color={rgbToHex(rgb.r, rgb.g, rgb.b)} />;
+};
+
+export const LightState = ({ s, name }) => {
   if (s === undefined) return null;
   let { rgb, ...others } = s;
   return (
     <div>
       <SampleBox color={rgbToHex(rgb.r, rgb.g, rgb.b)} />
-      <pre>{JSON.stringify(others)}</pre>
+      <code>{JSON.stringify(others)}</code>
     </div>
   );
 };
-export default LightState;

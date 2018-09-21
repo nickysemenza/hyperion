@@ -18,3 +18,7 @@ export const rgbToHex = (r, g, b, withoutPound = false) =>
   componentToHex(r) +
   componentToHex(g) +
   componentToHex(b);
+
+export const isRGBDark = (r, g, b) =>
+  //calculate perceptive luminance
+  r * 0.299 + g * 0.587 + b * 0.114 / 255 > 0.5;

@@ -1,10 +1,11 @@
-import React from "react";
-import styled from "styled-components";
-import { rgbToHex } from "../utils";
+import React from 'react';
+import styled from 'styled-components';
+import { rgbToHex, isRGBDark } from '../utils';
 
-const COLOR_PROCESSED = "#B360E4";
-const COLOR_ENQUEUED = "#008AFF";
-const COLOR_ACTIVE = "#56D868";
+const COLOR_PROCESSED = '#2c3e50';
+const COLOR_ENQUEUED = '#2980b9';
+const COLOR_ACTIVE = '#2ecc71';
+const COLOR_WAIT = '#e74c3c';
 export const CueFrameWrapper = styled.div`
   display: flex;
 `;
@@ -12,55 +13,62 @@ export const CueFrameWrapper = styled.div`
 export const CueTable = styled.div`
   display: flex;
   border: 1px solid black;
+  overflow-x: auto;
 `;
 export const CueTableCol = styled.div`
   flex-direction: column;
 `;
 
-const TIME_SCALE = 0.3;
-
-const ColorPreview = styled.div.attrs({
-  style: ({ hex }) => ({
-    backgroundColor: hex
-  })
-})`
-  min-width: 15px;
-  width: 15px;
-  min-height: 15px;
-  height: 15px;
-`;
+// const ColorPreview = styled.div.attrs({
+//   style: ({ hex }) => ({
+//     backgroundColor: hex
+//   })
+// })`
+//   min-width: 15px;
+//   width: 15px;
+//   min-height: 15px;
+//   height: 15px;
+// `;
 
 const CueFrameInner = styled.div.attrs({
-  style: ({ duration }) => ({
-    width: `${duration * TIME_SCALE}px`,
-    minWidth: `${duration * TIME_SCALE}px`
+  style: ({ width, hex, contrastingTextColor }) => ({
+    width: `${width}px`,
+    minWidth: `${width}px`,
+    backgroundColor: hex,
+    color: contrastingTextColor
   })
 })`
-  height: 70px;
+  height: 33px;
   border: 1px solid black;
-  padding: 5px;
+  padding: 3px;
+  font-size: 12px;
 `;
 
 export const CueFrame = ({ ...props }) => {
   let { rgb } = props.action.new_state;
-  let hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  let { r, g, b } = rgb;
+
+  props.hex = rgbToHex(r, g, b);
+  props.contrastingTextColor = isRGBDark(r, g, b) ? '#292937' : '#F7F7F7';
   return (
     <CueFrameInner {...props}>
-      {props.duration} ms (F:{props.frameId} | A:{props.actionId}) <br />
-      {props.action.light_name} <ColorPreview hex={hex} />
+      {props.duration} ms {' | '}
+      {props.debug ? ` (F:${props.frameId} | A:${props.actionId}) | ` : null}
+      <b>{props.action.light_name}</b>
+      {/* <ColorPreview hex={hex} /> */}
     </CueFrameInner>
   );
 };
 
 const CueFrameWaitInner = styled.div.attrs({
-  style: ({ duration }) => ({
-    width: `${duration * TIME_SCALE}px`,
-    minWidth: `${duration * TIME_SCALE}px`
+  style: ({ width }) => ({
+    width: `${width}px`,
+    minWidth: `${width}px`
   })
 })`
-  height: 70px;
+  height: 33px;
   border: 1px solid black;
-  background-color: #f96f3a;
+  background-color: ${COLOR_WAIT};
   padding: 5px;
 `;
 export const CueFrameWait = ({ ...props }) => (
@@ -70,10 +78,10 @@ export const CueFrameWait = ({ ...props }) => (
 const CueLabelInner = styled.div.attrs({
   style: ({ numActions, status }) => {
     let statusColor = COLOR_ENQUEUED;
-    if (status === "active") statusColor = COLOR_ACTIVE;
-    else if (status === "processed") statusColor = COLOR_PROCESSED;
+    if (status === 'active') statusColor = COLOR_ACTIVE;
+    else if (status === 'processed') statusColor = COLOR_PROCESSED;
     return {
-      height: `${numActions * 70 + 20}px`,
+      height: `${numActions * 33 + 16}px`,
       backgroundColor: statusColor
     };
   }
@@ -89,27 +97,29 @@ const CueLabelInner = styled.div.attrs({
 `;
 
 export const CueLabel = ({ ...props }) => {
-  let { id, duration, duration_drift_ms, cue } = props;
+  let { id, duration, duration_drift_ms, cue, debug } = props;
   return (
     <CueLabelInner {...props}>
       # {id} <br />
-      {`${duration} ms`}{" "}
-      {cue.status === "active"
+      {`${duration} ms`}{' '}
+      {cue.status === 'active'
         ? `${(cue.elapsed_ms / cue.expected_duration_ms * 100).toFixed(1)} %`
         : null}
-      <i>{(duration_drift_ms && `(+${duration_drift_ms} ms)`) || null}</i>
+      <i>
+        {(debug && duration_drift_ms && `(+${duration_drift_ms} ms)`) || null}
+      </i>
     </CueLabelInner>
   );
 };
 
 const ProgressInner = styled.div.attrs({
-  style: ({ duration, color }) => ({
-    width: `${duration * TIME_SCALE}px`,
-    minWidth: `${duration * TIME_SCALE}px`,
+  style: ({ width, color }) => ({
+    width: `${width}px`,
+    minWidth: `${width}px`,
     backgroundColor: color
   })
 })`
-  height: 20px;
+  height: 16px;
   border: 1px solid black;
 `;
 export const Progress = ({ ...props }) => {
@@ -117,11 +127,16 @@ export const Progress = ({ ...props }) => {
   let { elapsed_ms, expected_duration_ms, status } = cue;
   let duration = 0;
   let color = COLOR_PROCESSED;
-  if (status === "active") {
+  if (status === 'active') {
     duration = Math.min(elapsed_ms, expected_duration_ms);
     color = COLOR_ACTIVE;
   }
-  if (status === "processed") duration = expected_duration_ms;
+  if (status === 'processed') duration = expected_duration_ms;
 
-  return <ProgressInner duration={duration} color={color} />;
+  return (
+    <ProgressInner
+      width={props.scaleDurationToUIWidth(duration)}
+      color={color}
+    />
+  );
 };

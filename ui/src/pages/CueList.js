@@ -11,11 +11,25 @@ import {
   Progress
 } from '../components/Cue';
 import { bindActionCreators } from 'redux';
-import { Header } from 'semantic-ui-react';
+import { Header, Button, Icon, Divider } from 'semantic-ui-react';
 class cueList extends Component {
+  state = {
+    scale: 0.8,
+    debug: false
+  };
   componentDidMount() {
     this.props.fetchCueMaster();
   }
+  scaleDurationToUIWidth = duration => duration * this.state.scale;
+
+  changeZoom = direction => {
+    this.setState({
+      scale: this.state.scale * (direction === 'in' ? 1.2 : 0.8)
+    });
+  };
+  toggleDebug = () => {
+    this.setState({ debug: !this.state.debug });
+  };
 
   render() {
     let mainStack = this.props.stacks[0];
@@ -26,6 +40,7 @@ class cueList extends Component {
 
     let all = {};
     let cuesById = {};
+    if (!mainStack.processed_cues) mainStack.processed_cues = [];
 
     let cueList = mainStack.processed_cues.concat(
       mainStack.cues || [],
@@ -53,10 +68,12 @@ class cueList extends Component {
           tmp['items'].push(
             <CueFrame
               action={action}
+              width={this.scaleDurationToUIWidth(action.action_duration_ms)}
               key={c.id + '-' + z + '-' + x}
               duration={action.action_duration_ms}
               frameId={f.id}
               actionId={action.id}
+              debug={this.state.debug}
             />
           );
           all[c.id][x] = tmp;
@@ -72,7 +89,13 @@ class cueList extends Component {
             let tmp = {};
             Object.assign(tmp, all[c.id][x]);
             tmp['length_ms'] += padding;
-            tmp['items'].push(<CueFrameWait key={x} duration={padding} />);
+            tmp['items'].push(
+              <CueFrameWait
+                key={x}
+                duration={padding}
+                width={this.scaleDurationToUIWidth(padding)}
+              />
+            );
             all[c.id][x] = tmp;
           }
         });
@@ -81,7 +104,26 @@ class cueList extends Component {
 
     return (
       <div>
-        <Header content={'cues'} />
+        <Header
+          as="h2"
+          content="Cues"
+          subheader="View and control the cuestack"
+          icon="play circle outline"
+          dividing
+        />
+        {/* zoom buttons */}
+        <Button.Group>
+          <Button onClick={() => this.changeZoom('out')} icon>
+            <Icon name="zoom-out" />
+          </Button>
+          <Button onClick={() => this.changeZoom('in')} icon>
+            <Icon name="zoom-in" />
+          </Button>
+          <Button toggle active={this.state.debug} onClick={this.toggleDebug}>
+            debug
+          </Button>
+        </Button.Group>
+        <Divider />
         <CueTable>
           <CueTableCol>
             {cueList.map(c => {
@@ -98,6 +140,7 @@ class cueList extends Component {
                   cue={c}
                   duration={c.expected_duration_ms}
                   duration_drift_ms={c.duration_drift_ms}
+                  debug={this.state.debug}
                 />
               );
             })}
@@ -107,7 +150,10 @@ class cueList extends Component {
               return (
                 <div>
                   <CueFrameWrapper key={k + '-2'}>
-                    <Progress cue={cuesById[parseInt(k, 10)]} />
+                    <Progress
+                      cue={cuesById[parseInt(k, 10)]}
+                      scaleDurationToUIWidth={this.scaleDurationToUIWidth}
+                    />
                   </CueFrameWrapper>
                   {all[k].map((item, x) => (
                     <CueFrameWrapper key={x}> {item.items}</CueFrameWrapper>

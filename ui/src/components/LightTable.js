@@ -1,5 +1,5 @@
 import React from 'react';
-import LightState from '../components/LightState';
+import { ColorBox } from '../components/LightState';
 import { Table } from 'semantic-ui-react';
 import { getLightType } from '../utils';
 const LightTable = ({ lights }) => {
@@ -12,10 +12,13 @@ const LightTable = ({ lights }) => {
         <Table.Cell>{name}</Table.Cell>
         <Table.Cell>{type}</Table.Cell>
         <Table.Cell>
-          <pre>{JSON.stringify(meta, null, 2)}</pre>
+          <code>{JSON.stringify(meta, null, 2)}</code>
         </Table.Cell>
         <Table.Cell>
-          <LightState s={state} name={name} />
+          <ColorBox state={state} />
+        </Table.Cell>
+        <Table.Cell>
+          <code>{JSON.stringify(state)}</code>
         </Table.Cell>
       </Table.Row>
     );
@@ -23,12 +26,13 @@ const LightTable = ({ lights }) => {
 
   return (
     <div>
-      <Table celled>
+      <Table singleLine>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>Name</Table.HeaderCell>
             <Table.HeaderCell>Type</Table.HeaderCell>
             <Table.HeaderCell>Meta</Table.HeaderCell>
+            <Table.HeaderCell>Color</Table.HeaderCell>
             <Table.HeaderCell>State</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
