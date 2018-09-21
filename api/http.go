@@ -38,11 +38,13 @@ func aa(b string) func(*gin.Context) {
 func debug(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
 	debugData := struct {
-		Config *config.Server       `json:"config"`
-		Hues   light.DiscoveredHues `json:"discovered_hues"`
+		Config  *config.Server       `json:"config"`
+		Hues    light.DiscoveredHues `json:"discovered_hues"`
+		Version string               `json:"version"`
 	}{
-		Config: config.GetServerConfig(ctx),
-		Hues:   light.GetDiscoveredHues(ctx),
+		Config:  config.GetServerConfig(ctx),
+		Hues:    light.GetDiscoveredHues(ctx),
+		Version: config.GetVersion(),
 	}
 
 	c.JSON(200, debugData)
