@@ -173,7 +173,11 @@ func ServeHTTP(ctx context.Context) {
 		log.Info("http is not enabled")
 		return
 	}
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.LoggerWithWriter(gin.DefaultWriter, "/_metrics"))
+
+	// Recovery middleware recovers from any panics and writes a 500 if there was one.
+	router.Use(gin.Recovery())
 
 	//setup CORS
 	corsConfig := cors.DefaultConfig()

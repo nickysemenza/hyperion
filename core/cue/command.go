@@ -3,7 +3,6 @@ package cue
 import (
 	"errors"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -108,13 +107,13 @@ func processSetCommand(cmd string) (*Cue, error) {
 		for x := 0; x < numLights; x++ {
 			action := FrameAction{}
 			action.LightName = lightList[x]
-			timeAsInt, err := strconv.Atoi(timeList[x])
+			duration, err := time.ParseDuration(timeList[x])
 			if err != nil {
 				return nil, errorInvalidTime
 			}
 			action.NewState = light.State{
 				RGB:      color.GetRGBFromString(colorList[x]),
-				Duration: time.Millisecond * time.Duration(timeAsInt),
+				Duration: duration,
 			}
 			frame.Actions = append(frame.Actions, action)
 		}

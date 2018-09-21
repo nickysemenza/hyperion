@@ -21,9 +21,9 @@ func TestCommand(t *testing.T) {
 		{"set()", nil, errorWrongPartCount},
 		{"set(a:b)", nil, errorWrongPartCount},
 		{"set(a:b:)", nil, errorWrongPartCount},
-		{"set(light1:#00FF00,#0000FF:1000)", nil, errorPartSizeMismatch},
-		{"set(light1:#00FF00:1 second)", nil, errorInvalidTime},
-		{"set(light1:#00FF00:1000)", &Cue{Frames: []Frame{
+		{"set(light1:green,#0000FF:1000)", nil, errorPartSizeMismatch},
+		{"set(light1:green:1 second)", nil, errorInvalidTime},
+		{"set(light1:green:1s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
@@ -34,7 +34,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"set(light1:#00FF00:1000|light1:#0000FF:1000)", &Cue{Frames: []Frame{
+		{"set(light1:#00FF00:1s|light1:#0000FF:1s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
@@ -53,7 +53,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"set(light1,light2:#00FF00,#FF0000:1000,2000)", &Cue{Frames: []Frame{
+		{"set(light1,light2:#00FF00,#FF0000:1s,2.2s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				{
 					LightName: "light1",
@@ -65,19 +65,19 @@ func TestCommand(t *testing.T) {
 				{
 					LightName: "light2",
 					NewState: light.State{
-						Duration: time.Duration(time.Second * 2),
+						Duration: time.Duration(time.Millisecond * 2200),
 						RGB:      color.RGB{R: 255},
 					},
 				},
 			}},
 		},
 		}, nil},
-		{"cycle(light1:2s)", &Cue{Frames: []Frame{
+		{"cycle(light1:500ms)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
 					NewState: light.State{
-						Duration: time.Duration(time.Second) * 2,
+						Duration: time.Duration(time.Second) / 2,
 						RGB:      color.RGB{G: 255},
 					}},
 			}},

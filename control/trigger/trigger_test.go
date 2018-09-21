@@ -13,7 +13,7 @@ func TestTrigger(t *testing.T) {
 	//just smoke test for now, make sure channels don't cause deadlock or anything
 	config := config.Server{
 		Triggers: []config.Trigger{
-			{ID: 1, Source: "foo", Command: "set(hue2:blue:1000)"},
+			{ID: 1, Source: "foo", Command: "set(hue2:blue:1s)"},
 			{ID: 2, Source: "bar", Command: "bogus"},
 		},
 	}
