@@ -18,6 +18,7 @@ import (
 	"github.com/nickysemenza/hyperion/util/tracing"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	colorful "github.com/lucasb-eyer/go-colorful"
@@ -191,6 +192,7 @@ func ServeHTTP(ctx context.Context) {
 	p.Use(router)
 
 	//setup routes
+	router.Use(static.Serve("/", static.LocalFile("./ui/build", false)))
 	router.GET("/_metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/lights", getLightInventory)
 	router.POST("cues", createCue)

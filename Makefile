@@ -1,5 +1,5 @@
 GIT_COMMIT := $(shell git rev-parse --short HEAD)
-GOBUILD=go build -ldflags "-X github.com/nickysemenza/hyperion/core/config.GitCommit=${GIT_COMMIT}"
+GOBUILD= CGO_ENABLED=0 go build -ldflags "-X github.com/nickysemenza/hyperion/core/config.GitCommit=${GIT_COMMIT}" -o hyperion
 
 build:
 	$(GOBUILD)
@@ -20,3 +20,10 @@ proto:
 	protoc --go_out=plugins=grpc:api proto/*.proto
 godepgraph:
 	graphpkg -match 'nickysemenza/hyperion' github.com/nickysemenza/hyperion
+
+IMAGE=nicky/hyperion
+
+docker-build:
+	docker build -t $(IMAGE) .
+docker-run:
+	docker run -p 8080:8080 -e "A=b" $(IMAGE) 

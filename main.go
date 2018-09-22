@@ -37,7 +37,7 @@ var cmdServer = &cobra.Command{
 	Short: "Run the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Running Server, version:" + config.GetVersion())
-		light.ReadLightConfigFromFile("./core/light/testconfig.yaml") //TODO: move to viper setup
+		light.ReadLightConfigFromFile("lights.yaml") //TODO: move to viper setup
 
 		server.Run(config.LoadServer().InjectIntoContext(context.Background()))
 	},
