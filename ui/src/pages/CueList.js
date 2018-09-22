@@ -15,7 +15,9 @@ import { Header, Button, Icon, Divider } from 'semantic-ui-react';
 class cueList extends Component {
   state = {
     scale: 0.8,
-    debug: false
+    debug: false,
+    autoZoom: true,
+    longestCueDuration: 0.0
   };
   componentDidMount() {
     this.props.fetchCueMaster();
@@ -23,13 +25,37 @@ class cueList extends Component {
   scaleDurationToUIWidth = duration => duration * this.state.scale;
 
   changeZoom = direction => {
+    //100px for the left column, 40px padding on either size, 5px buffer
+    let cueDisplayWidth = this.props.windowDimensions.width - 185;
+    if (direction === 'auto') {
+      this.setState({
+        scale: cueDisplayWidth / this.state.longestCueDuration,
+        autoZoom: true
+      });
+      return;
+    }
     this.setState({
-      scale: this.state.scale * (direction === 'in' ? 1.2 : 0.8)
+      scale: this.state.scale * (direction === 'in' ? 1.2 : 0.8),
+      autoZoom: false
     });
   };
   toggleDebug = () => {
     this.setState({ debug: !this.state.debug });
   };
+  setLongestCueDuration = duration => {
+    if (duration > this.state.longestCueDuration)
+      this.setState({ longestCueDuration: duration });
+  };
+
+  componentDidUpdate = (prevProps, prevState, snapshot) => {
+    let oldStack = this.getMainStack(prevProps.stacks);
+    let newStack = this.getMainStack(this.props.stacks);
+    if (oldStack && newStack && oldStack !== newStack && this.state.autoZoom)
+      this.changeZoom('auto');
+  };
+
+  //todo: move to selector
+  getMainStack = stacks => stacks && stacks[0] && stacks[0].processed_cues;
 
   render() {
     let mainStack = this.props.stacks[0];
@@ -79,10 +105,13 @@ class cueList extends Component {
           all[c.id][x] = tmp;
         });
         //todo: add padding
+        //figure out how long the whole box needs to be
         let targetLen = all[c.id][0]['length_ms'];
+        this.setLongestCueDuration(targetLen);
         all[c.id].forEach(
           x => (targetLen = Math.max(targetLen, x['length_ms']))
         );
+        //add padding where necessary
         all[c.id].forEach((item, x) => {
           let padding = targetLen - item['length_ms'];
           if (padding !== 0) {
@@ -119,7 +148,15 @@ class cueList extends Component {
           <Button onClick={() => this.changeZoom('in')} icon>
             <Icon name="zoom-in" />
           </Button>
-          <Button toggle active={this.state.debug} onClick={this.toggleDebug}>
+          <Button
+            toggle
+            active={this.state.autoZoom}
+            onClick={() => this.changeZoom('auto')}
+            icon
+          >
+            <Icon name="magic" />
+          </Button>
+          <Button active={this.state.debug} onClick={this.toggleDebug}>
             debug
           </Button>
         </Button.Group>
@@ -169,7 +206,8 @@ class cueList extends Component {
 }
 
 function mapStateToProps(state) {
-  return { stacks: state.cues.cue_stacks };
+  let { windowDimensions } = state.system;
+  return { stacks: state.cues.cue_stacks, windowDimensions };
 }
 
 const mapDispatchToProps = dispatch => {

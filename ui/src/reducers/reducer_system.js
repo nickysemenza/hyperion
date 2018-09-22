@@ -1,6 +1,7 @@
-import { WS_META_OPEN } from '../actions/index';
+import { WS_META_OPEN, UPDATE_WINDOW_DIMENSIONS } from '../actions/index';
 const INITIAL_STATE = {
-  ws_open: false
+  ws_open: false,
+  windowDimensions: { width: 0, height: 0 }
 };
 
 export default function(state = INITIAL_STATE, action) {
@@ -9,6 +10,13 @@ export default function(state = INITIAL_STATE, action) {
       return {
         ...state,
         ws_open: action.open
+      };
+    case UPDATE_WINDOW_DIMENSIONS:
+      return {
+        ...state,
+        windowDimensions: {
+          ...action
+        }
       };
     default:
       return state;
