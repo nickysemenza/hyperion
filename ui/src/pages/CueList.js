@@ -137,7 +137,7 @@ class cueList extends Component {
           as="h2"
           content="Cues"
           subheader="View and control the cuestack"
-          icon="play circle outline"
+          icon="play circle outline blue"
           dividing
         />
         {/* zoom buttons */}

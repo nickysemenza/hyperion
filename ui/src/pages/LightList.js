@@ -12,7 +12,7 @@ class LightList extends Component {
           as="h2"
           content="Lights"
           // subheader="View lights"
-          icon="lightbulb"
+          icon="lightbulb blue"
           dividing
         />
         <LightTable lights={this.props.lights} />
