@@ -20,6 +20,7 @@ jobs:
       - checkout:
           path: ~/hyperion
       - run: yarn install
+      - run: yarn run build-css
       - run: yarn test -- --coverage
       - run: bash <(curl -s https://codecov.io/bash)
       - store_test_results:

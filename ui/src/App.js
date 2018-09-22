@@ -6,6 +6,7 @@ import LightList from './pages/LightList';
 import CueList from './pages/CueList';
 import Nav from './components/Nav';
 import WS from './components/WS';
+import Helpers from './components/Helpers';
 import { Container } from 'semantic-ui-react';
 import ReduxToastr from 'react-redux-toastr';
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/cues" component={CueList} />
         </Switch>
         <WS />
+        <Helpers />
       </Container>
     </div>
   </Router>

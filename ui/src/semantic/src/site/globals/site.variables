@@ -1,0 +1,14 @@
+/*******************************
+     User Global Variables
+     https://flatuicolors.com/palette/defo
+*******************************/
+@emSize: 13px;
+@fontSize: 13px;
+@fontName: 'Montserrat';
+
+
+@red: #c0392b;
+@green: #27ae60;
+@blue: #2980b9;
+@black: #2c3e50;
+@white: #ecf0f1;

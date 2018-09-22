@@ -34,3 +34,12 @@ export const receiveSocketData = json => {
       return { type: null };
   }
 };
+
+export const UPDATE_WINDOW_DIMENSIONS = 'UPDATE_WINDOW_DIMENSIONS';
+export const updateWindowDimensions = (width, height) => {
+  return {
+    type: UPDATE_WINDOW_DIMENSIONS,
+    width,
+    height
+  };
+};
