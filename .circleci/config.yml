@@ -34,7 +34,8 @@ jobs:
       - deploy:
           name: Push application Docker image
           command: |
-            echo "todo"
+            docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASS         # (5)
+            docker push nicky/hyperion:latest
             docker run --entrypoint="./hyperion" nicky/hyperion
   test-server:
     docker:
