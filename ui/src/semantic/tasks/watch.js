@@ -134,17 +134,17 @@ module.exports = function(callback) {
           .pipe(gulpif(config.hasPermission, chmod(config.permission)));
 
         // use 2 concurrent streams from same pipe
-        uncompressedStream = stream.pipe(clone());
+        // uncompressedStream = stream.pipe(clone());
         compressedStream = stream.pipe(clone());
 
-        uncompressedStream
-          .pipe(plumber())
-          .pipe(replace(assets.source, assets.uncompressed))
-          .pipe(gulp.dest(output.uncompressed))
-          .pipe(print(log.created))
-          .on('end', function() {
-            gulp.start('package uncompressed css');
-          });
+        // uncompressedStream
+        //   .pipe(plumber())
+        //   .pipe(replace(assets.source, assets.uncompressed))
+        //   .pipe(gulp.dest(output.uncompressed))
+        //   .pipe(print(log.created))
+        //   .on('end', function() {
+        //     gulp.start('package uncompressed css');
+        //   });
 
         compressedStream = stream
           .pipe(plumber())
@@ -166,23 +166,23 @@ module.exports = function(callback) {
       Watch JS
   ---------------*/
 
-  gulp.watch([source.definitions + '/**/*.js'], function(file) {
-    gulp
-      .src(file.path)
-      .pipe(plumber())
-      .pipe(replace(comments.license.in, comments.license.out))
-      .pipe(gulpif(config.hasPermission, chmod(config.permission)))
-      .pipe(gulp.dest(output.uncompressed))
-      .pipe(print(log.created))
-      .pipe(uglify(settings.uglify))
-      .pipe(rename(settings.rename.minJS))
-      .pipe(gulp.dest(output.compressed))
-      .pipe(print(log.created))
-      .on('end', function() {
-        gulp.start('package compressed js');
-        gulp.start('package uncompressed js');
-      });
-  });
+  // gulp.watch([source.definitions + '/**/*.js'], function(file) {
+  //   gulp
+  //     .src(file.path)
+  //     .pipe(plumber())
+  //     .pipe(replace(comments.license.in, comments.license.out))
+  //     .pipe(gulpif(config.hasPermission, chmod(config.permission)))
+  //     .pipe(gulp.dest(output.uncompressed))
+  //     .pipe(print(log.created))
+  //     .pipe(uglify(settings.uglify))
+  //     .pipe(rename(settings.rename.minJS))
+  //     .pipe(gulp.dest(output.compressed))
+  //     .pipe(print(log.created))
+  //     .on('end', function() {
+  //       gulp.start('package compressed js');
+  //       gulp.start('package uncompressed js');
+  //     });
+  // });
 
   /*--------------
     Watch Assets
