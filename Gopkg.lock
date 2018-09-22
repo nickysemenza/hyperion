@@ -108,6 +108,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:2b0df69b0d482719446858d567d12f4565d1908ff563db27250cb2cde7f461ec"
+  name = "github.com/gin-contrib/static"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8cbcdde04781ade853025b0ff7001aaf0ed06150"
+
+[[projects]]
+  branch = "master"
   digest = "1:2512ffe1a5325870c95033ff962b156ffea66e480a13a9c45a32c53443e77782"
   name = "github.com/gin-gonic/gin"
   packages = [
@@ -626,6 +634,7 @@
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
     "github.com/gin-contrib/cors",
+    "github.com/gin-contrib/static",
     "github.com/gin-gonic/gin",
     "github.com/golang/protobuf/proto",
     "github.com/gorilla/websocket",
