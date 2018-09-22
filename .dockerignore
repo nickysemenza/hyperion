@@ -1,0 +1,5 @@
+# downloaded content
+vendor/*
+ui/node_modules/*
+#binaries
+hyperion

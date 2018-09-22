@@ -5,18 +5,18 @@ inputs:
   http:
     address: ":8080"
     ws-tick: 200ms
-  homekit:
-    pin: "10000000"
+  # homekit:
+  #   pin: "10000000"
 outputs:
-  ola:
-    address: "localhost:9010"
-    tick: 40ms
+  # ola:
+  #   address: "localhost:9010"
+  #   tick: 40ms
   hue:
     address: "10.0.0.39"
     username: "foo"
-tracing:
-  server: "localhost:6831"
-  servicename: "hyperion-server"
+# tracing:
+#   server: "localhost:6831"
+#   servicename: "hyperion-server"
 timings:
   fade-interpolation-tick: 30ms
   cue-backoff: 50ms
