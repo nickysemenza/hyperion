@@ -36,7 +36,7 @@
     "watch-css": "cd src/semantic && gulp watch",
     "dev": "npm-run-all -p start watch-css",
     "build-css": "cd src/semantic && gulp build",
-    "build-all": "npm-run-all -p build build-css"
+    "build-all": "npm-run-all -s build-css build"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": ["prettier --single-quote --write", "git add"]

@@ -25,9 +25,21 @@ jobs:
       - run: bash <(curl -s https://codecov.io/bash)
       - store_test_results:
           path: ~/hyperion/ui
+  build-ui:
+    docker:
+      - image: node:9.3.0
+    working_directory: ~/hyperion/ui
+    steps:
+      - checkout:
+          path: ~/hyperion
+      - run: yarn install
+      - run: yarn run build-all
 workflows:
   version: 2
-  test-all:
+  build-and-deploy:
     jobs:
       - test-server
       - test-ui
+      - build-ui:
+          requires:
+            - test-ui
