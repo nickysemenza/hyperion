@@ -2,3 +2,4 @@ _homekit_data
 hyperion
 vendor/
 config.yaml
+ui/src/semantic/dist
