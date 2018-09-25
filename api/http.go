@@ -59,7 +59,10 @@ func runCommands(c *gin.Context) {
 		for _, eachCommand := range commands {
 
 			if x, err := cue.NewFromCommand(eachCommand); err != nil {
+
 				log.Println(err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
+				return
 			} else {
 				cs.EnQueueCue(*x)
 				responses = append(responses, *x)

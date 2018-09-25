@@ -16,6 +16,7 @@ var (
 	errorInvalidTime       = errors.New("command: invalid time")
 	errorMissingFunction   = errors.New("command: fn(?) is missing")
 	errorUndefinedFunction = errors.New("command: function is not defined")
+	errorWrongPartLen      = errors.New("command: wrong number of colon delimited groups")
 )
 
 //NewFromCommand returns a cue based on a command.
@@ -52,6 +53,9 @@ func NewFromCommand(cmd string) (*Cue, error) {
 func processCycleCommand(cmd string) (*Cue, error) {
 	cue := Cue{}
 	parts := strings.Split(cmd, ":")
+	if len(parts) != 2 {
+		return nil, errorWrongPartLen
+	}
 	lightList := strings.Split(parts[0], ",")
 	duration, err := time.ParseDuration(parts[1])
 	if err != nil {
@@ -64,12 +68,12 @@ func processCycleCommand(cmd string) (*Cue, error) {
 			action.LightName = lightList[y]
 
 			action.NewState = light.State{
-				RGB:      color.GetRGBFromString("#00FF00"),
+				RGB:      color.GetRGBFromString("#0000FF"),
 				Duration: duration,
 			}
 			if x == y {
 				action.NewState = light.State{
-					RGB:      color.GetRGBFromString("#00FF00"),
+					RGB:      color.GetRGBFromString("#FF0000"),
 					Duration: duration,
 				}
 			}

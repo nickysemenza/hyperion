@@ -78,7 +78,7 @@ func TestCommand(t *testing.T) {
 					LightName: "light1",
 					NewState: light.State{
 						Duration: time.Duration(time.Second) / 2,
-						RGB:      color.RGB{G: 255},
+						RGB:      color.RGB{R: 255},
 					}},
 			}},
 		},
