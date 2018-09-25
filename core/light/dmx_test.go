@@ -56,7 +56,7 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 		{"withOffsetStartAddress", fields{Profile: "a", Universe: 4, StartAddress: 10}, color.GetRGBFromString("#00FF00")},
 	}
 
-	DMXProfilesByName = make(map[string]dmxProfile)
+	DMXProfilesByName = make(DMXProfileMap)
 	DMXProfilesByName["a"] = dmxProfile{Name: "a", Channels: []string{"noop", "red", "green", "blue"}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

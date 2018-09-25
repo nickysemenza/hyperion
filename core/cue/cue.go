@@ -68,9 +68,9 @@ type Frame struct {
 
 //FrameAction is an action within a Cue(Frame) to be executed simultaneously
 type FrameAction struct {
-	NewState  light.State `json:"new_state"`
-	ID        int64       `json:"id"`
-	LightName string      `json:"light_name"`
+	NewState  light.TargetState `json:"new_state"`
+	ID        int64             `json:"id"`
+	LightName string            `json:"light_name"`
 	//TODO: add `light`
 	//TODO: add way to have a noop action (to block aka wait for time)
 }

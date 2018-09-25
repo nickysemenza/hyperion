@@ -27,7 +27,7 @@ func TestCommand(t *testing.T) {
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
-					NewState: light.State{
+					NewState: light.TargetState{
 						Duration: time.Duration(time.Second),
 						RGB:      color.RGB{G: 255},
 					}},
@@ -38,7 +38,7 @@ func TestCommand(t *testing.T) {
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
-					NewState: light.State{
+					NewState: light.TargetState{
 						Duration: time.Duration(time.Second),
 						RGB:      color.RGB{G: 255},
 					}},
@@ -46,7 +46,7 @@ func TestCommand(t *testing.T) {
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
-					NewState: light.State{
+					NewState: light.TargetState{
 						Duration: time.Duration(time.Second),
 						RGB:      color.RGB{B: 255},
 					}},
@@ -57,14 +57,14 @@ func TestCommand(t *testing.T) {
 			{Actions: []FrameAction{
 				{
 					LightName: "light1",
-					NewState: light.State{
+					NewState: light.TargetState{
 						Duration: time.Duration(time.Second),
 						RGB:      color.RGB{G: 255},
 					},
 				},
 				{
 					LightName: "light2",
-					NewState: light.State{
+					NewState: light.TargetState{
 						Duration: time.Duration(time.Millisecond * 2200),
 						RGB:      color.RGB{R: 255},
 					},
@@ -76,7 +76,7 @@ func TestCommand(t *testing.T) {
 			{Actions: []FrameAction{
 				FrameAction{
 					LightName: "light1",
-					NewState: light.State{
+					NewState: light.TargetState{
 						Duration: time.Duration(time.Second) / 2,
 						RGB:      color.RGB{R: 255},
 					}},

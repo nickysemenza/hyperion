@@ -19,7 +19,6 @@ import (
 type HueLight struct {
 	HueID int    `json:"hue_id" yaml:"hue_id"`
 	Name  string `json:"name" yaml:"name"`
-	State State  `json:"state" yaml:"state"`
 	m     sync.Mutex
 }
 
@@ -33,13 +32,8 @@ func (hl *HueLight) GetType() string {
 	return TypeHue
 }
 
-//GetState returns the light's state.
-func (hl *HueLight) GetState() *State {
-	return &hl.State
-}
-
 //SetState updates the Hue's state.
-func (hl *HueLight) SetState(ctx context.Context, s State) {
+func (hl *HueLight) SetState(ctx context.Context, s TargetState) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight SetState")
 	defer span.Finish()
 	span.SetTag("hue-id", hl.HueID)
@@ -48,7 +42,7 @@ func (hl *HueLight) SetState(ctx context.Context, s State) {
 	hl.m.Lock()
 	defer hl.m.Unlock()
 	span.LogKV("event", "acquired lock")
-	hl.State = s
+	SetCurrentState(hl.Name, s.ToState())
 	go hl.SetColor(ctx, s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
 }
 

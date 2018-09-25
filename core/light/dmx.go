@@ -29,7 +29,6 @@ type DMXLight struct {
 	StartAddress int    `json:"start_address" yaml:"start_address"`
 	Universe     int    `json:"universe" yaml:"universe"`
 	Profile      string `json:"profile" yaml:"profile"`
-	State        State  `json:"state" yaml:"state"`
 }
 
 type dmxOperation struct {
@@ -64,11 +63,6 @@ func (d *DMXLight) GetType() string {
 	return TypeDMX
 }
 
-//GetState returns the light's state.
-func (d *DMXLight) GetState() *State {
-	return &d.State
-}
-
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
 func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.RGB) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
@@ -86,15 +80,15 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.R
 		dmxOperation{universe: d.Universe, channel: gChan, value: gVal},
 		dmxOperation{universe: d.Universe, channel: bChan, value: bVal})
 
-	d.State.RGB = color
+	SetCurrentState(d.Name, State{RGB: color})
 
 }
 
 //SetState updates the light's state.
 //TODO: other properties? on/off?
-func (d *DMXLight) SetState(ctx context.Context, target State) {
+func (d *DMXLight) SetState(ctx context.Context, target TargetState) {
 	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
-	currentState := d.State
+	currentState := GetCurrentState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
 	defer span.Finish()
@@ -114,7 +108,7 @@ func (d *DMXLight) SetState(ctx context.Context, target State) {
 
 	d.blindlySetRGBToStateAndDMX(ctx, target.RGB)
 	span.LogKV("event", "finished fade interpolation")
-	d.State = target
+	SetCurrentState(d.Name, target.ToState())
 
 }
 
@@ -214,10 +208,9 @@ type DMXProfileMap map[string]dmxProfile
 var DMXProfilesByName DMXProfileMap
 
 func getDMXProfileByName(name string) *dmxProfile {
-	for _, x := range DMXProfilesByName {
-		if x.Name == name {
-			return &x
-		}
+	profile, ok := DMXProfilesByName[name]
+	if ok {
+		return &profile
 	}
 	return nil
 }
