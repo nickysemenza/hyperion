@@ -3,6 +3,7 @@ package cue
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -35,18 +36,68 @@ func TestCueFrameGetDuration(t *testing.T) {
 		}, time.Duration(0)},
 	}
 	for _, x := range tt {
-		if x.cf.GetDuration() != x.expectedDuration {
-			t.Errorf("got %d, wanted %d", x.cf.GetDuration(), x.expectedDuration)
-		}
-
+		require.Equal(t, x.expectedDuration, x.cf.GetDuration())
+		//test with real timings
 		t1 := time.Now()
 		x.cf.ProcessFrame(context.Background())
 		t2 := time.Now()
-		//7ms of padding/lenience (travis is slow)
-		assert.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
+		//7ms of padding/lenience (CI is slow)
+		require.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
+	}
+}
 
-		// t.Error(diff)
+func TestCueDurationHelpers(t *testing.T) {
+	tests := []struct {
+		c                     Cue
+		expectedDuration      time.Duration
+		expectedDurationDrift time.Duration
+	}{
+		{Cue{
+			RealDuration: time.Millisecond * 3,
+			Status:       statusProcessed,
+		}, 0, time.Millisecond * 3},
+		{Cue{
+			RealDuration: time.Millisecond * 3,
+			Status:       statusActive,
+		}, 0, 0},
+		{Cue{
+			Status:       statusProcessed,
+			RealDuration: time.Millisecond * 25,
+			Frames: []Frame{
+				{Actions: []FrameAction{
+					{NewState: light.State{Duration: time.Millisecond * 7}},
+					{NewState: light.State{Duration: time.Millisecond * 12}},
+				}},
+				{Actions: []FrameAction{
+					{NewState: light.State{Duration: time.Millisecond * 8}},
+					{NewState: light.State{Duration: time.Millisecond * 11}},
+				}},
+			},
+		}, time.Millisecond * 23, time.Millisecond * 2},
+	}
 
+	for _, tt := range tests {
+		require := require.New(t)
+		cue := &tt.c
+		require.Equal(tt.expectedDuration, cue.GetDuration())
+		require.Equal(tt.expectedDurationDrift, cue.getDurationDrift())
+
+		if cue.Status != statusActive {
+			require.Zero(cue.getElapsedTime())
+		} else {
+			cue.StartedAt = time.Now()
+			time.Sleep(time.Microsecond)
+			require.NotZero(cue.getElapsedTime())
+		}
+
+		t1 := time.Now()
+		cue.ProcessCue(context.Background())
+		t2 := time.Now()
+		//TODO: move status switching form ProcessStack to ProcessCue
+		// require.Equal(statusProcessed, cue.Status)
+
+		//7ms of padding/lenience (CI is slow)
+		require.WithinDuration(t1, t2, tt.expectedDuration+(7*time.Millisecond))
 	}
 }
 
@@ -69,6 +120,49 @@ func TestCueQueueing(t *testing.T) {
 	assert.Equal(t, cs.deQueueNextCue().Name, "c3", "queue should be FIFO")
 
 	assert.Nil(t, cs.deQueueNextCue())
+}
+
+func TestCueMarshalling(t *testing.T) {
+	require := require.New(t)
+
+	//FrameAction
+	cfa := FrameAction{NewState: light.State{Duration: time.Millisecond * 7}, ID: 1}
+	b, err := cfa.MarshalJSON()
+	require.NoError(err)
+	json := fmt.Sprintf("%s", b)
+	require.Contains(json, `"action_duration_ms":7`)
+	require.Contains(json, `"id":1`)
+
+	//Frame
+	cf := Frame{Actions: []FrameAction{
+		FrameAction{NewState: light.State{Duration: time.Millisecond * 8}, ID: 2},
+		FrameAction{NewState: light.State{Duration: time.Millisecond * 9}, ID: 3},
+	}}
+	b, err = cf.MarshalJSON()
+	require.NoError(err)
+	json = fmt.Sprintf("%s", b)
+	require.Contains(json, `"expected_duration_ms":9`)
+	require.Contains(json, `"id":2`)
+
+	//Cue
+	c := Cue{
+		Status:       statusProcessed,
+		RealDuration: time.Millisecond * 25,
+		Frames: []Frame{
+			{Actions: []FrameAction{
+				{NewState: light.State{Duration: time.Millisecond * 7}},
+				{NewState: light.State{Duration: time.Millisecond * 12}},
+			}},
+			{Actions: []FrameAction{
+				{NewState: light.State{Duration: time.Millisecond * 8}},
+				{NewState: light.State{Duration: time.Millisecond * 11}},
+			}},
+		},
+	}
+	b, err = c.MarshalJSON()
+	require.NoError(err)
+	json = fmt.Sprintf("%s", b)
+	require.Contains(json, `"duration_drift_ms":2`)
 }
 
 func BenchmarkCueFrameProcessing(b *testing.B) {
