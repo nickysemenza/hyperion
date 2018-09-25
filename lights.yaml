@@ -22,16 +22,16 @@ lights:
       universe: 1
       profile: china-par-1
     - name: par2
-      start_address: 8
+      start_address: 18
       universe: 1
       profile: china-par-1
     - name: light1
       start_address: 8
-      universe: 2
+      universe: 1
       profile: china-par-1
   generic:
     - name: generic1
-profiles:
+dmx_profiles:
   - name: china-par-1
     capabilities:
       - rgbw

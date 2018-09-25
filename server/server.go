@@ -19,6 +19,7 @@ import (
 //Run starts the server
 func Run(ctx context.Context) {
 	go tracing.InitTracer(ctx)
+	light.Initialize(ctx)
 	//Set up Homekit Server
 	go homekit.Start(ctx)
 
