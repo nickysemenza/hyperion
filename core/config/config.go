@@ -75,16 +75,22 @@ type Server struct {
 	}
 	DMXProfiles DMXProfileMap
 }
+
+//DMXProfileMap represents a map of dmx profiles
 type DMXProfileMap map[string]LightProfileDMX
 
+//LightHue holds config info for a Hue
 type LightHue struct {
 	Name  string
 	HueID int `mapstructure:"hue_id"`
 }
+
+//LightGeneric holds config info for a Generic
 type LightGeneric struct {
 	Name string
 }
 
+//LightDMX hol;ds config info for a dmx light
 type LightDMX struct {
 	Name         string
 	StartAddress int `mapstructure:"start_address"`
@@ -92,6 +98,7 @@ type LightDMX struct {
 	Profile      string
 }
 
+//LightProfileDMX holds config info for a dmx profile: channel and capability mappings
 type LightProfileDMX struct {
 	Name         string
 	Capabilities []string
