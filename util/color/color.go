@@ -58,6 +58,10 @@ func (c *RGB) AsPB() pb.RGB {
 	}
 }
 
+func (c *RGB) ToHex() string {
+	return c.AsColorful().Hex()
+}
+
 //GetRGBFromString turns a string into an RGB color
 //The input can either be hex (#00FF00) or a string (green)
 func GetRGBFromString(s string) RGB {

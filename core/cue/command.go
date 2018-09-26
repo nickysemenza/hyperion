@@ -1,11 +1,13 @@
 package cue
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 )
@@ -20,7 +22,7 @@ var (
 )
 
 //NewFromCommand returns a cue based on a command.
-func NewFromCommand(cmd string) (*Cue, error) {
+func NewFromCommand(ctx context.Context, cmd string) (*Cue, error) {
 	cmd = strings.Replace(cmd, " ", "", -1)
 
 	//extracts: `match1(match2)`
@@ -35,12 +37,17 @@ func NewFromCommand(cmd string) (*Cue, error) {
 	var cue *Cue
 	var err error
 	switch commandType {
+
 	case "set":
 		cue, err = processSetCommand(subCommand)
 	case "cycle":
 		cue, err = processCycleCommand(subCommand)
 	default:
-		err = errorUndefinedFunction
+		if userCommand, ok := config.GetServerConfig(ctx).Commands[commandType]; ok {
+			cue, err = BuildCueFromUserCommand(ctx, userCommand, subCommand)
+		} else {
+			err = errorUndefinedFunction
+		}
 	}
 
 	if err != nil {

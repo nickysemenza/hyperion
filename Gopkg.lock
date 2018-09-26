@@ -497,6 +497,27 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:8c4037cfe969b0ce37e1bd68b7dcc47b51c5ee78328b23627015af7d8bc72606"
+  name = "github.com/yuin/gluamapper"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d836955830e75240d46ce9f0e6d148d94f2e1d3a"
+
+[[projects]]
+  branch = "master"
+  digest = "1:01c635b58a702e90a93e75b9aa736c4375ce4a58c999b0073ff801c795033072"
+  name = "github.com/yuin/gopher-lua"
+  packages = [
+    ".",
+    "ast",
+    "parse",
+    "pm",
+  ]
+  pruneopts = "UT"
+  revision = "799fa34954fbf844a6c25ea3b061bfd56f73bd10"
+
+[[projects]]
+  branch = "master"
   digest = "1:8774db9c4d755ee61c5abc8570b84afc1426f00e4536e0b2f2c7c6536df1d2dd"
   name = "golang.org/x/crypto"
   packages = [
@@ -633,6 +654,7 @@
     "github.com/aybabtme/rgbterm",
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
+    "github.com/davecgh/go-spew/spew",
     "github.com/gin-contrib/cors",
     "github.com/gin-contrib/static",
     "github.com/gin-gonic/gin",
@@ -644,7 +666,6 @@
     "github.com/nickysemenza/gola",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
-    "github.com/pkg/errors",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
@@ -656,9 +677,10 @@
     "github.com/uber/jaeger-client-go",
     "github.com/uber/jaeger-client-go/config",
     "github.com/uber/jaeger-client-go/log",
+    "github.com/yuin/gluamapper",
+    "github.com/yuin/gopher-lua",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
-    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

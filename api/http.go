@@ -52,13 +52,14 @@ func debug(c *gin.Context) {
 }
 
 func runCommands(c *gin.Context) {
+	ctx := c.MustGet("ctx").(context.Context)
 	var commands []string
 	var responses []cue.Cue
 	if err := c.ShouldBindJSON(&commands); err == nil {
 		cs := cue.GetCueMaster().GetDefaultCueStack()
 		for _, eachCommand := range commands {
 
-			if x, err := cue.NewFromCommand(eachCommand); err != nil {
+			if x, err := cue.NewFromCommand(ctx, eachCommand); err != nil {
 
 				log.Println(err)
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})

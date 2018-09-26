@@ -104,3 +104,11 @@
 [[constraint]]
   branch = "master"
   name = "github.com/gin-contrib/static"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/yuin/gopher-lua"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/yuin/gluamapper"
