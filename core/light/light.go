@@ -107,7 +107,7 @@ func Initialize(ctx context.Context) error {
 	DMXProfilesByName = make(DMXProfileMap)
 	for _, item := range config.DMXProfiles {
 		//todo: use config DMXProfile instead of dmxProfile
-		DMXProfilesByName[item.Name] = dmxProfile{
+		DMXProfilesByName[item.Name] = mainConfig.LightProfileDMX{
 			Name:         item.Name,
 			Capabilities: item.Capabilities,
 			Channels:     item.Channels,

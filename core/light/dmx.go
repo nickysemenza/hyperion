@@ -35,7 +35,7 @@ type dmxOperation struct {
 	universe, channel, value int
 }
 
-func (d *DMXLight) getProfile() *dmxProfile {
+func (d *DMXLight) getProfile() *mainConfig.LightProfileDMX {
 	return getDMXProfileByName(d.Profile)
 }
 
@@ -44,7 +44,7 @@ func (d *DMXLight) getChannelIDForAttribute(attr string) int {
 	if profile == nil {
 		log.Println("cannot find profile!")
 	}
-	channelIndex := profile.getChannelIndexForAttribute(attr)
+	channelIndex := getChannelIndexForAttribute(profile, attr)
 	return d.StartAddress + channelIndex
 }
 func (d *DMXLight) getRGBChannelIDs() (int, int, int) {
@@ -185,13 +185,7 @@ func SendDMXWorker(ctx context.Context) {
 	}
 }
 
-type dmxProfile struct {
-	Name         string   `json:"name"`
-	Capabilities []string `json:"capabilities"`
-	Channels     []string `json:"channels"`
-}
-
-func (p *dmxProfile) getChannelIndexForAttribute(attrName string) int {
+func getChannelIndexForAttribute(p *mainConfig.LightProfileDMX, attrName string) int {
 
 	for i, x := range p.Channels {
 		if attrName == x {
@@ -202,12 +196,12 @@ func (p *dmxProfile) getChannelIndexForAttribute(attrName string) int {
 }
 
 //DMXProfileMap is a map of profiles
-type DMXProfileMap map[string]dmxProfile
+type DMXProfileMap map[string]mainConfig.LightProfileDMX
 
 //DMXProfilesByName holds dmx profiles
 var DMXProfilesByName DMXProfileMap
 
-func getDMXProfileByName(name string) *dmxProfile {
+func getDMXProfileByName(name string) *mainConfig.LightProfileDMX {
 	profile, ok := DMXProfilesByName[name]
 	if ok {
 		return &profile

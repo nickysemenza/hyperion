@@ -4,20 +4,21 @@ import (
 	"context"
 	"testing"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDMXAttributeChannels(t *testing.T) {
 	tt := []struct {
-		profile  dmxProfile
+		profile  config.LightProfileDMX
 		name     string
 		expected int
 	}{
-		{dmxProfile{Channels: []string{"red", "green"}}, "red", 0},
+		{config.LightProfileDMX{Channels: []string{"red", "green"}}, "red", 0},
 	}
 	for _, tc := range tt {
-		res := tc.profile.getChannelIndexForAttribute(tc.name)
+		res := getChannelIndexForAttribute(&tc.profile, tc.name)
 		if res != tc.expected {
 			t.Errorf("got channel index %d, expected %d", res, tc.expected)
 		}
@@ -57,7 +58,7 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 	}
 
 	DMXProfilesByName = make(DMXProfileMap)
-	DMXProfilesByName["a"] = dmxProfile{Name: "a", Channels: []string{"noop", "red", "green", "blue"}}
+	DMXProfilesByName["a"] = config.LightProfileDMX{Name: "a", Channels: []string{"noop", "red", "green", "blue"}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := &DMXLight{
