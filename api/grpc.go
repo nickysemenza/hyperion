@@ -43,11 +43,11 @@ func (s *Server) StreamCueMaster(in *pb.Ping, stream pb.API_StreamCueMasterServe
 
 func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServer) error {
 	for {
-		allLights := light.GetLights()
+		allLights := light.GetLightsByName()
 		var pbLights []*pb.Light
 
 		for k, v := range allLights {
-			color := v.GetState().RGB.AsPB()
+			color := light.GetCurrentState(v.GetName()).RGB.AsPB()
 			pbLights = append(pbLights, &pb.Light{
 				Name:         k,
 				Type:         v.GetType(),

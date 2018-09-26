@@ -3,8 +3,10 @@ package light
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
+	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 )
 
@@ -12,8 +14,7 @@ import (
 type Light interface {
 	GetName() string
 	GetType() string
-	SetState(context.Context, State)
-	GetState() *State
+	SetState(context.Context, TargetState)
 }
 
 //constants for the different types of lights
@@ -23,15 +24,59 @@ const (
 	TypeGeneric = "generic"
 )
 
-//State represents the state of a light, is source of truth
-type State struct {
+//TargetState represents the state of a light, is source of truth
+type TargetState struct {
 	// On   bool
-	RGB      color.RGB     `json:"rgb"`      //RGB color
+	State
 	Duration time.Duration `json:"duration"` //time to transition to the new state
 }
 
-func (s *State) String() string {
-	return fmt.Sprintf("Duration: %s, RGB: %s", s.Duration, s.RGB.TermString())
+//ToState converts a TargetState to a State
+func (t *TargetState) ToState() State {
+	return State{RGB: t.RGB}
+}
+
+//State represents the current state of the light
+type State struct {
+	RGB color.RGB `json:"rgb"` //RGB color
+}
+
+//NameMap holds string-keyed Lights
+type NameMap map[string]Light
+
+//StateMap holds Global light state
+type StateMap map[string]State
+
+type stateManager struct {
+	byName       StateMap
+	stateMapLock sync.RWMutex
+}
+
+var states stateManager
+
+//SetCurrentState will set the current state for a light
+func SetCurrentState(name string, s State) {
+	states.stateMapLock.Lock()
+	defer states.stateMapLock.Unlock()
+	if states.byName == nil {
+		states.byName = make(StateMap)
+	}
+	states.byName[name] = s
+}
+
+//GetCurrentState will get the current state for a light
+func GetCurrentState(name string) *State {
+	states.stateMapLock.RLock()
+	defer states.stateMapLock.RUnlock()
+	state, ok := states.byName[name]
+	if ok {
+		return &state
+	}
+	return nil
+}
+
+func (t *TargetState) String() string {
+	return fmt.Sprintf("Duration: %s, RGB: %s", t.Duration, t.RGB.TermString())
 }
 
 //DebugString gives info
@@ -39,11 +84,8 @@ func DebugString(l Light) string {
 	return fmt.Sprintf("%s - %s", l.GetName(), l.GetType())
 }
 
-//NameMap holds string-keyed Lights
-type NameMap map[string]Light
-
-//GetLights returns lights keyed by name
-func GetLights() NameMap {
+//GetLightsByName returns lights keyed by name
+func GetLightsByName() NameMap {
 	return ByName
 }
 
@@ -52,10 +94,43 @@ var ByName NameMap
 
 //GetByName looks up a light by name
 func GetByName(name string) Light {
-	for _, x := range ByName {
-		if x.GetName() == name {
-			return x
-		}
+	light, ok := ByName[name]
+	if ok {
+		return light
 	}
+	return nil
+}
+
+//Initialize parses light config
+func Initialize(ctx context.Context) error {
+	config := mainConfig.GetServerConfig(ctx)
+
+	ByName = make(NameMap)
+	for i := range config.Lights.Hue {
+		x := &config.Lights.Hue[i]
+		ByName[x.Name] = &HueLight{
+			HueID: x.HueID,
+			Name:  x.Name,
+		}
+		SetCurrentState(x.Name, State{})
+	}
+	for i := range config.Lights.DMX {
+		x := &config.Lights.DMX[i]
+		ByName[x.Name] = &DMXLight{
+			Name:         x.Name,
+			StartAddress: x.StartAddress,
+			Universe:     x.Universe,
+			Profile:      x.Profile,
+		}
+		SetCurrentState(x.Name, State{})
+	}
+	for i := range config.Lights.Generic {
+		x := &config.Lights.Generic[i]
+		ByName[x.Name] = &GenericLight{
+			Name: x.Name,
+		}
+		SetCurrentState(x.Name, State{})
+	}
+
 	return nil
 }

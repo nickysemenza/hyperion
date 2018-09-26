@@ -29,29 +29,27 @@ type DMXLight struct {
 	StartAddress int    `json:"start_address" yaml:"start_address"`
 	Universe     int    `json:"universe" yaml:"universe"`
 	Profile      string `json:"profile" yaml:"profile"`
-	State        State  `json:"state" yaml:"state"`
 }
 
 type dmxOperation struct {
 	universe, channel, value int
 }
 
-func (d *DMXLight) getProfile() *dmxProfile {
-	return getDMXProfileByName(d.Profile)
-}
-
-func (d *DMXLight) getChannelIDForAttribute(attr string) int {
-	profile := d.getProfile()
-	if profile == nil {
-		log.Println("cannot find profile!")
+func (d *DMXLight) getChannelIDForAttributes(ctx context.Context, attrs ...string) (ids []int) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "getChannelIDForAttribute")
+	defer span.Finish()
+	profileMap := mainConfig.GetServerConfig(ctx).DMXProfiles
+	profile, ok := profileMap[d.Profile]
+	ids = make([]int, len(attrs))
+	if ok {
+		for x, attr := range attrs {
+			channelIndex := getChannelIndexForAttribute(&profile, attr) //1 indexed
+			ids[x] = d.StartAddress + channelIndex - 1
+		}
+		return
 	}
-	channelIndex := profile.getChannelIndexForAttribute(attr)
-	return d.StartAddress + channelIndex
-}
-func (d *DMXLight) getRGBChannelIDs() (int, int, int) {
-	return d.getChannelIDForAttribute(ChannelRed),
-		d.getChannelIDForAttribute(ChannelGreen),
-		d.getChannelIDForAttribute(ChannelBlue)
+	log.WithFields(log.Fields{"light": d.Name}).Warn("could not find DMX profile")
+	return
 }
 
 //GetName returns the light's name.
@@ -64,37 +62,32 @@ func (d *DMXLight) GetType() string {
 	return TypeDMX
 }
 
-//GetState returns the light's state.
-func (d *DMXLight) GetState() *State {
-	return &d.State
-}
-
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
 func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.RGB) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
 	span.SetTag("dmx-name", d.Name)
 	defer span.Finish()
 	span.LogKV("event", "getting channel ids")
-	rChan, gChan, bChan := d.getRGBChannelIDs()
-	span.LogKV("event", "getting channel valyes")
+	rgbChannelIds := d.getChannelIDForAttributes(ctx, ChannelRed, ChannelGreen, ChannelBlue)
+	span.LogKV("event", "getting channel values")
 	rVal, gVal, bVal := color.AsComponents()
 
 	span.LogKV("event", "begin getDMXStateInstance")
 	ds := getDMXStateInstance()
 	span.LogKV("event", "now setting values")
-	ds.setDMXValues(ctx, dmxOperation{universe: d.Universe, channel: rChan, value: rVal},
-		dmxOperation{universe: d.Universe, channel: gChan, value: gVal},
-		dmxOperation{universe: d.Universe, channel: bChan, value: bVal})
+	ds.setDMXValues(ctx, dmxOperation{universe: d.Universe, channel: rgbChannelIds[0], value: rVal},
+		dmxOperation{universe: d.Universe, channel: rgbChannelIds[1], value: gVal},
+		dmxOperation{universe: d.Universe, channel: rgbChannelIds[2], value: bVal})
 
-	d.State.RGB = color
+	SetCurrentState(d.Name, State{RGB: color})
 
 }
 
 //SetState updates the light's state.
 //TODO: other properties? on/off?
-func (d *DMXLight) SetState(ctx context.Context, target State) {
+func (d *DMXLight) SetState(ctx context.Context, target TargetState) {
 	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
-	currentState := d.State
+	currentState := GetCurrentState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
 	defer span.Finish()
@@ -114,7 +107,7 @@ func (d *DMXLight) SetState(ctx context.Context, target State) {
 
 	d.blindlySetRGBToStateAndDMX(ctx, target.RGB)
 	span.LogKV("event", "finished fade interpolation")
-	d.State = target
+	SetCurrentState(d.Name, target.ToState())
 
 }
 
@@ -179,10 +172,8 @@ func SendDMXWorker(ctx context.Context) {
 	client := gola.New(olaConfig.Address)
 	defer client.Close()
 
-	s := getDMXStateInstance()
-
 	for {
-		for k, v := range s.universes {
+		for k, v := range getDMXStateInstance().universes {
 			timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
 			client.SendDmx(k, v)
 			timer.ObserveDuration()
@@ -191,33 +182,11 @@ func SendDMXWorker(ctx context.Context) {
 	}
 }
 
-type dmxProfile struct {
-	Name         string   `json:"name"`
-	Capabilities []string `json:"capabilities"`
-	Channels     []string `json:"channels"`
-}
+func getChannelIndexForAttribute(p *mainConfig.LightProfileDMX, attrName string) int {
 
-func (p *dmxProfile) getChannelIndexForAttribute(attrName string) int {
-
-	for i, x := range p.Channels {
-		if attrName == x {
-			return i
-		}
+	id, ok := p.Channels[attrName]
+	if ok {
+		return id
 	}
-	return -1
-}
-
-//DMXProfileMap is a map of profiles
-type DMXProfileMap map[string]dmxProfile
-
-//DMXProfilesByName holds dmx profiles
-var DMXProfilesByName DMXProfileMap
-
-func getDMXProfileByName(name string) *dmxProfile {
-	for _, x := range DMXProfilesByName {
-		if x.Name == name {
-			return &x
-		}
-	}
-	return nil
+	return 0
 }

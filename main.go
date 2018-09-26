@@ -7,7 +7,6 @@ import (
 
 	"github.com/nickysemenza/hyperion/client"
 	"github.com/nickysemenza/hyperion/core/config"
-	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/server"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +36,6 @@ var cmdServer = &cobra.Command{
 	Short: "Run the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Running Server, version:" + config.GetVersion())
-		light.ReadLightConfigFromFile("lights.yaml") //TODO: move to viper setup
 
 		server.Run(config.LoadServer().InjectIntoContext(context.Background()))
 	},

@@ -4,8 +4,7 @@ import "context"
 
 //GenericLight is for testing
 type GenericLight struct {
-	Name  string `json:"name" yaml:"name"`
-	State State  `json:"state" yaml:"state"`
+	Name string `json:"name" yaml:"name"`
 }
 
 //GetName returns the light's name.
@@ -19,11 +18,7 @@ func (gl *GenericLight) GetType() string {
 }
 
 //SetState updates the light's state.
-func (gl *GenericLight) SetState(ctx context.Context, s State) {
-	gl.State = s
-}
+func (gl *GenericLight) SetState(ctx context.Context, s TargetState) {
+	SetCurrentState(gl.Name, s.ToState())
 
-//GetState returns the light's state.
-func (gl *GenericLight) GetState() *State {
-	return &gl.State
 }

@@ -22,13 +22,13 @@ func TestCueFrameGetDuration(t *testing.T) {
 	}{
 		{Frame{
 			Actions: []FrameAction{
-				{NewState: light.State{Duration: time.Millisecond, RGB: color.RGB{}}},
+				{NewState: light.TargetState{Duration: time.Millisecond, State: light.State{RGB: color.RGB{}}}},
 			},
 		}, time.Millisecond},
 		{Frame{
 			Actions: []FrameAction{
-				{NewState: light.State{Duration: time.Millisecond}},
-				{NewState: light.State{Duration: time.Millisecond * 50}},
+				{NewState: light.TargetState{Duration: time.Millisecond}},
+				{NewState: light.TargetState{Duration: time.Millisecond * 50}},
 			},
 		}, time.Millisecond * 50},
 		{Frame{
@@ -65,12 +65,12 @@ func TestCueDurationHelpers(t *testing.T) {
 			RealDuration: time.Millisecond * 25,
 			Frames: []Frame{
 				{Actions: []FrameAction{
-					{NewState: light.State{Duration: time.Millisecond * 7}},
-					{NewState: light.State{Duration: time.Millisecond * 12}},
+					{NewState: light.TargetState{Duration: time.Millisecond * 7}},
+					{NewState: light.TargetState{Duration: time.Millisecond * 12}},
 				}},
 				{Actions: []FrameAction{
-					{NewState: light.State{Duration: time.Millisecond * 8}},
-					{NewState: light.State{Duration: time.Millisecond * 11}},
+					{NewState: light.TargetState{Duration: time.Millisecond * 8}},
+					{NewState: light.TargetState{Duration: time.Millisecond * 11}},
 				}},
 			},
 		}, time.Millisecond * 23, time.Millisecond * 2},
@@ -126,7 +126,7 @@ func TestCueMarshalling(t *testing.T) {
 	require := require.New(t)
 
 	//FrameAction
-	cfa := FrameAction{NewState: light.State{Duration: time.Millisecond * 7}, ID: 1}
+	cfa := FrameAction{NewState: light.TargetState{Duration: time.Millisecond * 7}, ID: 1}
 	b, err := cfa.MarshalJSON()
 	require.NoError(err)
 	json := fmt.Sprintf("%s", b)
@@ -135,8 +135,8 @@ func TestCueMarshalling(t *testing.T) {
 
 	//Frame
 	cf := Frame{Actions: []FrameAction{
-		FrameAction{NewState: light.State{Duration: time.Millisecond * 8}, ID: 2},
-		FrameAction{NewState: light.State{Duration: time.Millisecond * 9}, ID: 3},
+		FrameAction{NewState: light.TargetState{Duration: time.Millisecond * 8}, ID: 2},
+		FrameAction{NewState: light.TargetState{Duration: time.Millisecond * 9}, ID: 3},
 	}}
 	b, err = cf.MarshalJSON()
 	require.NoError(err)
@@ -150,12 +150,12 @@ func TestCueMarshalling(t *testing.T) {
 		RealDuration: time.Millisecond * 25,
 		Frames: []Frame{
 			{Actions: []FrameAction{
-				{NewState: light.State{Duration: time.Millisecond * 7}},
-				{NewState: light.State{Duration: time.Millisecond * 12}},
+				{NewState: light.TargetState{Duration: time.Millisecond * 7}},
+				{NewState: light.TargetState{Duration: time.Millisecond * 12}},
 			}},
 			{Actions: []FrameAction{
-				{NewState: light.State{Duration: time.Millisecond * 8}},
-				{NewState: light.State{Duration: time.Millisecond * 11}},
+				{NewState: light.TargetState{Duration: time.Millisecond * 8}},
+				{NewState: light.TargetState{Duration: time.Millisecond * 11}},
 			}},
 		},
 	}
@@ -168,7 +168,7 @@ func TestCueMarshalling(t *testing.T) {
 func BenchmarkCueFrameProcessing(b *testing.B) {
 	actions := []FrameAction{}
 	for i := 0; i < b.N; i++ {
-		actions = append(actions, FrameAction{NewState: light.State{Duration: 0, RGB: color.RGB{}}})
+		actions = append(actions, FrameAction{NewState: light.TargetState{Duration: 0, State: light.State{RGB: color.RGB{}}}})
 	}
 	frame := Frame{Actions: actions}
 	frame.ProcessFrame(context.Background())

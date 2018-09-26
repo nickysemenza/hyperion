@@ -67,13 +67,13 @@ func processCycleCommand(cmd string) (*Cue, error) {
 			action := FrameAction{}
 			action.LightName = lightList[y]
 
-			action.NewState = light.State{
-				RGB:      color.GetRGBFromString("#0000FF"),
+			action.NewState = light.TargetState{
+				State:    light.State{RGB: color.GetRGBFromString("#0000FF")},
 				Duration: duration,
 			}
 			if x == y {
-				action.NewState = light.State{
-					RGB:      color.GetRGBFromString("#FF0000"),
+				action.NewState = light.TargetState{
+					State:    light.State{RGB: color.GetRGBFromString("#FF0000")},
 					Duration: duration,
 				}
 			}
@@ -115,8 +115,8 @@ func processSetCommand(cmd string) (*Cue, error) {
 			if err != nil {
 				return nil, errorInvalidTime
 			}
-			action.NewState = light.State{
-				RGB:      color.GetRGBFromString(colorList[x]),
+			action.NewState = light.TargetState{
+				State:    light.State{RGB: color.GetRGBFromString(colorList[x])},
 				Duration: duration,
 			}
 			frame.Actions = append(frame.Actions, action)

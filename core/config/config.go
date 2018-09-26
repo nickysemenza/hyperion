@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/viper"
 )
 
@@ -66,6 +67,42 @@ type Server struct {
 		CueBackoff            time.Duration
 	}
 	Triggers []Trigger
+
+	Lights struct {
+		Hue     []LightHue
+		DMX     []LightDMX
+		Generic []LightGeneric
+	}
+	DMXProfiles DMXProfileMap
+}
+
+//DMXProfileMap represents a map of dmx profiles
+type DMXProfileMap map[string]LightProfileDMX
+
+//LightHue holds config info for a Hue
+type LightHue struct {
+	Name  string
+	HueID int `mapstructure:"hue_id"`
+}
+
+//LightGeneric holds config info for a Generic
+type LightGeneric struct {
+	Name string
+}
+
+//LightDMX hol;ds config info for a dmx light
+type LightDMX struct {
+	Name         string
+	StartAddress int `mapstructure:"start_address"`
+	Universe     int
+	Profile      string
+}
+
+//LightProfileDMX holds config info for a dmx profile: channel and capability mappings
+type LightProfileDMX struct {
+	Name         string
+	Capabilities []string
+	Channels     map[string]int
 }
 
 //Trigger holds configuration for a trigger
@@ -151,5 +188,11 @@ func LoadServer() *Server {
 
 	//triggers
 	err = viper.UnmarshalKey("triggers", &c.Triggers)
+
+	//light config
+	viper.UnmarshalKey("lights", &c.Lights)
+	viper.UnmarshalKey("dmx_profiles", &c.DMXProfiles)
+	spew.Dump(c)
+
 	return &c
 }
