@@ -27,7 +27,7 @@ const (
 //TargetState represents the state of a light, is source of truth
 type TargetState struct {
 	// On   bool
-	RGB      color.RGB     `json:"rgb"`      //RGB color
+	State
 	Duration time.Duration `json:"duration"` //time to transition to the new state
 }
 
