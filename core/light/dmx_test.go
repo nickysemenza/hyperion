@@ -16,6 +16,7 @@ func TestDMXAttributeChannels(t *testing.T) {
 		expected int
 	}{
 		{config.LightProfileDMX{Channels: map[string]int{"red": 1, "green": 2}}, "red", 1},
+		{config.LightProfileDMX{Channels: map[string]int{"red": 1, "green": 2}}, "blue", 0},
 	}
 	for _, tc := range tt {
 		res := getChannelIndexForAttribute(&tc.profile, tc.name)
