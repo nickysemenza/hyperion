@@ -104,15 +104,6 @@ func GetByName(name string) Light {
 //Initialize parses light config
 func Initialize(ctx context.Context) error {
 	config := mainConfig.GetServerConfig(ctx)
-	DMXProfilesByName = make(DMXProfileMap)
-	for _, item := range config.DMXProfiles {
-		//todo: use config DMXProfile instead of dmxProfile
-		DMXProfilesByName[item.Name] = mainConfig.LightProfileDMX{
-			Name:         item.Name,
-			Capabilities: item.Capabilities,
-			Channels:     item.Channels,
-		}
-	}
 
 	ByName = make(NameMap)
 	for i := range config.Lights.Hue {

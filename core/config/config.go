@@ -73,8 +73,9 @@ type Server struct {
 		DMX     []LightDMX
 		Generic []LightGeneric
 	}
-	DMXProfiles []LightProfileDMX
+	DMXProfiles DMXProfileMap
 }
+type DMXProfileMap map[string]LightProfileDMX
 
 type LightHue struct {
 	Name  string
@@ -94,7 +95,7 @@ type LightDMX struct {
 type LightProfileDMX struct {
 	Name         string
 	Capabilities []string
-	Channels     []string
+	Channels     map[string]int
 }
 
 //Trigger holds configuration for a trigger

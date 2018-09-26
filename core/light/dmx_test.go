@@ -6,7 +6,7 @@ import (
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDMXAttributeChannels(t *testing.T) {
@@ -15,7 +15,7 @@ func TestDMXAttributeChannels(t *testing.T) {
 		name     string
 		expected int
 	}{
-		{config.LightProfileDMX{Channels: []string{"red", "green"}}, "red", 0},
+		{config.LightProfileDMX{Channels: map[string]int{"red": 1, "green": 2}}, "red", 1},
 	}
 	for _, tc := range tt {
 		res := getChannelIndexForAttribute(&tc.profile, tc.name)
@@ -29,17 +29,9 @@ func TestDMX(t *testing.T) {
 	s1.setDMXValues(context.Background(), dmxOperation{2, 22, 40})
 
 	s2 := getDMXStateInstance()
-	if s2.universes[2][22-1] != 40 {
-		t.Error("didn't set DMX state instance properly")
-	}
-
-	if err := s2.setDMXValues(context.Background(), dmxOperation{2, 0, 2}); err == nil {
-		t.Error("should not allow channel 0")
-	}
-
-	if s1 != s2 {
-		t.Error("should be singleton!")
-	}
+	require.EqualValues(t, 40, s2.universes[2][21], "didn't set DMX state instance properly")
+	require.Error(t, s2.setDMXValues(context.Background(), dmxOperation{2, 0, 2}), "should not allow channel 0")
+	require.Equal(t, s1, s2, "should be a singleton!")
 }
 
 func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
@@ -53,12 +45,17 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 		fields fields
 		color  color.RGB
 	}{
-		{"setLightToGreen", fields{Profile: "a", Universe: 4}, color.GetRGBFromString("#00FF00")},
-		{"withOffsetStartAddress", fields{Profile: "a", Universe: 4, StartAddress: 10}, color.GetRGBFromString("#00FF00")},
+		{"setLightToGreen", fields{Profile: "a", Universe: 4, StartAddress: 1}, color.GetRGBFromString("green")},
+		{"withOffsetStartAddress", fields{Profile: "a", Universe: 4, StartAddress: 10}, color.GetRGBFromString("green")},
 	}
 
-	DMXProfilesByName = make(DMXProfileMap)
-	DMXProfilesByName["a"] = config.LightProfileDMX{Name: "a", Channels: []string{"noop", "red", "green", "blue"}}
+	c := config.Server{}
+	c.DMXProfiles = make(config.DMXProfileMap)
+	c.DMXProfiles["a"] = config.LightProfileDMX{Name: "a", Channels: map[string]int{"red": 1, "green": 2, "blue": 3}}
+
+	ctx := c.InjectIntoContext(context.Background())
+	Initialize(ctx)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := &DMXLight{
@@ -66,10 +63,11 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 				Universe:     tt.fields.Universe,
 				Profile:      tt.fields.Profile,
 			}
-			d.blindlySetRGBToStateAndDMX(context.Background(), tt.color)
+			d.blindlySetRGBToStateAndDMX(ctx, tt.color)
 			ds := getDMXStateInstance()
-			assert.Equal(t, 255, ds.getDmxValue(tt.fields.Universe, 2+tt.fields.StartAddress))
-			assert.Equal(t, 0, ds.getDmxValue(tt.fields.Universe, 1+tt.fields.StartAddress))
+			//green means first chan should be 0, secnd 255
+			require.Equal(t, 0, ds.getDmxValue(tt.fields.Universe, tt.fields.StartAddress))
+			require.Equal(t, 255, ds.getDmxValue(tt.fields.Universe, 1+tt.fields.StartAddress))
 		})
 	}
 }
