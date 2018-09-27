@@ -14,9 +14,10 @@ func TestGetRGBComponents(t *testing.T) {
 	require.Equal(t, b, c.B)
 }
 
-func TestAsColorful(t *testing.T) {
+func TestAsColorfulAndHex(t *testing.T) {
 	c1 := RGB{R: 12, G: 255, B: 120}
 	require.EqualValues(t, 1, c1.AsColorful().G)
+	require.EqualValues(t, "#0cff78", c1.ToHex())
 }
 func TestIsBlack(t *testing.T) {
 	c1 := RGB{R: 12, G: 255, B: 120}

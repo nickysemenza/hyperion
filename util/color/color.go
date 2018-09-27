@@ -58,6 +58,7 @@ func (c *RGB) AsPB() pb.RGB {
 	}
 }
 
+//ToHex converts a color to hex
 func (c *RGB) ToHex() string {
 	return c.AsColorful().Hex()
 }

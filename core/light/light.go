@@ -64,6 +64,8 @@ func SetCurrentState(name string, s State) {
 	states.byName[name] = s
 }
 
+//GetLightNames returns all the light names
+//TODO: move this to pull from config in context
 func GetLightNames() []string {
 	states.stateMapLock.RLock()
 	defer states.stateMapLock.RUnlock()

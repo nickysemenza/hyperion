@@ -73,3 +73,23 @@ dmx_profiles:
         green: 2
         blue: 3
         white: 4
+
+commands:
+  - setall:
+      body: |
+        function process()
+          actions = {}
+          for i, light in ipairs(light_list) do
+            table.insert(actions, {
+              light = light,
+              color = rgb_to_hex(100,0,120),
+              timing = "1s"
+            })
+          end
+          frame1 = {
+            actions = actions
+          }
+          return {
+            frames = {frame1}
+          }
+        end

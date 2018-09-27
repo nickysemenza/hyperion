@@ -106,9 +106,12 @@ type LightProfileDMX struct {
 	Channels     map[string]int
 }
 
+//UserCommand holds a user command
 type UserCommand struct {
 	Body string
 }
+
+//UserCommandMap is used to map user commands by name
 type UserCommandMap map[string]UserCommand
 
 //Trigger holds configuration for a trigger
