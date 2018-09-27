@@ -1,9 +1,11 @@
 package cue
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/require"
@@ -88,7 +90,9 @@ func TestCommand(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.cmd, func(t *testing.T) {
 			require := require.New(t)
-			cue, err := NewFromCommand(tc.cmd)
+			config := config.Server{}
+			ctx := config.InjectIntoContext(context.Background())
+			cue, err := NewFromCommand(ctx, tc.cmd)
 			if tc.expectedCue == nil {
 				require.Nil(cue)
 			} else {

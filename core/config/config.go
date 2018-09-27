@@ -74,6 +74,7 @@ type Server struct {
 		Generic []LightGeneric
 	}
 	DMXProfiles DMXProfileMap
+	Commands    UserCommandMap
 }
 
 //DMXProfileMap represents a map of dmx profiles
@@ -104,6 +105,14 @@ type LightProfileDMX struct {
 	Capabilities []string
 	Channels     map[string]int
 }
+
+//UserCommand holds a user command
+type UserCommand struct {
+	Body string
+}
+
+//UserCommandMap is used to map user commands by name
+type UserCommandMap map[string]UserCommand
 
 //Trigger holds configuration for a trigger
 type Trigger struct {
@@ -192,6 +201,7 @@ func LoadServer() *Server {
 	//light config
 	viper.UnmarshalKey("lights", &c.Lights)
 	viper.UnmarshalKey("dmx_profiles", &c.DMXProfiles)
+	viper.UnmarshalKey("commands", &c.Commands)
 	spew.Dump(c)
 
 	return &c
