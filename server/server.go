@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"time"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 
@@ -18,34 +18,36 @@ import (
 
 //Run starts the server
 func Run(ctx context.Context) {
+
+	ctx, cancel := context.WithCancel(ctx)
+	wg := sync.WaitGroup{}
+
 	go tracing.InitTracer(ctx)
 	light.Initialize(ctx)
 	//Set up Homekit Server
-	go homekit.Start(ctx)
+	wg.Add(1)
+	go homekit.Start(ctx, &wg)
 
 	//Set up RPC server
-	go api.ServeRPC(ctx)
+	wg.Add(1)
+	go api.ServeRPC(ctx, &wg)
 
 	//Setup API server
-	go api.ServeHTTP(ctx)
+	wg.Add(1)
+	go api.ServeHTTP(ctx, &wg)
 
 	//proceess cues forever
 	cue.GetCueMaster().ProcessForever(ctx)
 
-	go light.SendDMXWorker(ctx)
+	wg.Add(1)
+	go light.SendDMXWorker(ctx, &wg)
 
-	//handle CTRL+C
+	//handle CTRL+C interrupt
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
-	go func() {
-		<-quit
-		log.Println("Shutdown hyperion ...")
-		os.Exit(0)
-	}()
 
-	//keep going
-	for {
-		time.Sleep(1 * time.Second)
-	}
-
+	<-quit
+	log.Println("shutting down hyperion server")
+	cancel()
+	wg.Wait()
 }

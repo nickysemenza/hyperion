@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/viper"
 )
 
@@ -202,7 +201,6 @@ func LoadServer() *Server {
 	viper.UnmarshalKey("lights", &c.Lights)
 	viper.UnmarshalKey("dmx_profiles", &c.DMXProfiles)
 	viper.UnmarshalKey("commands", &c.Commands)
-	spew.Dump(c)
 
 	return &c
 }

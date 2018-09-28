@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -68,7 +69,7 @@ func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServ
 }
 
 //ServeRPC runs a RPC server
-func ServeRPC(ctx context.Context) {
+func ServeRPC(ctx context.Context, wg *sync.WaitGroup) {
 	RPCConfig := config.GetServerConfig(ctx).Inputs.RPC
 	if !RPCConfig.Enabled {
 		log.Info("rpc is not enabled")
@@ -81,5 +82,11 @@ func ServeRPC(ctx context.Context) {
 	}
 	grpcServer := grpc.NewServer()
 	pb.RegisterAPIServer(grpcServer, &Server{})
-	grpcServer.Serve(lis)
+	go grpcServer.Serve(lis)
+
+	<-ctx.Done()
+	log.Printf("[grpc] shutdown")
+	grpcServer.GracefulStop()
+	wg.Done()
+
 }

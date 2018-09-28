@@ -3,6 +3,7 @@ package homekit
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 
@@ -59,7 +60,8 @@ func buildSwitchList(ctx context.Context) {
 }
 
 //Start starts the HomeKit services
-func Start(ctx context.Context) {
+func Start(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	hkConfig := config.GetServerConfig(ctx).Inputs.HomeKit
 	if !hkConfig.Enabled {
 		log.Info("homekit is not enabled")
@@ -79,11 +81,12 @@ func Start(ctx context.Context) {
 		log.Panic(err)
 	}
 
-	//shutdown handler
-	hc.OnTermination(func() {
+	go func() {
+		<-ctx.Done()
 		<-t.Stop()
 		log.Println("Homekit services stopped.")
-	})
+		return
+	}()
 
 	t.Start()
 }
