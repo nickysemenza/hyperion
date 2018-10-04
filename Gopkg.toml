@@ -112,3 +112,8 @@
 [[constraint]]
   branch = "master"
   name = "github.com/yuin/gluamapper"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/gin-contrib/pprof"
+  

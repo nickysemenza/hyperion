@@ -100,6 +100,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:43872a09562f93f82c4238d358883580d4315941ec8be43fd1cefda305610f58"
+  name = "github.com/gin-contrib/pprof"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a27513940d36b2d14ba3c3459216b28b807fe8bd"
+
+[[projects]]
+  branch = "master"
   digest = "1:36fe9527deed01d2a317617e59304eb2c4ce9f8a24115bcc5c2e37b3aee5bae4"
   name = "github.com/gin-contrib/sse"
   packages = ["."]
@@ -654,8 +662,8 @@
     "github.com/aybabtme/rgbterm",
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
-    "github.com/davecgh/go-spew/spew",
     "github.com/gin-contrib/cors",
+    "github.com/gin-contrib/pprof",
     "github.com/gin-contrib/static",
     "github.com/gin-gonic/gin",
     "github.com/golang/protobuf/proto",

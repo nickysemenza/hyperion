@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gin-contrib/pprof"
+
 	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 
@@ -162,20 +164,12 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 
 	go func() {
 		for {
-
+			//todo: only emit when things have changed
 			conn.WriteJSON(&wsWrapper{Data: light.GetLightsByName(), Type: wsTypeLightList})
-			conn.WriteJSON(&wsWrapper{Data: cue.GetCueMaster(), Type: wsTypeCueList})
+			conn.WriteJSON(&wsWrapper{Data: *cue.GetCueMaster(), Type: wsTypeCueList})
 			time.Sleep(tickInterval)
 		}
 	}()
-
-	// for {
-	// 	t, msg, err := conn.ReadMessage()
-	// 	if err != nil {
-	// 		break
-	// 	}
-	// 	conn.WriteMessage(t, msg)
-	// }
 }
 
 //ServeHTTP runs the gin server
@@ -202,6 +196,8 @@ func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
 	//register prometheus gin metrics middleware
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(router)
+
+	pprof.Register(router)
 
 	//setup routes
 	router.Use(static.Serve("/", static.LocalFile("./ui/build", false)))
