@@ -63,7 +63,7 @@ func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServ
 			log.Println(err)
 			break
 		}
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 20)
 	}
 	return nil
 }

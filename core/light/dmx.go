@@ -169,7 +169,11 @@ func SendDMXWorker(ctx context.Context, wg *sync.WaitGroup) error {
 		log.Info("ola output is not enabled")
 		return nil
 	}
-	client := gola.New(olaConfig.Address)
+	client, err := gola.New(olaConfig.Address)
+	if err != nil {
+		log.Errorf("could not start DMX worker: could not connect to ola: %v", err)
+		return err
+	}
 	defer client.Close()
 
 	t := time.NewTimer(olaConfig.Tick)

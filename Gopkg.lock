@@ -292,8 +292,7 @@
   version = "1.0.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:bb50ea9ef90bb78fb3c48780068c73e77c08dc1dae4cb1a60258adee7cdb9cdc"
+  digest = "1:4a84d57e2caeb905e4624a5cdab10aaf6ca5917009ab1507265fa7fe3ea4199c"
   name = "github.com/nickysemenza/gola"
   packages = [
     ".",
@@ -301,7 +300,7 @@
     "ola_rpc",
   ]
   pruneopts = "UT"
-  revision = "9e33ab08e328cc40be0070bb1bfc36a5f3aadc90"
+  revision = "4a869f3481ff322f6a3e951ccf2123ea24ccfaed"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
