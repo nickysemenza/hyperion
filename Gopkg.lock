@@ -136,6 +136,14 @@
   revision = "220e8d34538f5dfdcc299dda79bf83cf52e633f6"
 
 [[projects]]
+  branch = "master"
+  digest = "1:20e84447a2f8555b014195aa52342b71adf4b40e8eb75abc4e620890a5de16d5"
+  name = "github.com/gizak/termui"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "fede2b0a7496f62f701fff3ea518ffd0740cf580"
+
+[[projects]]
   digest = "1:bbadccf3d3317ea03c0dac0b45b673b4b397c8f91a1d2eff550a3c51c4ad770e"
   name = "github.com/gogo/protobuf"
   packages = ["proto"]
@@ -244,6 +252,14 @@
   version = "v0.0.3"
 
 [[projects]]
+  digest = "1:cdb899c199f907ac9fb50495ec71212c95cb5b0e0a8ee0800da0238036091033"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb"
+  version = "v0.0.3"
+
+[[projects]]
   digest = "1:ff5ebae34cfbf047d505ee150de27e60570e8c394b3b8fdbb720ff6ac71985fc"
   name = "github.com/matttproud/golang_protobuf_extensions"
   packages = ["pbutil"]
@@ -266,6 +282,14 @@
   pruneopts = "UT"
   revision = "5a2b9fab83ff0f8bfc99684bd5f43a37abe560f1"
   version = "v1.0.8"
+
+[[projects]]
+  branch = "master"
+  digest = "1:abf08734a6527df70ed361d7c369fb580e6840d8f7a6012e5f609fdfd93b4e48"
+  name = "github.com/mitchellh/go-wordwrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9e67c67572bc5dd02aef930e2b0ae3c02a4b5a5c"
 
 [[projects]]
   digest = "1:645110e089152bd0f4a011a2648fbb0e4df5977be73ca605781157ac297f50c4"
@@ -301,6 +325,14 @@
   ]
   pruneopts = "UT"
   revision = "4a869f3481ff322f6a3e951ccf2123ea24ccfaed"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f335d800550786b6f51ddaedb9d1107a7a72f4a2195e5b039dd7c0e103e119bc"
+  name = "github.com/nsf/termbox-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b66b20ab708e289ff1eb3e218478302e6aec28ce"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
@@ -665,6 +697,7 @@
     "github.com/gin-contrib/pprof",
     "github.com/gin-contrib/static",
     "github.com/gin-gonic/gin",
+    "github.com/gizak/termui",
     "github.com/golang/protobuf/proto",
     "github.com/gorilla/websocket",
     "github.com/heatxsink/go-hue/lights",

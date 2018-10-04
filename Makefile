@@ -6,7 +6,7 @@ build:
 dev: dev-server
 dev-server: build
 	./hyperion server
-dev-client:
+dev-client: build
 	./hyperion client
 dev-ui:
 	cd ui && yarn run dev

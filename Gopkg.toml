@@ -117,3 +117,7 @@
   branch = "master"
   name = "github.com/gin-contrib/pprof"
   
+
+[[constraint]]
+  name = "github.com/gizak/termui"
+  branch = "master"
