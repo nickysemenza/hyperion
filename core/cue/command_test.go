@@ -12,6 +12,8 @@ import (
 )
 
 func TestCommand(t *testing.T) {
+	light.SetCurrentState("light2", light.State{})
+	//TODO: make user commands read from ctx?
 	tt := []struct {
 		cmd         string
 		expectedCue *Cue
@@ -81,6 +83,17 @@ func TestCommand(t *testing.T) {
 					NewState: light.TargetState{
 						Duration: time.Duration(time.Second) / 2,
 						State:    light.State{RGB: color.RGB{R: 255}},
+					}},
+			}},
+		},
+		}, nil},
+		{"blackout(400ms)", &Cue{Frames: []Frame{
+			{Actions: []FrameAction{
+				FrameAction{
+					LightName: "light2",
+					NewState: light.TargetState{
+						Duration: time.Duration(time.Millisecond) * 400,
+						State:    light.State{RGB: color.RGB{}},
 					}},
 			}},
 		},

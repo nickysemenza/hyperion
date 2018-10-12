@@ -89,22 +89,24 @@ func TestToCue(t *testing.T) {
 func TestBuildCueFromUserCommand(t *testing.T) {
 
 	light.SetCurrentState("light2", light.State{})
+	//TODO: make user commands read from ctx?
 	tests := []struct {
 		name    string
 		command config.UserCommand
 		want    *Cue
 		wantErr bool
+		args    []string
 	}{
 		{"nil cmd",
-			config.UserCommand{}, nil, true},
+			config.UserCommand{}, nil, true, []string{""}},
 		{"bad user code",
 			config.UserCommand{Body: "badcode("},
-			nil, true},
+			nil, true, []string{""}},
 		{"bad user code return val", config.UserCommand{Body: `
 		function process()
 			return {"bad structed return val"}
 		end
-				`}, nil, true},
+				`}, nil, true, []string{""}},
 		{"basic command",
 			config.UserCommand{Body: `
 			function process()
@@ -130,7 +132,33 @@ func TestBuildCueFromUserCommand(t *testing.T) {
 							}},
 					}},
 				},
-			}, false},
+			}, false, []string{""}},
+		{"basic command with args",
+			config.UserCommand{Body: `
+			function process(x, y)
+				action1 = {
+					light = x,
+					color = y,
+					timing = "3s"
+				}
+				frame1 = {
+					actions = {action1}
+				}
+				return {
+					frames = {frame1}
+				}
+			end
+		`}, &Cue{
+				Frames: []Frame{
+					{Actions: []FrameAction{
+						{LightName: "light1",
+							NewState: light.TargetState{
+								Duration: time.Second * 3,
+								State:    light.State{RGB: color.RGB{B: 255}},
+							}},
+					}},
+				},
+			}, false, []string{"light1", "blue"}},
 		{"command using light_list",
 			config.UserCommand{Body: `
 			function process()
@@ -159,13 +187,13 @@ func TestBuildCueFromUserCommand(t *testing.T) {
 							}},
 					}},
 				},
-			}, false},
+			}, false, []string{""}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			cue, err := BuildCueFromUserCommand(ctx, tt.command, "")
+			cue, err := BuildCueFromUserCommand(ctx, tt.command, tt.args)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
