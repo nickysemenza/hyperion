@@ -23,7 +23,7 @@ func TestCommand(t *testing.T) {
 		{"set()", nil, errorWrongPartCount},
 		{"set(a:b)", nil, errorWrongPartCount},
 		{"set(a:b:)", nil, errorWrongPartCount},
-		{"set(light1:green,#0000FF:1000)", nil, errorPartSizeMismatch},
+		{"set(light1:green+#0000FF:1000)", nil, errorPartSizeMismatch},
 		{"set(light1:green:1 second)", nil, errorInvalidTime},
 		{"set(light1:green:1s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
@@ -55,7 +55,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"set(light1,light2:#00FF00,#FF0000:1s,2.2s)", &Cue{Frames: []Frame{
+		{"set(light1+light2:#00FF00+#FF0000:1s+2.2s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				{
 					LightName: "light1",

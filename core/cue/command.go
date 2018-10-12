@@ -63,7 +63,7 @@ func processCycleCommand(cmd string) (*Cue, error) {
 	if len(parts) != 2 {
 		return nil, errorWrongPartLen
 	}
-	lightList := strings.Split(parts[0], ",")
+	lightList := strings.Split(parts[0], "+")
 	duration, err := time.ParseDuration(parts[1])
 	if err != nil {
 		return nil, err
@@ -104,9 +104,9 @@ func processSetCommand(cmd string) (*Cue, error) {
 		if len(parts[0]) == 0 || len(parts[1]) == 0 || len(parts[2]) == 0 {
 			return nil, errorWrongPartCount
 		}
-		lightList := strings.Split(parts[0], ",")
-		colorList := strings.Split(parts[1], ",")
-		timeList := strings.Split(parts[2], ",")
+		lightList := strings.Split(parts[0], "+")
+		colorList := strings.Split(parts[1], "+")
+		timeList := strings.Split(parts[2], "+")
 
 		numTimes := len(timeList)
 		numColors := len(colorList)
