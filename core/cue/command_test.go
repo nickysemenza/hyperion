@@ -12,6 +12,8 @@ import (
 )
 
 func TestCommand(t *testing.T) {
+	light.SetCurrentState("light2", light.State{})
+	//TODO: make user commands read from ctx?
 	tt := []struct {
 		cmd         string
 		expectedCue *Cue
@@ -23,7 +25,7 @@ func TestCommand(t *testing.T) {
 		{"set()", nil, errorWrongPartCount},
 		{"set(a:b)", nil, errorWrongPartCount},
 		{"set(a:b:)", nil, errorWrongPartCount},
-		{"set(light1:green,#0000FF:1000)", nil, errorPartSizeMismatch},
+		{"set(light1:green+#0000FF:1000)", nil, errorPartSizeMismatch},
 		{"set(light1:green:1 second)", nil, errorInvalidTime},
 		{"set(light1:green:1s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
@@ -55,7 +57,7 @@ func TestCommand(t *testing.T) {
 			}},
 		},
 		}, nil},
-		{"set(light1,light2:#00FF00,#FF0000:1s,2.2s)", &Cue{Frames: []Frame{
+		{"set(light1+light2:#00FF00+#FF0000:1s+2.2s)", &Cue{Frames: []Frame{
 			{Actions: []FrameAction{
 				{
 					LightName: "light1",
@@ -81,6 +83,17 @@ func TestCommand(t *testing.T) {
 					NewState: light.TargetState{
 						Duration: time.Duration(time.Second) / 2,
 						State:    light.State{RGB: color.RGB{R: 255}},
+					}},
+			}},
+		},
+		}, nil},
+		{"blackout(400ms)", &Cue{Frames: []Frame{
+			{Actions: []FrameAction{
+				FrameAction{
+					LightName: "light2",
+					NewState: light.TargetState{
+						Duration: time.Duration(time.Millisecond) * 400,
+						State:    light.State{RGB: color.RGB{}},
 					}},
 			}},
 		},

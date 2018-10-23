@@ -162,23 +162,36 @@ func (s *dmxState) initializeUniverse(universe int) {
 }
 
 //SendDMXWorker sends OLA the current dmxState across all universes
-func SendDMXWorker(ctx context.Context) {
+func SendDMXWorker(ctx context.Context, wg *sync.WaitGroup) error {
+	defer wg.Done()
 	olaConfig := mainConfig.GetServerConfig(ctx).Outputs.OLA
 	if !olaConfig.Enabled {
 		log.Info("ola output is not enabled")
-		return
+		return nil
 	}
-	//TODO: put this on a timer
-	client := gola.New(olaConfig.Address)
+	client, err := gola.New(olaConfig.Address)
+	if err != nil {
+		log.Errorf("could not start DMX worker: could not connect to ola: %v", err)
+		return err
+	}
 	defer client.Close()
 
+	t := time.NewTimer(olaConfig.Tick)
+	log.Printf("timer started at %v", time.Now())
+	defer t.Stop()
 	for {
-		for k, v := range getDMXStateInstance().universes {
-			timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
-			client.SendDmx(k, v)
-			timer.ObserveDuration()
+		select {
+		case <-ctx.Done():
+			log.Println("SendDMXWorker shutdown")
+			return ctx.Err()
+		case <-t.C:
+			for k, v := range getDMXStateInstance().universes {
+				timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
+				client.SendDmx(k, v)
+				timer.ObserveDuration()
+			}
+			t.Reset(olaConfig.Tick)
 		}
-		time.Sleep(olaConfig.Tick)
 	}
 }
 

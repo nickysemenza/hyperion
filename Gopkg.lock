@@ -100,6 +100,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:43872a09562f93f82c4238d358883580d4315941ec8be43fd1cefda305610f58"
+  name = "github.com/gin-contrib/pprof"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a27513940d36b2d14ba3c3459216b28b807fe8bd"
+
+[[projects]]
+  branch = "master"
   digest = "1:36fe9527deed01d2a317617e59304eb2c4ce9f8a24115bcc5c2e37b3aee5bae4"
   name = "github.com/gin-contrib/sse"
   packages = ["."]
@@ -284,8 +292,7 @@
   version = "1.0.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:bb50ea9ef90bb78fb3c48780068c73e77c08dc1dae4cb1a60258adee7cdb9cdc"
+  digest = "1:4a84d57e2caeb905e4624a5cdab10aaf6ca5917009ab1507265fa7fe3ea4199c"
   name = "github.com/nickysemenza/gola"
   packages = [
     ".",
@@ -293,7 +300,7 @@
     "ola_rpc",
   ]
   pruneopts = "UT"
-  revision = "9e33ab08e328cc40be0070bb1bfc36a5f3aadc90"
+  revision = "4a869f3481ff322f6a3e951ccf2123ea24ccfaed"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
@@ -654,8 +661,8 @@
     "github.com/aybabtme/rgbterm",
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
-    "github.com/davecgh/go-spew/spew",
     "github.com/gin-contrib/cors",
+    "github.com/gin-contrib/pprof",
     "github.com/gin-contrib/static",
     "github.com/gin-gonic/gin",
     "github.com/golang/protobuf/proto",

@@ -23,6 +23,7 @@ var (
 
 //NewFromCommand returns a cue based on a command.
 func NewFromCommand(ctx context.Context, cmd string) (*Cue, error) {
+	//remove spaces
 	cmd = strings.Replace(cmd, " ", "", -1)
 
 	//extracts: `match1(match2)`
@@ -32,19 +33,23 @@ func NewFromCommand(ctx context.Context, cmd string) (*Cue, error) {
 		return nil, errorMissingFunction
 	}
 	commandType := groups[0][1]
-	subCommand := groups[0][2]
+	argString := groups[0][2]
+
+	args := strings.Split(argString, ",")
 
 	var cue *Cue
 	var err error
 	switch commandType {
 
 	case "set":
-		cue, err = processSetCommand(subCommand)
+		cue, err = processSetCommand(argString)
 	case "cycle":
-		cue, err = processCycleCommand(subCommand)
+		cue, err = processCycleCommand(argString)
 	default:
 		if userCommand, ok := config.GetServerConfig(ctx).Commands[commandType]; ok {
-			cue, err = BuildCueFromUserCommand(ctx, userCommand, subCommand)
+			cue, err = BuildCueFromUserCommand(ctx, userCommand, args)
+		} else if systemCommand, ok := systemCommands[commandType]; ok {
+			cue, err = BuildCueFromUserCommand(ctx, systemCommand, args)
 		} else {
 			err = errorUndefinedFunction
 		}
@@ -63,7 +68,7 @@ func processCycleCommand(cmd string) (*Cue, error) {
 	if len(parts) != 2 {
 		return nil, errorWrongPartLen
 	}
-	lightList := strings.Split(parts[0], ",")
+	lightList := strings.Split(parts[0], "+")
 	duration, err := time.ParseDuration(parts[1])
 	if err != nil {
 		return nil, err
@@ -104,9 +109,9 @@ func processSetCommand(cmd string) (*Cue, error) {
 		if len(parts[0]) == 0 || len(parts[1]) == 0 || len(parts[2]) == 0 {
 			return nil, errorWrongPartCount
 		}
-		lightList := strings.Split(parts[0], ",")
-		colorList := strings.Split(parts[1], ",")
-		timeList := strings.Split(parts[2], ",")
+		lightList := strings.Split(parts[0], "+")
+		colorList := strings.Split(parts[1], "+")
+		timeList := strings.Split(parts[2], "+")
 
 		numTimes := len(timeList)
 		numColors := len(colorList)

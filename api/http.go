@@ -8,9 +8,10 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"net/http"
-	"os"
-	"os/signal"
+	"sync"
 	"time"
+
+	"github.com/gin-contrib/pprof"
 
 	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
@@ -30,6 +31,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+var contextLoggerHTTP *log.Entry
+
+func init() {
+	contextLoggerHTTP = log.WithFields(log.Fields{
+		"module": "http",
+	})
+}
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
 		c.JSON(200, cue.GetCueMaster())
@@ -55,19 +63,20 @@ func runCommands(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
 	var commands []string
 	var responses []cue.Cue
+	span, ctx := opentracing.StartSpanFromContext(ctx, "runCommands")
+	defer span.Finish()
 	if err := c.ShouldBindJSON(&commands); err == nil {
 		cs := cue.GetCueMaster().GetDefaultCueStack()
 		for _, eachCommand := range commands {
-
-			if x, err := cue.NewFromCommand(ctx, eachCommand); err != nil {
-
-				log.Println(err)
+			x, err := cue.NewFromCommand(ctx, eachCommand)
+			if err != nil {
+				contextLoggerHTTP.Println(err)
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
 				return
-			} else {
-				cs.EnQueueCue(*x)
-				responses = append(responses, *x)
 			}
+			cs.EnQueueCue(*x)
+			responses = append(responses, *x)
+
 		}
 
 		c.JSON(200, responses)
@@ -117,7 +126,7 @@ func hexFade(c *gin.Context) {
 
 	buffer := new(bytes.Buffer)
 	if err := jpeg.Encode(buffer, img, nil); err != nil {
-		log.Println("unable to encode image.")
+		contextLoggerHTTP.Println("unable to encode image.")
 	}
 
 	c.Header("Content-Type", "image/jpeg")
@@ -155,27 +164,20 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 
 	go func() {
 		for {
-
+			//todo: only emit when things have changed
 			conn.WriteJSON(&wsWrapper{Data: light.GetLightsByName(), Type: wsTypeLightList})
-			conn.WriteJSON(&wsWrapper{Data: cue.GetCueMaster(), Type: wsTypeCueList})
+			conn.WriteJSON(&wsWrapper{Data: *cue.GetCueMaster(), Type: wsTypeCueList})
 			time.Sleep(tickInterval)
 		}
 	}()
-
-	// for {
-	// 	t, msg, err := conn.ReadMessage()
-	// 	if err != nil {
-	// 		break
-	// 	}
-	// 	conn.WriteMessage(t, msg)
-	// }
 }
 
 //ServeHTTP runs the gin server
-func ServeHTTP(ctx context.Context) {
+func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
 	if !httpConfig.Enabled {
-		log.Info("http is not enabled")
+		contextLoggerHTTP.Info("http is not enabled")
 		return
 	}
 	router := gin.New()
@@ -194,6 +196,8 @@ func ServeHTTP(ctx context.Context) {
 	//register prometheus gin metrics middleware
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(router)
+
+	pprof.Register(router)
 
 	//setup routes
 	router.Use(static.Serve("/", static.LocalFile("./ui/build", false)))
@@ -218,20 +222,17 @@ func ServeHTTP(ctx context.Context) {
 	go func() {
 		// service connections
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			contextLoggerHTTP.Fatalf("listen: %s\n", err)
 		}
 	}()
+	<-ctx.Done()
 
-	//block until graceful shutdown signal
-	quit := make(chan os.Signal)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
-	log.Println("Shutdown Server ...")
+	contextLoggerHTTP.Println("Shutdown Server ...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		contextLoggerHTTP.Fatal("Server Shutdown:", err)
 	}
-	log.Println("Server exiting")
+	contextLoggerHTTP.Println("Server exiting")
 }
