@@ -63,7 +63,7 @@ func LuaToHex(L *lua.LState) int {
 }
 
 //BuildCueFromUserCommand processes a lua user command
-func BuildCueFromUserCommand(ctx context.Context, command config.UserCommand, rawCommand string) (*Cue, error) {
+func BuildCueFromUserCommand(ctx context.Context, command config.UserCommand, args []string) (*Cue, error) {
 	L := lua.NewState()
 	defer L.Close()
 
@@ -77,6 +77,12 @@ func BuildCueFromUserCommand(ctx context.Context, command config.UserCommand, ra
 	L.SetGlobal("light_list", luaLightList)
 	L.SetGlobal("rgb_to_hex", L.NewFunction(LuaToHex))
 
+	//transform arg list
+	lArgs := make([]lua.LValue, len(args))
+	for x := range args {
+		lArgs[x] = lua.LString(args[x])
+	}
+
 	//run the lua command blob
 	if err := L.DoString(command.Body); err != nil {
 		return nil, fmt.Errorf("user command processing error, could not run provided lua code err=%v", err)
@@ -86,7 +92,7 @@ func BuildCueFromUserCommand(ctx context.Context, command config.UserCommand, ra
 		Fn:      L.GetGlobal("process"),
 		NRet:    1,
 		Protect: true,
-	}); err != nil {
+	}, lArgs...); err != nil {
 		return nil, fmt.Errorf("user command processing error, could not call process() err=%v", err)
 	}
 	//get/pop the return value

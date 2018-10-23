@@ -35,6 +35,16 @@ func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
 	}
 }
 
+//Source describes what enqueued the cue
+type Source struct {
+	//http api? grpc? trigger?
+	Input string
+	//command? trigger? plain?
+	Ttype string
+	//per-kind meta info
+	Meta string
+}
+
 //Stack is basically a precedence priority queue (really a CueQueue sigh)
 type Stack struct {
 	Priority      int    `json:"priority"`
@@ -58,6 +68,7 @@ type Cue struct {
 	StartedAt       time.Time     `json:"started_at"`
 	FinishedAt      time.Time     `json:"finished_at"`
 	RealDuration    time.Duration `json:"real_duration"`
+	Source          Source        `json:"source"`
 }
 
 //Frame is a single 'animation frame' of a Cue
