@@ -3,8 +3,8 @@ syntax = "proto3";
 service API {
     rpc GetPing(Ping) returns (Ping) {}
 
-    rpc StreamCueMaster(Ping) returns (stream MarshalledJSON) {}
-    rpc StreamGetLights(Empty) returns (stream Lights) {}
+    rpc StreamCueMaster(ConnectionSettings) returns (stream MarshalledJSON) {}
+    rpc StreamGetLights(ConnectionSettings) returns (stream Lights) {}
 }
 
 message Ping {
@@ -31,6 +31,6 @@ message RGB {
     int32 B = 3;
 }
 
-message Empty {
-
+message ConnectionSettings {
+    string tick = 1;
 }

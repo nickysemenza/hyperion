@@ -120,16 +120,6 @@ type Trigger struct {
 	Command string
 }
 
-//GetClientConfig extracts Client config from context
-func GetClientConfig(ctx context.Context) *Client {
-	return ctx.Value(ContextKeyClient).(*Client)
-}
-
-//Client represents client config
-type Client struct {
-	ServerAddress string
-}
-
 var (
 	//GitCommit is injected at build time with the commit hash
 	GitCommit = "0"
@@ -147,7 +137,7 @@ func LoadServer() *Server {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		fmt.Printf("error config file: %s", err)
 	}
 
 	c := Server{}

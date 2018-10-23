@@ -25,7 +25,12 @@ func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
 	return &pb.Ping{Message: fmt.Sprintf("hi back! (%s)", in.Message)}, nil
 }
 
-func (s *Server) StreamCueMaster(in *pb.Ping, stream pb.API_StreamCueMasterServer) error {
+//StreamCueMaster streams the cuemaster
+func (s *Server) StreamCueMaster(in *pb.ConnectionSettings, stream pb.API_StreamCueMasterServer) error {
+	tick, err := time.ParseDuration(in.Tick)
+	if err != nil {
+		return err
+	}
 	log.Println("StreamCueMaster started")
 	for {
 		cm := cue.GetCueMaster()
@@ -36,13 +41,18 @@ func (s *Server) StreamCueMaster(in *pb.Ping, stream pb.API_StreamCueMasterServe
 			log.Println(err)
 			break
 		}
-		time.Sleep(time.Second)
+		time.Sleep(tick)
 	}
 	return nil
 
 }
 
-func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServer) error {
+//StreamGetLights sends the light state to the client on an interval
+func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_StreamGetLightsServer) error {
+	tick, err := time.ParseDuration(in.Tick)
+	if err != nil {
+		return err
+	}
 	for {
 		allLights := light.GetLightsByName()
 		var pbLights []*pb.Light
@@ -63,7 +73,7 @@ func (s *Server) StreamGetLights(in *pb.Empty, stream pb.API_StreamGetLightsServ
 			log.Println(err)
 			break
 		}
-		time.Sleep(time.Millisecond * 20)
+		time.Sleep(tick)
 	}
 	return nil
 }

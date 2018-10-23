@@ -6,7 +6,7 @@ build:
 dev: dev-server
 dev-server: build
 	./hyperion server
-dev-client:
+dev-client: build
 	./hyperion client
 dev-ui:
 	cd ui && yarn run dev
@@ -16,7 +16,7 @@ test-ui:
 	cd ui && CI=true yarn test
 test: test-server test-ui
 
-proto:
+generate-proto:
 	protoc --go_out=plugins=grpc:api proto/*.proto
 godepgraph:
 	graphpkg -match 'nickysemenza/hyperion' github.com/nickysemenza/hyperion

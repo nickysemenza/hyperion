@@ -45,11 +45,7 @@ var cmdClient = &cobra.Command{
 	Use:   "client",
 	Short: "Run the client",
 	Run: func(cmd *cobra.Command, args []string) {
-		c := config.Client{
-			ServerAddress: "localhost:8888",
-		}
-
-		ctx := context.WithValue(context.Background(), config.ContextKeyClient, &c)
+		ctx := config.LoadClient().InjectIntoContext(context.Background())
 		client.Run(ctx)
 	},
 }

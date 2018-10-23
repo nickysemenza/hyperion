@@ -26,7 +26,7 @@ func Run(ctx context.Context) {
 	client := pb.NewAPIClient(conn)
 
 	lights := make(map[string]*pb.Light)
-	stream, err := client.StreamGetLights(context.Background(), &pb.Empty{})
+	stream, err := client.StreamGetLights(context.Background(), &pb.ConnectionSettings{Tick: "20ms"})
 	if err != nil {
 		log.Fatal(client, err)
 	}
