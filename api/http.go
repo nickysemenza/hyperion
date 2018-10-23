@@ -74,6 +74,9 @@ func runCommands(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
 				return
 			}
+			x.Source.Input = cue.SourceInputAPI
+			x.Source.Type = cue.SourceTypeCommand
+			x.Source.Meta = eachCommand
 			cs.EnQueueCue(*x)
 			responses = append(responses, *x)
 
@@ -97,6 +100,8 @@ func createCue(c *gin.Context) {
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
 		stack := cue.GetCueMaster().GetDefaultCueStack()
+		newCue.Source.Input = cue.SourceInputAPI
+		newCue.Source.Type = cue.SourceTypeJSON
 		cue := stack.EnQueueCue(newCue)
 		span.SetTag("cue-id", cue.ID)
 		c.JSON(200, cue)

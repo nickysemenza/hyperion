@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"context"
+	"fmt"
 
 	opentracing "github.com/opentracing/opentracing-go"
 
@@ -34,6 +35,9 @@ func process(ctx context.Context, t trigger) {
 				log.Errorf("failed to build command from trigger, trigger=%v, command=%v", t, each.Command)
 			} else {
 				stack := cue.GetCueMaster().GetDefaultCueStack()
+				c.Source.Input = cue.SourceInputTrigger
+				c.Source.Type = cue.SourceTypeCommand
+				c.Source.Meta = fmt.Sprintf("trigger=%s:%d", t.source, t.id)
 				stack.EnQueueCue(*c)
 			}
 			// TODO: require one command per trigger, return here

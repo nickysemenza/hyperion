@@ -36,13 +36,22 @@ func getLogrusFieldsFromContext(ctx context.Context) log.Fields {
 }
 
 //Source describes what enqueued the cue
+const (
+	SourceInputAPI     = "http_api"
+	SourceInputRPC     = "rpc"
+	SourceInputTrigger = "trigger"
+	SourceTypeCommand  = "command"
+	SourceTypeTrigger  = "trigger"
+	SourceTypeJSON     = "json"
+)
+
 type Source struct {
 	//http api? grpc? trigger?
-	Input string
-	//command? trigger? plain?
-	Ttype string
+	Input string `json:"input,omitempty"`
+	//command? trigger? json?
+	Type string `json:"type,omitempty"`
 	//per-kind meta info
-	Meta string
+	Meta string `json:"meta,omitempty"`
 }
 
 //Stack is basically a precedence priority queue (really a CueQueue sigh)
