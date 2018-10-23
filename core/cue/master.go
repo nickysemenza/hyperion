@@ -15,8 +15,21 @@ import (
 type Master struct {
 	CueStacks []Stack `json:"cue_stacks"`
 	currentID int64
+	cl        Clock
 	m         sync.Mutex
 }
+
+type Clock interface {
+	Now() time.Time
+	Sleep(d time.Duration)
+	After(d time.Duration) <-chan time.Time
+}
+
+type realClock struct{}
+
+func (realClock) Now() time.Time                         { return time.Now() }
+func (realClock) Sleep(d time.Duration)                  { time.Sleep(d) }
+func (realClock) After(d time.Duration) <-chan time.Time { return time.After(d) }
 
 //cueMaster singleton
 var (
@@ -27,7 +40,7 @@ var (
 //GetCueMaster makes a singleton for the cue master
 func GetCueMaster() *Master {
 	once.Do(func() {
-		cueMasterSingleton = Master{currentID: 1}
+		cueMasterSingleton = Master{currentID: 1, cl: realClock{}}
 		cueMasterSingleton.CueStacks = append(cueMasterSingleton.CueStacks, cueMasterSingleton.NewStack(1, "main"))
 	})
 	return &cueMasterSingleton

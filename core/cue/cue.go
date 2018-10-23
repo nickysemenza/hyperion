@@ -99,6 +99,7 @@ type FrameAction struct {
 func (cs *Stack) ProcessStack(ctx context.Context) {
 	log.Printf("[CueStack: %s]\n", cs.Name)
 	cueBackoff := config.GetServerConfig(ctx).Timings.CueBackoff
+	cm := GetCueMaster()
 	for {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
 			ctx := context.WithValue(ctx, keyStackName, cs.Name)
@@ -125,7 +126,7 @@ func (cs *Stack) ProcessStack(ctx context.Context) {
 			span.Finish()
 		} else {
 			//backoff?
-			time.Sleep(cueBackoff)
+			cm.cl.Sleep(cueBackoff)
 		}
 	}
 }
@@ -268,7 +269,7 @@ func (cf *Frame) ProcessFrame(ctx context.Context) {
 	}
 	//no blocking, so wait until all the child frames have theoretically finished
 	span.LogKV("event", "sleeping/blocking for calculated duration of frame")
-	time.Sleep(cf.GetDuration())
+	GetCueMaster().cl.Sleep(cf.GetDuration())
 	span.LogKV("event", "done")
 }
 
@@ -292,7 +293,7 @@ func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
 	//goroutine doesn't block, so hold until the SetState has (hopefully) finished timing-wise
 	//TODO: why are we doing this?
 	span.LogKV("event", "sleeping/blocking for duration of action")
-	time.Sleep(cfa.NewState.Duration)
+	GetCueMaster().cl.Sleep(cfa.NewState.Duration)
 	span.LogKV("event", "done")
 }
 
