@@ -72,8 +72,8 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 		if err != nil {
 			log.Println(err)
 			break
-    }
-		time.Sleep(time.Millisecond * 20)
+		}
+		time.Sleep(tick)
 	}
 	return nil
 }
