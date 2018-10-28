@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/nickysemenza/hyperion/core/light"
+	"github.com/nickysemenza/hyperion/util/clock"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,11 +37,12 @@ func TestCueFrameGetDuration(t *testing.T) {
 		}, time.Duration(0)},
 	}
 	for _, x := range tt {
+		m := InitializeMaster(clock.RealClock{})
 		require.Equal(t, x.expectedDuration, x.cf.GetDuration())
 		//test with real timings
 		t1 := time.Now()
 
-		GetCueMaster().ProcessFrame(context.Background(), &x.cf)
+		m.ProcessFrame(context.Background(), &x.cf)
 		t2 := time.Now()
 		//7ms of padding/lenience (CI is slow)
 		require.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
@@ -79,6 +81,7 @@ func TestCueDurationHelpers(t *testing.T) {
 
 	for _, tt := range tests {
 		require := require.New(t)
+		m := InitializeMaster(clock.RealClock{})
 		cue := &tt.c
 		require.Equal(tt.expectedDuration, cue.GetDuration())
 		require.Equal(tt.expectedDurationDrift, cue.getDurationDrift())
@@ -92,7 +95,7 @@ func TestCueDurationHelpers(t *testing.T) {
 		}
 
 		t1 := time.Now()
-		GetCueMaster().ProcessCue(context.Background(), cue)
+		m.ProcessCue(context.Background(), cue)
 		t2 := time.Now()
 		//TODO: move status switching form ProcessStack to ProcessCue
 		// require.Equal(statusProcessed, cue.Status)
@@ -103,10 +106,10 @@ func TestCueDurationHelpers(t *testing.T) {
 }
 
 func TestCueQueueing(t *testing.T) {
+	m := InitializeMaster(clock.RealClock{})
 	cs := Stack{}
 	assert.Nil(t, cs.deQueueNextCue(), "deque on empty should return nil")
 
-	m := GetCueMaster()
 	c1 := m.EnQueueCue(Cue{Name: "c1"}, &cs)
 	c2 := m.EnQueueCue(Cue{Name: "c2"}, &cs)
 	require.NotEqual(t, c1.ID, c2.ID)
@@ -173,7 +176,9 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 		actions = append(actions, FrameAction{NewState: light.TargetState{Duration: 0, State: light.State{RGB: color.RGB{}}}})
 	}
 	frame := Frame{Actions: actions}
-	GetCueMaster().ProcessFrame(context.Background(), &frame)
+	m := InitializeMaster(clock.RealClock{})
+
+	m.ProcessFrame(context.Background(), &frame)
 }
 
 func TestAddingIDsToUnmarshalledCue(t *testing.T) {
@@ -202,7 +207,7 @@ func TestAddingIDsToUnmarshalledCue(t *testing.T) {
 
 	assert.Zero(t, cue.ID)
 
-	GetCueMaster().AddIDsRecursively(&cue)
+	InitializeMaster(clock.RealClock{}).AddIDsRecursively(&cue)
 
 	assert.NotZero(t, cue.ID)
 	assert.NotZero(t, cue.Frames[0].ID)

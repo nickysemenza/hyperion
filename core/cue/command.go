@@ -62,6 +62,7 @@ func NewFromCommand(ctx context.Context, cmd string) (*Cue, error) {
 
 }
 
+// e.g. cycle(c1+c2+c3+c4+c5+c6:500ms)
 func processCycleCommand(cmd string) (*Cue, error) {
 	cue := Cue{}
 	parts := strings.Split(cmd, ":")

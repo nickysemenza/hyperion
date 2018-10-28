@@ -6,6 +6,8 @@ import (
 	"os/signal"
 	"sync"
 
+	"github.com/nickysemenza/hyperion/util/clock"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/hyperion/util/tracing"
@@ -22,6 +24,8 @@ func Run(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	wg := sync.WaitGroup{}
 
+	master := cue.InitializeMaster(clock.RealClock{})
+
 	go tracing.InitTracer(ctx)
 	light.Initialize(ctx)
 	//Set up Homekit Server
@@ -37,7 +41,7 @@ func Run(ctx context.Context) {
 	go api.ServeHTTP(ctx, &wg)
 
 	//proceess cues forever
-	cue.GetCueMaster().ProcessForever(ctx)
+	master.ProcessForever(ctx)
 
 	wg.Add(1)
 	go light.SendDMXWorker(ctx, &wg)

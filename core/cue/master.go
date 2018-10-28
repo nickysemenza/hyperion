@@ -38,10 +38,16 @@ var (
 
 //GetCueMaster makes a singleton for the cue master
 func GetCueMaster() *Master {
-	once.Do(func() {
-		cueMasterSingleton = Master{currentID: 1, cl: clock.RealClock{}}
-		cueMasterSingleton.CueStacks = append(cueMasterSingleton.CueStacks, cueMasterSingleton.NewStack(1, "main"))
-	})
+	if &cueMasterSingleton == nil {
+		panic("Master not initialized")
+	}
+	return &cueMasterSingleton
+}
+
+//InitializeMaster initializes the cuemaster
+func InitializeMaster(cl clock.Clock) *Master {
+	cueMasterSingleton = Master{currentID: 1, cl: cl}
+	cueMasterSingleton.CueStacks = append(cueMasterSingleton.CueStacks, cueMasterSingleton.NewStack(1, "main"))
 	return &cueMasterSingleton
 }
 

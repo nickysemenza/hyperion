@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/nickysemenza/hyperion/util/clock"
+
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +20,8 @@ func TestTrigger(t *testing.T) {
 		},
 	}
 	ctx := config.InjectIntoContext(context.Background())
-	stack := cue.GetCueMaster().GetDefaultCueStack()
+	m := cue.InitializeMaster(clock.RealClock{})
+	stack := m.GetDefaultCueStack()
 
 	//should start with empty cue stack
 	assert.Len(t, stack.Cues, 0)
