@@ -29,16 +29,17 @@ func process(ctx context.Context, t trigger) {
 	span.LogKV("trigger", t)
 	triggerConf := config.GetServerConfig(ctx).Triggers
 	log.Printf("new trigger! %v\n", t)
+	m := cue.GetCueMaster()
 	for _, each := range triggerConf {
 		if each.ID == t.id && each.Source == t.source {
 			if c, err := cue.NewFromCommand(ctx, each.Command); err != nil {
 				log.Errorf("failed to build command from trigger, trigger=%v, command=%v", t, each.Command)
 			} else {
-				stack := cue.GetCueMaster().GetDefaultCueStack()
+				stack := m.GetDefaultCueStack()
 				c.Source.Input = cue.SourceInputTrigger
 				c.Source.Type = cue.SourceTypeCommand
 				c.Source.Meta = fmt.Sprintf("trigger=%s:%d", t.source, t.id)
-				stack.EnQueueCue(*c)
+				m.EnQueueCue(*c, stack)
 			}
 			// TODO: require one command per trigger, return here
 		}

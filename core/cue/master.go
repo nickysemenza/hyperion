@@ -8,28 +8,27 @@ import (
 	"time"
 
 	"github.com/nickysemenza/hyperion/core/light"
+	"github.com/nickysemenza/hyperion/util/clock"
 	"github.com/nickysemenza/hyperion/util/color"
 )
+
+//MasterManager is an interface
+type MasterManager interface {
+	ProcessStack(ctx context.Context, cs *Stack)
+	ProcessCue(ctx context.Context, c *Cue)
+	ProcessFrame(ctx context.Context, cf *Frame)
+	ProcessFrameAction(ctx context.Context, cfa *FrameAction)
+	EnQueueCue(c Cue, cs *Stack)
+	AddIDsRecursively(c *Cue)
+}
 
 //Master is the parent of all CueStacks, is a singleton
 type Master struct {
 	CueStacks []Stack `json:"cue_stacks"`
 	currentID int64
-	cl        Clock
+	cl        clock.Clock
 	m         sync.Mutex
 }
-
-type Clock interface {
-	Now() time.Time
-	Sleep(d time.Duration)
-	After(d time.Duration) <-chan time.Time
-}
-
-type realClock struct{}
-
-func (realClock) Now() time.Time                         { return time.Now() }
-func (realClock) Sleep(d time.Duration)                  { time.Sleep(d) }
-func (realClock) After(d time.Duration) <-chan time.Time { return time.After(d) }
 
 //cueMaster singleton
 var (
@@ -40,7 +39,7 @@ var (
 //GetCueMaster makes a singleton for the cue master
 func GetCueMaster() *Master {
 	once.Do(func() {
-		cueMasterSingleton = Master{currentID: 1, cl: realClock{}}
+		cueMasterSingleton = Master{currentID: 1, cl: clock.RealClock{}}
 		cueMasterSingleton.CueStacks = append(cueMasterSingleton.CueStacks, cueMasterSingleton.NewStack(1, "main"))
 	})
 	return &cueMasterSingleton
@@ -93,6 +92,6 @@ func (cm *Master) New(frames []Frame, name string) Cue {
 //ProcessForever runs all the cuestacks
 func (cm *Master) ProcessForever(ctx context.Context) {
 	for x := range cm.CueStacks {
-		go cm.CueStacks[x].ProcessStack(ctx)
+		go cm.ProcessStack(ctx, &cm.CueStacks[x])
 	}
 }

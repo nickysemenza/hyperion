@@ -39,7 +39,8 @@ func TestCueFrameGetDuration(t *testing.T) {
 		require.Equal(t, x.expectedDuration, x.cf.GetDuration())
 		//test with real timings
 		t1 := time.Now()
-		x.cf.ProcessFrame(context.Background())
+
+		GetCueMaster().ProcessFrame(context.Background(), &x.cf)
 		t2 := time.Now()
 		//7ms of padding/lenience (CI is slow)
 		require.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
@@ -91,7 +92,7 @@ func TestCueDurationHelpers(t *testing.T) {
 		}
 
 		t1 := time.Now()
-		cue.ProcessCue(context.Background())
+		GetCueMaster().ProcessCue(context.Background(), cue)
 		t2 := time.Now()
 		//TODO: move status switching form ProcessStack to ProcessCue
 		// require.Equal(statusProcessed, cue.Status)
@@ -105,8 +106,9 @@ func TestCueQueueing(t *testing.T) {
 	cs := Stack{}
 	assert.Nil(t, cs.deQueueNextCue(), "deque on empty should return nil")
 
-	c1 := cs.EnQueueCue(Cue{Name: "c1"})
-	c2 := cs.EnQueueCue(Cue{Name: "c2"})
+	m := GetCueMaster()
+	c1 := m.EnQueueCue(Cue{Name: "c1"}, &cs)
+	c2 := m.EnQueueCue(Cue{Name: "c2"}, &cs)
 	require.NotEqual(t, c1.ID, c2.ID)
 
 	assert.Equal(t, len(cs.Cues), 2)
@@ -115,7 +117,7 @@ func TestCueQueueing(t *testing.T) {
 
 	assert.Equal(t, pop.Name, "c1", "queue should be FIFO")
 
-	cs.EnQueueCue(Cue{Name: "c3"})
+	m.EnQueueCue(Cue{Name: "c3"}, &cs)
 	assert.Equal(t, cs.deQueueNextCue().Name, "c2", "queue should be FIFO")
 	assert.Equal(t, cs.deQueueNextCue().Name, "c3", "queue should be FIFO")
 
@@ -171,7 +173,7 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 		actions = append(actions, FrameAction{NewState: light.TargetState{Duration: 0, State: light.State{RGB: color.RGB{}}}})
 	}
 	frame := Frame{Actions: actions}
-	frame.ProcessFrame(context.Background())
+	GetCueMaster().ProcessFrame(context.Background(), &frame)
 }
 
 func TestAddingIDsToUnmarshalledCue(t *testing.T) {
@@ -200,7 +202,7 @@ func TestAddingIDsToUnmarshalledCue(t *testing.T) {
 
 	assert.Zero(t, cue.ID)
 
-	cue.AddIDsRecursively()
+	GetCueMaster().AddIDsRecursively(&cue)
 
 	assert.NotZero(t, cue.ID)
 	assert.NotZero(t, cue.Frames[0].ID)

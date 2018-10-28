@@ -66,7 +66,8 @@ func runCommands(c *gin.Context) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "runCommands")
 	defer span.Finish()
 	if err := c.ShouldBindJSON(&commands); err == nil {
-		cs := cue.GetCueMaster().GetDefaultCueStack()
+		m := cue.GetCueMaster()
+		cs := m.GetDefaultCueStack()
 		for _, eachCommand := range commands {
 			x, err := cue.NewFromCommand(ctx, eachCommand)
 			if err != nil {
@@ -77,7 +78,7 @@ func runCommands(c *gin.Context) {
 			x.Source.Input = cue.SourceInputAPI
 			x.Source.Type = cue.SourceTypeCommand
 			x.Source.Meta = eachCommand
-			cs.EnQueueCue(*x)
+			m.EnQueueCue(*x, cs)
 			responses = append(responses, *x)
 
 		}
@@ -99,10 +100,11 @@ func createCue(c *gin.Context) {
 	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
-		stack := cue.GetCueMaster().GetDefaultCueStack()
+		m := cue.GetCueMaster()
+		stack := m.GetDefaultCueStack()
 		newCue.Source.Input = cue.SourceInputAPI
 		newCue.Source.Type = cue.SourceTypeJSON
-		cue := stack.EnQueueCue(newCue)
+		cue := m.EnQueueCue(newCue, stack)
 		span.SetTag("cue-id", cue.ID)
 		c.JSON(200, cue)
 	} else {

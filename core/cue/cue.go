@@ -96,10 +96,10 @@ type FrameAction struct {
 }
 
 //ProcessStack processes cues
-func (cs *Stack) ProcessStack(ctx context.Context) {
+func (m *Master) ProcessStack(ctx context.Context, cs *Stack) {
 	log.Printf("[CueStack: %s]\n", cs.Name)
 	cueBackoff := config.GetServerConfig(ctx).Timings.CueBackoff
-	cm := GetCueMaster()
+
 	for {
 		if nextCue := cs.deQueueNextCue(); nextCue != nil {
 			ctx := context.WithValue(ctx, keyStackName, cs.Name)
@@ -111,7 +111,7 @@ func (cs *Stack) ProcessStack(ctx context.Context) {
 			cs.ActiveCue = nextCue
 			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()
-			nextCue.ProcessCue(ctx)
+			m.ProcessCue(ctx, nextCue)
 			//post processing cleanup
 			nextCue.FinishedAt = time.Now()
 			nextCue.Status = statusProcessed
@@ -126,7 +126,7 @@ func (cs *Stack) ProcessStack(ctx context.Context) {
 			span.Finish()
 		} else {
 			//backoff?
-			cm.cl.Sleep(cueBackoff)
+			m.cl.Sleep(cueBackoff)
 		}
 	}
 }
@@ -144,10 +144,10 @@ func (cs *Stack) deQueueNextCue() *Cue {
 
 //EnQueueCue puts a cue on the queue
 //it also assigns the cue (and subcomponents) an ID
-func (cs *Stack) EnQueueCue(c Cue) *Cue {
+func (m *Master) EnQueueCue(c Cue, cs *Stack) *Cue {
 	cs.m.Lock()
 	defer cs.m.Unlock()
-	c.AddIDsRecursively()
+	m.AddIDsRecursively(&c)
 	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name}).Info("enqueued!")
 
 	cs.Cues = append(cs.Cues, c)
@@ -155,32 +155,31 @@ func (cs *Stack) EnQueueCue(c Cue) *Cue {
 }
 
 //ProcessCue processes cue
-func (c *Cue) ProcessCue(ctx context.Context) {
+func (m *Master) ProcessCue(ctx context.Context, c *Cue) {
 	ctx = context.WithValue(ctx, keyCueID, c.ID)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessCue")
 	defer span.Finish()
 	log.WithFields(getLogrusFieldsFromContext(ctx)).Info("ProcessCue")
 	for _, eachFrame := range c.Frames {
-		eachFrame.ProcessFrame(ctx)
+		m.ProcessFrame(ctx, &eachFrame)
 	}
 }
 
 //AddIDsRecursively populates the ID fields on a cue, its frames, and their actions
-func (c *Cue) AddIDsRecursively() {
-	cm := GetCueMaster()
+func (m *Master) AddIDsRecursively(c *Cue) {
 	c.Status = statusEnqueued
 	if c.ID == 0 {
-		c.ID = cm.getNextIDForUse()
+		c.ID = m.getNextIDForUse()
 	}
 	for x := range c.Frames {
 		eachFrame := &c.Frames[x]
 		if eachFrame.ID == 0 {
-			eachFrame.ID = cm.getNextIDForUse()
+			eachFrame.ID = m.getNextIDForUse()
 		}
 		for y := range eachFrame.Actions {
 			eachAction := &eachFrame.Actions[y]
 			if eachAction.ID == 0 {
-				eachAction.ID = cm.getNextIDForUse()
+				eachAction.ID = m.getNextIDForUse()
 			}
 		}
 	}
@@ -253,7 +252,7 @@ func (cf *Frame) MarshalJSON() ([]byte, error) {
 }
 
 //ProcessFrame processes the cueframe
-func (cf *Frame) ProcessFrame(ctx context.Context) {
+func (m *Master) ProcessFrame(ctx context.Context, cf *Frame) {
 	ctx = context.WithValue(ctx, keyFrameID, cf.ID)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessFrame")
 	defer span.Finish()
@@ -265,16 +264,16 @@ func (cf *Frame) ProcessFrame(ctx context.Context) {
 
 	// fmt.Println(cf.Actions)
 	for x := range cf.Actions {
-		go cf.Actions[x].ProcessFrameAction(ctx)
+		go m.ProcessFrameAction(ctx, &cf.Actions[x])
 	}
 	//no blocking, so wait until all the child frames have theoretically finished
 	span.LogKV("event", "sleeping/blocking for calculated duration of frame")
-	GetCueMaster().cl.Sleep(cf.GetDuration())
+	m.cl.Sleep(cf.GetDuration())
 	span.LogKV("event", "done")
 }
 
 //ProcessFrameAction does job stuff
-func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
+func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessFrameAction")
 	defer span.Finish()
 	span.SetTag("frameaction-id", cfa.ID)
@@ -293,7 +292,7 @@ func (cfa *FrameAction) ProcessFrameAction(ctx context.Context) {
 	//goroutine doesn't block, so hold until the SetState has (hopefully) finished timing-wise
 	//TODO: why are we doing this?
 	span.LogKV("event", "sleeping/blocking for duration of action")
-	GetCueMaster().cl.Sleep(cfa.NewState.Duration)
+	m.cl.Sleep(cfa.NewState.Duration)
 	span.LogKV("event", "done")
 }
 
