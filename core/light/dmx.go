@@ -192,7 +192,6 @@ func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, wg
 }
 
 func getChannelIndexForAttribute(p *mainConfig.LightProfileDMX, attrName string) int {
-
 	id, ok := p.Channels[attrName]
 	if ok {
 		return id

@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/heatxsink/go-hue/lights"
-	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
 )
@@ -43,12 +42,12 @@ func (hl *HueLight) SetState(ctx context.Context, s TargetState) {
 	defer hl.m.Unlock()
 	span.LogKV("event", "acquired lock")
 	SetCurrentState(hl.Name, s.ToState())
-	go hl.SetColor(ctx, s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
+	go hl.setColor(ctx, GetManager().hueConnection, s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
 }
 
-//SetColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
-func (hl *HueLight) SetColor(ctx context.Context, color color.RGB, timing time.Duration) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight SetColor")
+//setColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
+func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, color color.RGB, timing time.Duration) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight setColor")
 	defer span.Finish()
 	span.SetTag("hue-id", hl.HueID)
 	span.SetTag("hue-name", hl.GetName())
@@ -68,12 +67,10 @@ func (hl *HueLight) SetColor(ctx context.Context, color color.RGB, timing time.D
 		TransitionTime: getTransitionTimeAs100msMultiple(timing),
 	}
 
-	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now(), "brightness": brightness, "on": isOn}).Infof("HueLight SetColor: %s", color.TermString())
-	hueConfig := mainConfig.GetServerConfig(ctx).Outputs.Hue
-	hueLights := lights.New(hueConfig.Address, hueConfig.Username)
+	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now(), "brightness": brightness, "on": isOn}).Infof("HueLight setColor: %s", color.TermString())
 	span.LogEventWithPayload("sending hue light change to bridge", state)
 	timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("hue"))
-	hueLights.SetLightState(lightID, *state) //TODO: use response
+	bridgeConn.SetLightState(lightID, *state) //TODO: use response
 	timer.ObserveDuration()
 	span.LogKV("event", "done")
 }
@@ -91,11 +88,7 @@ type DiscoveredHues struct {
 
 //GetDiscoveredHues finds all the hues on the network
 func GetDiscoveredHues(ctx context.Context) DiscoveredHues {
-
-	hueConfig := mainConfig.GetServerConfig(ctx).Outputs.Hue
-	hueLights := lights.New(hueConfig.Address, hueConfig.Username)
-
-	lights, _ := hueLights.GetAllLights()
+	lights, _ := GetManager().hueConnection.GetAllLights()
 
 	byName := make(map[string]int)
 	for _, x := range lights {

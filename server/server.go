@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"sync"
 
+	"github.com/heatxsink/go-hue/lights"
 	"github.com/nickysemenza/gola"
 	"github.com/nickysemenza/hyperion/util/clock"
 
@@ -22,14 +23,18 @@ import (
 
 //Run starts the server
 func Run(ctx context.Context) {
-
 	ctx, cancel := context.WithCancel(ctx)
 	wg := sync.WaitGroup{}
 
+	c := config.GetServerConfig(ctx)
 	master := cue.InitializeMaster(clock.RealClock{})
 
 	go tracing.InitTracer(ctx)
-	light.Initialize(ctx)
+
+	//Initialize lights (including hue output)
+	hueConn := lights.New(c.Outputs.Hue.Address, c.Outputs.Hue.Username)
+	light.Initialize(ctx, hueConn)
+
 	//Set up Homekit Server
 	wg.Add(1)
 	go homekit.Start(ctx, &wg)
@@ -45,7 +50,7 @@ func Run(ctx context.Context) {
 	//proceess cues forever
 	master.ProcessForever(ctx)
 
-	olaConfig := config.GetServerConfig(ctx).Outputs.OLA
+	olaConfig := c.Outputs.OLA
 	if !olaConfig.Enabled {
 		log.Info("ola output is not enabled")
 	} else {

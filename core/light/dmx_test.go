@@ -58,7 +58,7 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 	c.DMXProfiles["a"] = config.LightProfileDMX{Name: "a", Channels: map[string]int{"red": 1, "green": 2, "blue": 3}}
 
 	ctx := c.InjectIntoContext(context.Background())
-	Initialize(ctx)
+	Initialize(ctx, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
