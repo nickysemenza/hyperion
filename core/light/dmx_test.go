@@ -97,11 +97,6 @@ func TestSendDMXWorker(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	go func() {
-		time.Sleep(time.Second)
-		cancel()
-
-	}()
 
 	s := getDMXStateInstance()
 	s.universes = make(map[int][]byte) //TODO: make it so i don't have to reset
@@ -116,8 +111,9 @@ func TestSendDMXWorker(t *testing.T) {
 	chans3[8] = 100
 	client.On("SendDmx", 3, chans3).Return(true, nil)
 
-	go SendDMXWorker(ctx, client, time.Second, &wg)
-	// spew.Dump(client.Calls)
+	go SendDMXWorker(ctx, client, time.Millisecond*20, &wg)
+	time.Sleep(time.Millisecond * 100)
+	cancel()
 	wg.Wait()
 	client.AssertExpectations(t)
 
