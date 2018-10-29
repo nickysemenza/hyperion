@@ -18,7 +18,11 @@ const (
 
 //GetServerConfig extracts Server config from context
 func GetServerConfig(ctx context.Context) *Server {
-	return ctx.Value(ContextKeyServer).(*Server)
+	val := ctx.Value(ContextKeyServer)
+	if val == nil {
+		return nil
+	}
+	return val.(*Server)
 }
 
 //InjectIntoContext injects Server config into a provided ctx

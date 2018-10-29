@@ -80,7 +80,6 @@ func runCommands(c *gin.Context) {
 			x.Source.Meta = eachCommand
 			m.EnQueueCue(*x, cs)
 			responses = append(responses, *x)
-
 		}
 
 		c.JSON(200, responses)
@@ -179,14 +178,12 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 	}()
 }
 
-//ServeHTTP runs the gin server
-func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
-	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
-	if !httpConfig.Enabled {
-		contextLoggerHTTP.Info("http is not enabled")
-		return
+func getRouter(ctx context.Context, testMode bool) *gin.Engine {
+	if testMode {
+		gin.SetMode(gin.TestMode)
+
 	}
+	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
 	router := gin.New()
 	router.Use(gin.LoggerWithWriter(gin.DefaultWriter, "/_metrics"))
 
@@ -220,10 +217,22 @@ func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
 	})
 	router.GET("debug", debug)
 
+	return router
+}
+
+//ServeHTTP runs the gin server
+func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
+	if !httpConfig.Enabled {
+		contextLoggerHTTP.Info("http is not enabled")
+		return
+	}
+
 	//server
 	srv := &http.Server{
 		Addr:    httpConfig.Address,
-		Handler: router,
+		Handler: getRouter(ctx, false),
 	}
 
 	go func() {

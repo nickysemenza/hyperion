@@ -113,6 +113,7 @@ func (m *Master) ProcessStack(ctx context.Context, cs *Stack) {
 			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()
 			var wg sync.WaitGroup //todo: move this elsewhere?
+			wg.Add(1)
 			m.ProcessCue(ctx, nextCue, &wg)
 			//post processing cleanup
 			nextCue.FinishedAt = time.Now()
