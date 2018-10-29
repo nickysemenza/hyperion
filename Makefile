@@ -11,7 +11,7 @@ dev-client: build
 dev-ui:
 	cd ui && yarn run dev
 test-server: 
-	go test -cover  ./...
+	go test -v -race -cover  ./...
 test-ui:
 	cd ui && CI=true yarn test
 test: test-server test-ui

@@ -127,6 +127,8 @@ func TestSetColor(t *testing.T) {
 			targetState.State.RGB = tt.color
 			hl.SetState(context.Background(), targetState)
 			time.Sleep(time.Millisecond)
+			h.AssertExpectations(t)
+
 			require.Len(t, h.Calls, 1)
 			stateParam := h.Calls[0].Arguments[1].(lights.State)
 			require.Equal(t, tt.expectedIsOn, stateParam.On)
@@ -136,7 +138,6 @@ func TestSetColor(t *testing.T) {
 
 			// h.On("GetAllLights").Return(tt.resp, tt.err)
 			// require.Equal(t, tt.expected, GetDiscoveredHues(context.Background()).ByName)
-			h.AssertExpectations(t)
 		})
 	}
 }

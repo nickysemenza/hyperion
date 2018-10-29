@@ -16,8 +16,8 @@ import (
 type MasterManager interface {
 	ProcessStack(ctx context.Context, cs *Stack)
 	ProcessCue(ctx context.Context, c *Cue)
-	ProcessFrame(ctx context.Context, cf *Frame)
-	ProcessFrameAction(ctx context.Context, cfa *FrameAction)
+	ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup)
+	ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *sync.WaitGroup)
 	EnQueueCue(c Cue, cs *Stack)
 	AddIDsRecursively(c *Cue)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -36,16 +37,21 @@ func TestCueFrameGetDuration(t *testing.T) {
 			Actions: []FrameAction{},
 		}, time.Duration(0)},
 	}
-	for _, x := range tt {
-		m := InitializeMaster(clock.RealClock{})
-		require.Equal(t, x.expectedDuration, x.cf.GetDuration())
-		//test with real timings
-		t1 := time.Now()
+	for i, x := range tt {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			m := InitializeMaster(clock.RealClock{})
+			require.Equal(t, x.expectedDuration, x.cf.GetDuration())
+			//test with real timings
+			t1 := time.Now()
 
-		m.ProcessFrame(context.Background(), &x.cf)
-		t2 := time.Now()
-		//7ms of padding/lenience (CI is slow)
-		require.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
+			var wg sync.WaitGroup
+			wg.Add(1)
+			m.ProcessFrame(context.Background(), &x.cf, &wg)
+			wg.Wait()
+			t2 := time.Now()
+			//7ms of padding/lenience (CI is slow)
+			require.WithinDuration(t, t1, t2, x.expectedDuration+(7*time.Millisecond))
+		})
 	}
 }
 
@@ -95,7 +101,10 @@ func TestCueDurationHelpers(t *testing.T) {
 		}
 
 		t1 := time.Now()
-		m.ProcessCue(context.Background(), cue)
+		var wg sync.WaitGroup
+		wg.Add(1)
+		m.ProcessCue(context.Background(), cue, &wg)
+		wg.Wait()
 		t2 := time.Now()
 		//TODO: move status switching form ProcessStack to ProcessCue
 		// require.Equal(statusProcessed, cue.Status)
@@ -178,7 +187,7 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 	frame := Frame{Actions: actions}
 	m := InitializeMaster(clock.RealClock{})
 
-	m.ProcessFrame(context.Background(), &frame)
+	m.ProcessFrame(context.Background(), &frame, &sync.WaitGroup{})
 }
 
 func TestAddingIDsToUnmarshalledCue(t *testing.T) {
