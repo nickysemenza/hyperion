@@ -1,7 +1,11 @@
 package light
 
 import (
+	"context"
 	"testing"
+
+	"github.com/nickysemenza/hyperion/core/config"
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -33,9 +37,11 @@ func TestFindLightByName(t *testing.T) {
 	dmx1 := &DMXLight{Name: "dmx1"}
 	hue1 := &HueLight{Name: "hue1"}
 
-	ByName = make(NameMap)
-	ByName["hue1"] = hue1
-	ByName["dmx1"] = dmx1
+	s := &config.Server{}
+	m, err := Initialize(s.InjectIntoContext(context.Background()), nil)
+	require.NoError(t, err)
+	m.items["hue1"] = hue1
+	m.items["dmx1"] = dmx1
 
 	tt := []struct {
 		nameToFind string
@@ -46,7 +52,7 @@ func TestFindLightByName(t *testing.T) {
 		{"aaa", nil},
 	}
 	for _, x := range tt {
-		res := GetByName(x.nameToFind)
+		res := m.GetByName(x.nameToFind)
 		if res == nil && x.expected == nil {
 			continue
 		}

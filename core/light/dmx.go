@@ -78,7 +78,7 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, m *Manager, c
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[1], value: gVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[2], value: bVal})
 
-	m.SetCurrentState(d.Name, State{RGB: color})
+	m.SetState(d.Name, State{RGB: color})
 
 }
 
@@ -86,7 +86,7 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, m *Manager, c
 //TODO: other properties? on/off?
 func (d *DMXLight) SetState(ctx context.Context, m *Manager, target TargetState) {
 	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
-	currentState := m.GetCurrentState(d.Name)
+	currentState := m.GetState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
 	defer span.Finish()
@@ -106,7 +106,7 @@ func (d *DMXLight) SetState(ctx context.Context, m *Manager, target TargetState)
 
 	d.blindlySetRGBToStateAndDMX(ctx, m, target.RGB)
 	span.LogKV("event", "finished fade interpolation")
-	m.SetCurrentState(d.Name, target.ToState())
+	m.SetState(d.Name, target.ToState())
 
 }
 

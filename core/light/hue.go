@@ -41,7 +41,7 @@ func (hl *HueLight) SetState(ctx context.Context, m *Manager, s TargetState) {
 	hl.m.Lock()
 	defer hl.m.Unlock()
 	span.LogKV("event", "acquired lock")
-	m.SetCurrentState(hl.Name, s.ToState())
+	m.SetState(hl.Name, s.ToState())
 	go hl.setColor(ctx, m.hueConnection, s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
 }
 

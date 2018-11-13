@@ -92,6 +92,7 @@ type FrameAction struct {
 	NewState  light.TargetState `json:"new_state"`
 	ID        int64             `json:"id"`
 	LightName string            `json:"light_name"`
+	Light     light.Light       `json:"light"`
 	//TODO: add `light`
 	//TODO: add way to have a noop action (to block aka wait for time)
 }
@@ -186,6 +187,7 @@ func (m *Master) AddIDsRecursively(c *Cue) {
 			if eachAction.ID == 0 {
 				eachAction.ID = m.getNextIDForUse()
 			}
+			eachAction.Light = m.GetLightManager().GetByName(eachAction.LightName)
 		}
 	}
 }
@@ -291,7 +293,7 @@ func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *s
 		WithFields(log.Fields{"duration": cfa.NewState.Duration, "now_ms": now, "light": cfa.LightName}).
 		Infof("ProcessFrameAction (color=%v)", cfa.NewState.RGB.TermString())
 
-	if l := light.GetByName(cfa.LightName); l != nil {
+	if l := m.GetLightManager().GetByName(cfa.LightName); l != nil {
 		go l.SetState(ctx, m.LightManager, cfa.NewState)
 	} else {
 		log.Errorf("Cannot find light by name: %s\n", cfa.LightName)
@@ -311,7 +313,6 @@ func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
 		DurationMS time.Duration `json:"action_duration_ms"`
 		*Alias
 	}{
-		Light:      light.GetByName(cfa.LightName),
 		DurationMS: cfa.NewState.Duration / time.Millisecond,
 		Alias:      (*Alias)(cfa),
 	})

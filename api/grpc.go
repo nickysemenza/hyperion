@@ -13,7 +13,6 @@ import (
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
-	"github.com/nickysemenza/hyperion/core/light"
 	"google.golang.org/grpc"
 )
 
@@ -56,11 +55,11 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 	}
 	for {
 
-		allLights := light.GetLightsByName() //TODO: fix this
+		allLights := s.master.GetLightManager().GetLightsByName() //TODO: fix this
 		var pbLights []*pb.Light
 
 		for k, v := range allLights {
-			color := s.master.GetLightManager().GetCurrentState(v.GetName()).RGB.AsPB()
+			color := s.master.GetLightManager().GetState(v.GetName()).RGB.AsPB()
 			pbLights = append(pbLights, &pb.Light{
 				Name:         k,
 				Type:         v.GetType(),

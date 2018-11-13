@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"sync"
-	"time"
 
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/clock"
-	"github.com/nickysemenza/hyperion/util/color"
 )
 
 //MasterManager is an interface
@@ -47,11 +45,6 @@ func InitializeMaster(cl clock.Clock, ls *light.Manager) MasterManager {
 	}
 }
 
-//NewFrameAction creates a new instate with incr ID
-func (cm *Master) NewFrameAction(duration time.Duration, color color.RGB, lightName string) FrameAction {
-	return FrameAction{ID: cm.getNextIDForUse(), LightName: lightName, NewState: light.TargetState{State: light.State{RGB: color}, Duration: duration}}
-}
-
 //DumpToFile write the CueMaster to a file
 func (cm *Master) DumpToFile(fileName string) error {
 	jsonData, err := json.MarshalIndent(cm, "", " ")
@@ -74,16 +67,6 @@ func (cm *Master) getNextIDForUse() int64 {
 //GetDefaultCueStack gives the first cuestack
 func (cm *Master) GetDefaultCueStack() *Stack {
 	return &cm.CueStacks[0]
-}
-
-//NewFrame creates a new instate with incr ID
-func (cm *Master) NewFrame(actions []FrameAction) Frame {
-	return Frame{ID: cm.getNextIDForUse(), Actions: actions}
-}
-
-//New creates a new instate with incr ID
-func (cm *Master) New(frames []Frame, name string) Cue {
-	return Cue{ID: cm.getNextIDForUse(), Frames: frames, Status: statusEnqueued}
 }
 
 //ProcessForever runs all the cuestacks
