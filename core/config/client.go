@@ -14,7 +14,11 @@ type Client struct {
 
 //GetClientConfig extracts Client config from context
 func GetClientConfig(ctx context.Context) *Client {
-	return ctx.Value(ContextKeyClient).(*Client)
+	val := ctx.Value(ContextKeyClient)
+	if val == nil {
+		return nil
+	}
+	return val.(*Client)
 }
 
 //InjectIntoContext injects Client config into a provided ctx

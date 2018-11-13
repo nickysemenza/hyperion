@@ -6,41 +6,62 @@ import (
 	"os/signal"
 	"sync"
 
+	"github.com/heatxsink/go-hue/lights"
+	"github.com/nickysemenza/gola"
+	"github.com/nickysemenza/hyperion/util/clock"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/hyperion/util/tracing"
 
 	"github.com/nickysemenza/hyperion/api"
 	"github.com/nickysemenza/hyperion/control/homekit"
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
 )
 
 //Run starts the server
 func Run(ctx context.Context) {
-
 	ctx, cancel := context.WithCancel(ctx)
 	wg := sync.WaitGroup{}
 
+	c := config.GetServerConfig(ctx)
+	master := cue.InitializeMaster(clock.RealClock{})
+
 	go tracing.InitTracer(ctx)
-	light.Initialize(ctx)
+
+	//Initialize lights (including hue output)
+	hueConn := lights.New(c.Outputs.Hue.Address, c.Outputs.Hue.Username)
+	light.Initialize(ctx, hueConn)
+
 	//Set up Homekit Server
 	wg.Add(1)
-	go homekit.Start(ctx, &wg)
+	go homekit.Start(ctx, &wg, master)
 
 	//Set up RPC server
 	wg.Add(1)
-	go api.ServeRPC(ctx, &wg)
+	go api.ServeRPC(ctx, &wg, master)
 
 	//Setup API server
 	wg.Add(1)
-	go api.ServeHTTP(ctx, &wg)
+	go api.ServeHTTP(ctx, &wg, master)
 
 	//proceess cues forever
-	cue.GetCueMaster().ProcessForever(ctx)
+	master.ProcessForever(ctx)
 
-	wg.Add(1)
-	go light.SendDMXWorker(ctx, &wg)
+	olaConfig := c.Outputs.OLA
+	if !olaConfig.Enabled {
+		log.Info("ola output is not enabled")
+	} else {
+		client, err := gola.New(olaConfig.Address)
+		if err != nil {
+			log.Errorf("could not start DMX worker: could not connect to ola: %v", err)
+		} else {
+			wg.Add(1)
+			go light.SendDMXWorker(ctx, client, olaConfig.Tick, &wg)
+		}
+	}
 
 	//handle CTRL+C interrupt
 	quit := make(chan os.Signal)

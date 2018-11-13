@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/heatxsink/go-hue/hue"
+	"github.com/heatxsink/go-hue/lights"
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 )
@@ -47,12 +49,21 @@ type NameMap map[string]Light
 //StateMap holds Global light state
 type StateMap map[string]State
 
-type stateManager struct {
-	byName       StateMap
-	stateMapLock sync.RWMutex
+//StateManager holds the state of lights
+type StateManager struct {
+	byName        StateMap
+	stateMapLock  sync.RWMutex
+	hueConnection HueConnection
 }
 
-var states stateManager
+var states StateManager
+
+//GetManager returns the light state manager
+func GetManager() *StateManager {
+	states.stateMapLock.RLock()
+	defer states.stateMapLock.RUnlock()
+	return &states
+}
 
 //SetCurrentState will set the current state for a light
 func SetCurrentState(name string, s State) {
@@ -113,9 +124,18 @@ func GetByName(name string) Light {
 	return nil
 }
 
+//HueConnection represents a connection to a hue bridge
+type HueConnection interface {
+	SetLightState(lightID int, state lights.State) ([]hue.ApiResponse, error)
+	GetAllLights() ([]lights.Light, error)
+}
+
 //Initialize parses light config
-func Initialize(ctx context.Context) error {
+func Initialize(ctx context.Context, h HueConnection) error {
 	config := mainConfig.GetServerConfig(ctx)
+	states.stateMapLock.Lock()
+	states.hueConnection = h
+	states.stateMapLock.Unlock()
 
 	ByName = make(NameMap)
 	for i := range config.Lights.Hue {

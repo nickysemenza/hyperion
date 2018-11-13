@@ -9,7 +9,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/nickysemenza/gola"
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
@@ -117,8 +116,10 @@ type dmxState struct {
 	m         sync.Mutex
 }
 
-var dmxStateInstance *dmxState
-var once sync.Once
+var (
+	dmxStateInstance *dmxState
+	once             sync.Once
+)
 
 //getDMXStateInstance makes a singleton for dmxState
 func getDMXStateInstance() *dmxState {
@@ -161,24 +162,21 @@ func (s *dmxState) initializeUniverse(universe int) {
 	}
 }
 
+//OLAClient is the interface for communicating with ola
+type OLAClient interface {
+	SendDmx(universe int, values []byte) (status bool, err error)
+	Close()
+}
+
 //SendDMXWorker sends OLA the current dmxState across all universes
-func SendDMXWorker(ctx context.Context, wg *sync.WaitGroup) error {
+func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, wg *sync.WaitGroup) error {
 	defer wg.Done()
-	olaConfig := mainConfig.GetServerConfig(ctx).Outputs.OLA
-	if !olaConfig.Enabled {
-		log.Info("ola output is not enabled")
-		return nil
-	}
-	client, err := gola.New(olaConfig.Address)
-	if err != nil {
-		log.Errorf("could not start DMX worker: could not connect to ola: %v", err)
-		return err
-	}
 	defer client.Close()
 
-	t := time.NewTimer(olaConfig.Tick)
-	log.Printf("timer started at %v", time.Now())
+	t := time.NewTimer(tick)
 	defer t.Stop()
+	log.Printf("timer started at %v", time.Now())
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -190,13 +188,12 @@ func SendDMXWorker(ctx context.Context, wg *sync.WaitGroup) error {
 				client.SendDmx(k, v)
 				timer.ObserveDuration()
 			}
-			t.Reset(olaConfig.Tick)
+			t.Reset(tick)
 		}
 	}
 }
 
 func getChannelIndexForAttribute(p *mainConfig.LightProfileDMX, attrName string) int {
-
 	id, ok := p.Channels[attrName]
 	if ok {
 		return id

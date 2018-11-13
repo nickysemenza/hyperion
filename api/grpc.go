@@ -18,7 +18,9 @@ import (
 )
 
 //Server conforms to interface for proto generated stubs
-type Server struct{}
+type Server struct {
+	master cue.MasterManager
+}
 
 //GetPing is test thing
 func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
@@ -33,8 +35,7 @@ func (s *Server) StreamCueMaster(in *pb.ConnectionSettings, stream pb.API_Stream
 	}
 	log.Println("StreamCueMaster started")
 	for {
-		cm := cue.GetCueMaster()
-		bytes, _ := json.Marshal(cm)
+		bytes, _ := json.Marshal(s.master)
 
 		err := stream.Send(&pb.MarshalledJSON{Data: bytes})
 		if err != nil {
@@ -79,7 +80,7 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 }
 
 //ServeRPC runs a RPC server
-func ServeRPC(ctx context.Context, wg *sync.WaitGroup) {
+func ServeRPC(ctx context.Context, wg *sync.WaitGroup, master cue.MasterManager) {
 	RPCConfig := config.GetServerConfig(ctx).Inputs.RPC
 	if !RPCConfig.Enabled {
 		log.Info("rpc is not enabled")
@@ -91,7 +92,7 @@ func ServeRPC(ctx context.Context, wg *sync.WaitGroup) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	pb.RegisterAPIServer(grpcServer, &Server{})
+	pb.RegisterAPIServer(grpcServer, &Server{master: master})
 	go grpcServer.Serve(lis)
 
 	<-ctx.Done()

@@ -15,11 +15,13 @@ import (
 //MasterManager is an interface
 type MasterManager interface {
 	ProcessStack(ctx context.Context, cs *Stack)
-	ProcessCue(ctx context.Context, c *Cue)
-	ProcessFrame(ctx context.Context, cf *Frame)
-	ProcessFrameAction(ctx context.Context, cfa *FrameAction)
-	EnQueueCue(c Cue, cs *Stack)
+	ProcessCue(ctx context.Context, c *Cue, wg *sync.WaitGroup)
+	ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup)
+	ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *sync.WaitGroup)
+	EnQueueCue(c Cue, cs *Stack) *Cue
 	AddIDsRecursively(c *Cue)
+	GetDefaultCueStack() *Stack
+	ProcessForever(ctx context.Context)
 }
 
 //Master is the parent of all CueStacks, is a singleton
@@ -27,22 +29,19 @@ type Master struct {
 	CueStacks []Stack `json:"cue_stacks"`
 	currentID int64
 	cl        clock.Clock
-	m         sync.Mutex
+	idLock    sync.Mutex
 }
 
 //cueMaster singleton
-var (
-	cueMasterSingleton Master
-	once               sync.Once
-)
+var cueMasterSingleton Master
 
-//GetCueMaster makes a singleton for the cue master
-func GetCueMaster() *Master {
-	once.Do(func() {
-		cueMasterSingleton = Master{currentID: 1, cl: clock.RealClock{}}
-		cueMasterSingleton.CueStacks = append(cueMasterSingleton.CueStacks, cueMasterSingleton.NewStack(1, "main"))
-	})
-	return &cueMasterSingleton
+//InitializeMaster initializes the cuemaster
+func InitializeMaster(cl clock.Clock) MasterManager {
+	return &Master{
+		currentID: 1,
+		cl:        cl,
+		CueStacks: []Stack{{Priority: 1, Name: "main"}},
+	}
 }
 
 //NewFrameAction creates a new instate with incr ID
@@ -61,8 +60,8 @@ func (cm *Master) DumpToFile(fileName string) error {
 }
 
 func (cm *Master) getNextIDForUse() int64 {
-	cm.m.Lock()
-	defer cm.m.Unlock()
+	cm.idLock.Lock()
+	defer cm.idLock.Unlock()
 
 	id := cm.currentID
 	cm.currentID++
@@ -72,11 +71,6 @@ func (cm *Master) getNextIDForUse() int64 {
 //GetDefaultCueStack gives the first cuestack
 func (cm *Master) GetDefaultCueStack() *Stack {
 	return &cm.CueStacks[0]
-}
-
-//NewStack makes a new cue stack
-func (cm *Master) NewStack(priority int, name string) Stack {
-	return Stack{Priority: priority, Name: name}
 }
 
 //NewFrame creates a new instate with incr ID

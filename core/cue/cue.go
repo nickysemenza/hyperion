@@ -45,6 +45,7 @@ const (
 	SourceTypeJSON     = "json"
 )
 
+//Source represents the source of a Cue
 type Source struct {
 	//http api? grpc? trigger?
 	Input string `json:"input,omitempty"`
@@ -111,7 +112,9 @@ func (m *Master) ProcessStack(ctx context.Context, cs *Stack) {
 			cs.ActiveCue = nextCue
 			nextCue.Status = statusActive
 			nextCue.StartedAt = time.Now()
-			m.ProcessCue(ctx, nextCue)
+			var wg sync.WaitGroup //todo: move this elsewhere?
+			wg.Add(1)
+			m.ProcessCue(ctx, nextCue, &wg)
 			//post processing cleanup
 			nextCue.FinishedAt = time.Now()
 			nextCue.Status = statusProcessed
@@ -155,13 +158,15 @@ func (m *Master) EnQueueCue(c Cue, cs *Stack) *Cue {
 }
 
 //ProcessCue processes cue
-func (m *Master) ProcessCue(ctx context.Context, c *Cue) {
+func (m *Master) ProcessCue(ctx context.Context, c *Cue, wg *sync.WaitGroup) {
 	ctx = context.WithValue(ctx, keyCueID, c.ID)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessCue")
 	defer span.Finish()
+	defer wg.Done()
 	log.WithFields(getLogrusFieldsFromContext(ctx)).Info("ProcessCue")
+	wg.Add(len(c.Frames))
 	for _, eachFrame := range c.Frames {
-		m.ProcessFrame(ctx, &eachFrame)
+		m.ProcessFrame(ctx, &eachFrame, wg)
 	}
 }
 
@@ -252,19 +257,20 @@ func (cf *Frame) MarshalJSON() ([]byte, error) {
 }
 
 //ProcessFrame processes the cueframe
-func (m *Master) ProcessFrame(ctx context.Context, cf *Frame) {
+func (m *Master) ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup) {
 	ctx = context.WithValue(ctx, keyFrameID, cf.ID)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessFrame")
 	defer span.Finish()
+	defer wg.Done()
 	span.SetTag("frame-id", cf.ID)
 
 	log.WithFields(getLogrusFieldsFromContext(ctx)).
 		WithFields(log.Fields{"duration": cf.GetDuration(), "num_actions": len(cf.Actions)}).
 		Info("ProcessFrame")
 
-	// fmt.Println(cf.Actions)
+	wg.Add(len(cf.Actions))
 	for x := range cf.Actions {
-		go m.ProcessFrameAction(ctx, &cf.Actions[x])
+		go m.ProcessFrameAction(ctx, &cf.Actions[x], wg)
 	}
 	//no blocking, so wait until all the child frames have theoretically finished
 	span.LogKV("event", "sleeping/blocking for calculated duration of frame")
@@ -273,9 +279,10 @@ func (m *Master) ProcessFrame(ctx context.Context, cf *Frame) {
 }
 
 //ProcessFrameAction does job stuff
-func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction) {
+func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *sync.WaitGroup) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessFrameAction")
 	defer span.Finish()
+	defer wg.Done()
 	span.SetTag("frameaction-id", cfa.ID)
 
 	ctx = context.WithValue(ctx, keyFrameActionID, cfa.ID)

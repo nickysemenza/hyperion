@@ -2,10 +2,13 @@ package light
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -55,7 +58,7 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 	c.DMXProfiles["a"] = config.LightProfileDMX{Name: "a", Channels: map[string]int{"red": 1, "green": 2, "blue": 3}}
 
 	ctx := c.InjectIntoContext(context.Background())
-	Initialize(ctx)
+	Initialize(ctx, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -71,4 +74,47 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 			require.Equal(t, 255, ds.getDmxValue(tt.fields.Universe, 1+tt.fields.StartAddress))
 		})
 	}
+}
+
+type MockOLAClient struct {
+	mock.Mock
+}
+
+func (c *MockOLAClient) Close() {
+	c.Called()
+	return
+}
+
+func (c *MockOLAClient) SendDmx(universe int, values []byte) (status bool, err error) {
+	args := c.Called(universe, values)
+	return args.Bool(0), nil
+}
+
+func TestSendDMXWorker(t *testing.T) {
+	client := new(MockOLAClient)
+	client.On("Close")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	s := getDMXStateInstance()
+	s.universes = make(map[int][]byte) //TODO: make it so i don't have to reset
+	s.setDMXValues(ctx, dmxOperation{1, 1, 12})
+	s.setDMXValues(ctx, dmxOperation{3, 9, 100})
+
+	chans1 := make([]byte, 255)
+	chans1[0] = 12
+	client.On("SendDmx", 1, chans1).Return(true, nil)
+
+	chans3 := make([]byte, 255)
+	chans3[8] = 100
+	client.On("SendDmx", 3, chans3).Return(true, nil)
+
+	go SendDMXWorker(ctx, client, time.Millisecond*20, &wg)
+	time.Sleep(time.Millisecond * 100)
+	cancel()
+	wg.Wait()
+	client.AssertExpectations(t)
+
 }
