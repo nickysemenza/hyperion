@@ -71,11 +71,11 @@ func TestGetDiscoveredHues(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := new(MockHueConn)
-			sm := StateManager{
+			m := Manager{
 				hueConnection: h,
 			}
 			h.On("GetAllLights").Return(tt.resp, tt.err)
-			require.Equal(t, tt.expected, sm.GetDiscoveredHues(context.Background()).ByName)
+			require.Equal(t, tt.expected, m.GetDiscoveredHues(context.Background()).ByName)
 			h.AssertExpectations(t)
 		})
 	}

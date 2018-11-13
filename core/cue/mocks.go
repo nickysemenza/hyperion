@@ -56,7 +56,7 @@ func (m *MockMaster) ProcessForever(ctx context.Context) {
 }
 
 //GetLightManager ris a mock implementation.
-func (m *MockMaster) GetLightManager() *light.StateManager {
+func (m *MockMaster) GetLightManager() *light.Manager {
 	args := m.Called()
-	return args.Get(0).(*light.StateManager)
+	return args.Get(0).(*light.Manager)
 }

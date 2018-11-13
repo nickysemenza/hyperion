@@ -16,7 +16,7 @@ import (
 type Light interface {
 	GetName() string
 	GetType() string
-	SetState(context.Context, *StateManager, TargetState)
+	SetState(context.Context, *Manager, TargetState)
 }
 
 //constants for the different types of lights
@@ -56,36 +56,36 @@ type NameMap map[string]Light
 //StateMap holds Global light state
 type StateMap map[string]State
 
-//StateManager holds the state of lights
-type StateManager struct {
+//Manager holds the state of lights
+type Manager struct {
 	byName        StateMap
 	stateMapLock  sync.RWMutex
 	hueConnection HueConnection
 }
 
 //SetCurrentState will set the current state for a light
-func (s *StateManager) SetCurrentState(name string, new State) {
-	s.stateMapLock.Lock()
-	defer s.stateMapLock.Unlock()
-	s.byName[name] = new
+func (m *Manager) SetCurrentState(name string, new State) {
+	m.stateMapLock.Lock()
+	defer m.stateMapLock.Unlock()
+	m.byName[name] = new
 }
 
 //GetLightNames returns all the light names
-func (s *StateManager) GetLightNames() []string {
-	s.stateMapLock.RLock()
-	defer s.stateMapLock.RUnlock()
-	keys := make([]string, 0, len(s.byName))
-	for k := range s.byName {
+func (m *Manager) GetLightNames() []string {
+	m.stateMapLock.RLock()
+	defer m.stateMapLock.RUnlock()
+	keys := make([]string, 0, len(m.byName))
+	for k := range m.byName {
 		keys = append(keys, k)
 	}
 	return keys
 }
 
 //GetCurrentState will get the current state for a light
-func (s *StateManager) GetCurrentState(name string) *State {
-	s.stateMapLock.RLock()
-	defer s.stateMapLock.RUnlock()
-	state, ok := s.byName[name]
+func (m *Manager) GetCurrentState(name string) *State {
+	m.stateMapLock.RLock()
+	defer m.stateMapLock.RUnlock()
+	state, ok := m.byName[name]
 	if ok {
 		return &state
 	}
@@ -125,9 +125,9 @@ type HueConnection interface {
 }
 
 //Initialize parses light config
-func Initialize(ctx context.Context, h HueConnection) (*StateManager, error) {
+func Initialize(ctx context.Context, h HueConnection) (*Manager, error) {
 	config := mainConfig.GetServerConfig(ctx)
-	s := StateManager{
+	s := Manager{
 		hueConnection: h,
 	}
 	s.byName = make(StateMap)

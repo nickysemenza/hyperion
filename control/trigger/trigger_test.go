@@ -23,7 +23,7 @@ func TestTrigger(t *testing.T) {
 		},
 	}
 	ctx := config.InjectIntoContext(context.Background())
-	m := cue.InitializeMaster(clock.RealClock{}, &light.StateManager{})
+	m := cue.InitializeMaster(clock.RealClock{}, &light.Manager{})
 	stack := m.GetDefaultCueStack()
 
 	//should start with empty cue stack

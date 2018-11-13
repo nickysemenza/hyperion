@@ -29,7 +29,7 @@ func TestRunCommands(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.jsonBody, func(t *testing.T) {
-			m := cue.InitializeMaster(clock.RealClock{}, &light.StateManager{})
+			m := cue.InitializeMaster(clock.RealClock{}, &light.Manager{})
 			s := &config.Server{}
 			s.Inputs.HTTP.Enabled = true
 			ctx := s.InjectIntoContext(context.Background())
