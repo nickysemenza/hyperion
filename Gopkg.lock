@@ -116,14 +116,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2b0df69b0d482719446858d567d12f4565d1908ff563db27250cb2cde7f461ec"
-  name = "github.com/gin-contrib/static"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "8cbcdde04781ade853025b0ff7001aaf0ed06150"
-
-[[projects]]
-  branch = "master"
   digest = "1:2512ffe1a5325870c95033ff962b156ffea66e480a13a9c45a32c53443e77782"
   name = "github.com/gin-gonic/gin"
   packages = [
@@ -444,10 +436,19 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:c40d65817cdd41fac9aa7af8bed56927bb2d6d47e4fea566a74880f5c2b1c41e"
+  digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
+
+[[projects]]
+  digest = "1:cf4fdb98e23a565bd82473027d37512a3d5b186fba3a1895d7e8401d8ce3ffe1"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
+    "mock",
     "require",
   ]
   pruneopts = "UT"
@@ -661,12 +662,13 @@
     "github.com/aybabtme/rgbterm",
     "github.com/brutella/hc",
     "github.com/brutella/hc/accessory",
+    "github.com/davecgh/go-spew/spew",
     "github.com/gin-contrib/cors",
     "github.com/gin-contrib/pprof",
-    "github.com/gin-contrib/static",
     "github.com/gin-gonic/gin",
     "github.com/golang/protobuf/proto",
     "github.com/gorilla/websocket",
+    "github.com/heatxsink/go-hue/hue",
     "github.com/heatxsink/go-hue/lights",
     "github.com/lucasb-eyer/go-colorful",
     "github.com/mcuadros/go-gin-prometheus",
@@ -680,6 +682,7 @@
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
     "github.com/stretchr/testify/require",
     "github.com/uber/jaeger-client-go",
     "github.com/uber/jaeger-client-go/config",
