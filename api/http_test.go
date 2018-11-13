@@ -33,7 +33,7 @@ func TestRunCommands(t *testing.T) {
 			ctx := s.InjectIntoContext(context.Background())
 
 			w := httptest.NewRecorder()
-			router := getRouter(ctx, true)
+			router := getRouter(ctx, m, true)
 
 			var jsonStr = []byte(tt.jsonBody)
 

@@ -19,7 +19,6 @@ import (
 	"github.com/nickysemenza/hyperion/util/tracing"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	colorful "github.com/lucasb-eyer/go-colorful"
@@ -33,6 +32,8 @@ import (
 
 var contextLoggerHTTP *log.Entry
 
+const ginContextKeyMaster = "master"
+
 func init() {
 	contextLoggerHTTP = log.WithFields(log.Fields{
 		"module": "http",
@@ -40,7 +41,7 @@ func init() {
 }
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
-		c.JSON(200, cue.GetCueMaster())
+		c.JSON(200, c.MustGet("master").(*cue.Master))
 	}
 }
 
@@ -66,7 +67,7 @@ func runCommands(c *gin.Context) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "runCommands")
 	defer span.Finish()
 	if err := c.ShouldBindJSON(&commands); err == nil {
-		m := cue.GetCueMaster()
+		m := c.MustGet("master").(*cue.Master)
 		cs := m.GetDefaultCueStack()
 		for _, eachCommand := range commands {
 			x, err := cue.NewFromCommand(ctx, eachCommand)
@@ -88,8 +89,8 @@ func runCommands(c *gin.Context) {
 	}
 
 }
-func getCueMaster(c *gin.Context) {
-	c.JSON(200, cue.GetCueMaster())
+func getMaster(c *gin.Context) {
+	c.JSON(200, c.MustGet("master").(*cue.Master))
 }
 
 //createCue takes a JSON cue, and adds it to the default cuestack.
@@ -99,7 +100,7 @@ func createCue(c *gin.Context) {
 	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
-		m := cue.GetCueMaster()
+		m := c.MustGet("master").(*cue.Master)
 		stack := m.GetDefaultCueStack()
 		newCue.Source.Input = cue.SourceInputAPI
 		newCue.Source.Type = cue.SourceTypeJSON
@@ -161,7 +162,7 @@ const (
 	wsTypeCueList   = "CUE_MASTER"
 )
 
-func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duration) {
+func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duration, master *cue.Master) {
 	conn, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("Failed to set websocket upgrade ", err)
@@ -172,13 +173,13 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 		for {
 			//todo: only emit when things have changed
 			conn.WriteJSON(&wsWrapper{Data: light.GetLightsByName(), Type: wsTypeLightList})
-			conn.WriteJSON(&wsWrapper{Data: *cue.GetCueMaster(), Type: wsTypeCueList})
+			conn.WriteJSON(&wsWrapper{Data: master, Type: wsTypeCueList})
 			time.Sleep(tickInterval)
 		}
 	}()
 }
 
-func getRouter(ctx context.Context, testMode bool) *gin.Engine {
+func getRouter(ctx context.Context, master *cue.Master, testMode bool) *gin.Engine {
 	if testMode {
 		gin.SetMode(gin.TestMode)
 
@@ -197,6 +198,11 @@ func getRouter(ctx context.Context, testMode bool) *gin.Engine {
 	router.Use(cors.New(corsConfig))
 	router.Use(tracing.GinMiddleware(ctx))
 
+	//inject pointer to cuemaster into gin context
+	router.Use(func(c *gin.Context) {
+		c.Set("master", master)
+	})
+
 	//register prometheus gin metrics middleware
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(router)
@@ -204,24 +210,24 @@ func getRouter(ctx context.Context, testMode bool) *gin.Engine {
 	pprof.Register(router)
 
 	//setup routes
-	router.Use(static.Serve("/", static.LocalFile("./ui/build", false)))
 	router.GET("/_metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/lights", getLightInventory)
 	router.POST("cues", createCue)
 	router.POST("commands", runCommands)
-	router.GET("cuemaster", getCueMaster)
+	router.GET("cuemaster", getMaster)
 	router.GET("/ping", aa("ff"))
 	router.GET("/hexfade/:from/:to", hexFade)
 	router.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request, httpConfig.WSTickInterval)
+		wshandler(c.Writer, c.Request, httpConfig.WSTickInterval, master)
 	})
 	router.GET("debug", debug)
 
+	// router.Use(static.Serve("/", static.LocalFile("./ui/build", false)))
 	return router
 }
 
 //ServeHTTP runs the gin server
-func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
+func ServeHTTP(ctx context.Context, wg *sync.WaitGroup, master *cue.Master) {
 	defer wg.Done()
 	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
 	if !httpConfig.Enabled {
@@ -232,7 +238,7 @@ func ServeHTTP(ctx context.Context, wg *sync.WaitGroup) {
 	//server
 	srv := &http.Server{
 		Addr:    httpConfig.Address,
-		Handler: getRouter(ctx, false),
+		Handler: getRouter(ctx, master, false),
 	}
 
 	go func() {

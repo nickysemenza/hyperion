@@ -37,15 +37,15 @@ func Run(ctx context.Context) {
 
 	//Set up Homekit Server
 	wg.Add(1)
-	go homekit.Start(ctx, &wg)
+	go homekit.Start(ctx, &wg, master)
 
 	//Set up RPC server
 	wg.Add(1)
-	go api.ServeRPC(ctx, &wg)
+	go api.ServeRPC(ctx, &wg, master)
 
 	//Setup API server
 	wg.Add(1)
-	go api.ServeHTTP(ctx, &wg)
+	go api.ServeHTTP(ctx, &wg, master)
 
 	//proceess cues forever
 	master.ProcessForever(ctx)

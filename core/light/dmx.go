@@ -116,8 +116,10 @@ type dmxState struct {
 	m         sync.Mutex
 }
 
-var dmxStateInstance *dmxState
-var once sync.Once
+var (
+	dmxStateInstance *dmxState
+	once             sync.Once
+)
 
 //getDMXStateInstance makes a singleton for dmxState
 func getDMXStateInstance() *dmxState {

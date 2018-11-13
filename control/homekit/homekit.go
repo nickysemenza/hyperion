@@ -11,6 +11,7 @@ import (
 	"github.com/brutella/hc/accessory"
 	"github.com/nickysemenza/hyperion/control/trigger"
 	"github.com/nickysemenza/hyperion/core/config"
+	"github.com/nickysemenza/hyperion/core/cue"
 )
 
 const numSwitches = 6
@@ -30,6 +31,11 @@ type Accessory struct {
 	Name         string
 }
 
+//HomeKit represents and instance of a homekit manager
+type HomeKit struct {
+	master cue.MasterManager
+}
+
 func buildRawAccessoryList(accessoryList []Accessory) []*accessory.Accessory {
 	accessories := make([]*accessory.Accessory, len(accessoryList))
 	for i, a := range accessoryList {
@@ -38,7 +44,7 @@ func buildRawAccessoryList(accessoryList []Accessory) []*accessory.Accessory {
 	return accessories
 }
 
-func buildSwitchList(ctx context.Context) {
+func (hk *HomeKit) buildSwitchList(ctx context.Context) {
 	//for now let's have N switches
 	for x := 1; x <= numSwitches; x++ {
 		id := x
@@ -46,7 +52,7 @@ func buildSwitchList(ctx context.Context) {
 		s := accessory.NewSwitch(accessory.Info{Name: switchName, Manufacturer: "hyperion"})
 		s.Switch.On.OnValueRemoteUpdate(func(on bool) {
 			if on {
-				trigger.Action(ctx, "homekit-switch", id)
+				trigger.Action(ctx, "homekit-switch", id, hk.master)
 				s.Switch.On.SetValue(false)
 			}
 			log.Printf("[homekit] changed: [%s] to %t", s.Accessory.Info.Name.String.GetValue(), on)
@@ -60,7 +66,7 @@ func buildSwitchList(ctx context.Context) {
 }
 
 //Start starts the HomeKit services
-func Start(ctx context.Context, wg *sync.WaitGroup) {
+func Start(ctx context.Context, wg *sync.WaitGroup, master cue.MasterManager) {
 	defer wg.Done()
 	hkConfig := config.GetServerConfig(ctx).Inputs.HomeKit
 	if !hkConfig.Enabled {
@@ -72,7 +78,8 @@ func Start(ctx context.Context, wg *sync.WaitGroup) {
 	bridge := accessory.NewBridge(accessory.Info{Name: "bridge1", Manufacturer: "Hyperion"})
 
 	//accessory setup
-	buildSwitchList(ctx)
+	hk := HomeKit{master: master}
+	hk.buildSwitchList(ctx)
 	accessories := buildRawAccessoryList(allAccessories)
 
 	//start the server
