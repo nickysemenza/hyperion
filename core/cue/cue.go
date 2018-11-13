@@ -292,7 +292,7 @@ func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *s
 		Infof("ProcessFrameAction (color=%v)", cfa.NewState.RGB.TermString())
 
 	if l := light.GetByName(cfa.LightName); l != nil {
-		go l.SetState(ctx, cfa.NewState)
+		go l.SetState(ctx, m.LightManager, cfa.NewState)
 	} else {
 		log.Errorf("Cannot find light by name: %s\n", cfa.LightName)
 	}

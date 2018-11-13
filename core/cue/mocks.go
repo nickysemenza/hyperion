@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -52,4 +53,10 @@ func (m *MockMaster) GetDefaultCueStack() *Stack {
 //ProcessForever is a mock implementation.
 func (m *MockMaster) ProcessForever(ctx context.Context) {
 	m.Called()
+}
+
+//GetLightManager ris a mock implementation.
+func (m *MockMaster) GetLightManager() *light.StateManager {
+	args := m.Called()
+	return args.Get(0).(*light.StateManager)
 }

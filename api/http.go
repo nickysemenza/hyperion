@@ -47,13 +47,14 @@ func aa(b string) func(*gin.Context) {
 
 func debug(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
+	master := c.MustGet("master").(cue.MasterManager)
 	debugData := struct {
 		Config  *config.Server       `json:"config"`
 		Hues    light.DiscoveredHues `json:"discovered_hues"`
 		Version string               `json:"version"`
 	}{
 		Config:  config.GetServerConfig(ctx),
-		Hues:    light.GetDiscoveredHues(ctx),
+		Hues:    master.GetLightManager().GetDiscoveredHues(ctx),
 		Version: config.GetVersion(),
 	}
 

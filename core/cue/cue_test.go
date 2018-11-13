@@ -39,7 +39,7 @@ func TestCueFrameGetDuration(t *testing.T) {
 	}
 	for i, x := range tt {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			m := InitializeMaster(clock.RealClock{})
+			m := InitializeMaster(clock.RealClock{}, &light.StateManager{})
 			require.Equal(t, x.expectedDuration, x.cf.GetDuration())
 			//test with real timings
 			t1 := time.Now()
@@ -87,7 +87,7 @@ func TestCueDurationHelpers(t *testing.T) {
 
 	for _, tt := range tests {
 		require := require.New(t)
-		m := InitializeMaster(clock.RealClock{})
+		m := InitializeMaster(clock.RealClock{}, &light.StateManager{})
 		cue := &tt.c
 		require.Equal(tt.expectedDuration, cue.GetDuration())
 		require.Equal(tt.expectedDurationDrift, cue.getDurationDrift())
@@ -115,7 +115,7 @@ func TestCueDurationHelpers(t *testing.T) {
 }
 
 func TestCueQueueing(t *testing.T) {
-	m := InitializeMaster(clock.RealClock{})
+	m := InitializeMaster(clock.RealClock{}, &light.StateManager{})
 	cs := Stack{}
 	assert.Nil(t, cs.deQueueNextCue(), "deque on empty should return nil")
 
@@ -185,7 +185,7 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 		actions = append(actions, FrameAction{NewState: light.TargetState{Duration: 0, State: light.State{RGB: color.RGB{}}}})
 	}
 	frame := Frame{Actions: actions}
-	m := InitializeMaster(clock.RealClock{})
+	m := InitializeMaster(clock.RealClock{}, &light.StateManager{})
 
 	m.ProcessFrame(context.Background(), &frame, &sync.WaitGroup{})
 }
@@ -216,7 +216,7 @@ func TestAddingIDsToUnmarshalledCue(t *testing.T) {
 
 	assert.Zero(t, cue.ID)
 
-	InitializeMaster(clock.RealClock{}).AddIDsRecursively(&cue)
+	InitializeMaster(clock.RealClock{}, &light.StateManager{}).AddIDsRecursively(&cue)
 
 	assert.NotZero(t, cue.ID)
 	assert.NotZero(t, cue.Frames[0].ID)

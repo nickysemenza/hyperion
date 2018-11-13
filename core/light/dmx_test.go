@@ -58,7 +58,6 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 	c.DMXProfiles["a"] = config.LightProfileDMX{Name: "a", Channels: map[string]int{"red": 1, "green": 2, "blue": 3}}
 
 	ctx := c.InjectIntoContext(context.Background())
-	Initialize(ctx, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,7 +66,8 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 				Universe:     tt.fields.Universe,
 				Profile:      tt.fields.Profile,
 			}
-			d.blindlySetRGBToStateAndDMX(ctx, tt.color)
+			sm, _ := Initialize(ctx, nil)
+			d.blindlySetRGBToStateAndDMX(ctx, sm, tt.color)
 			ds := InitializeDMXState()
 			//green means first chan should be 0, secnd 255
 			require.Equal(t, 0, ds.getValue(tt.fields.Universe, tt.fields.StartAddress))

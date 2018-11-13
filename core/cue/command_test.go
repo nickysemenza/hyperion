@@ -12,8 +12,6 @@ import (
 )
 
 func TestCommand(t *testing.T) {
-	light.SetCurrentState("light2", light.State{})
-	//TODO: make user commands read from ctx?
 	tt := []struct {
 		cmd         string
 		expectedCue *Cue
@@ -105,10 +103,13 @@ func TestCommand(t *testing.T) {
 			require := require.New(t)
 			config := config.Server{}
 			ctx := config.InjectIntoContext(context.Background())
+			ctx = context.WithValue(ctx, light.ContextKeyLightNames, []string{"light2"}) //TODO: fix this up (#31)
 			cue, err := NewFromCommand(ctx, tc.cmd)
 			if tc.expectedCue == nil {
 				require.Nil(cue)
+				require.Error(err)
 			} else {
+				require.NoError(err)
 				cue.ID = 0
 				cue.Status = "" //todo:fix
 				for x := range cue.Frames {

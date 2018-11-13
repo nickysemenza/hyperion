@@ -87,9 +87,6 @@ func TestToCue(t *testing.T) {
 }
 
 func TestBuildCueFromUserCommand(t *testing.T) {
-
-	light.SetCurrentState("light2", light.State{})
-	//TODO: make user commands read from ctx?
 	tests := []struct {
 		name    string
 		command config.UserCommand
@@ -193,6 +190,7 @@ func TestBuildCueFromUserCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
+			ctx = context.WithValue(ctx, light.ContextKeyLightNames, []string{"light2"}) //TODO: fix this up (#31)
 			cue, err := BuildCueFromUserCommand(ctx, tt.command, tt.args)
 			if tt.wantErr {
 				require.Error(t, err)

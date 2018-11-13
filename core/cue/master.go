@@ -22,25 +22,28 @@ type MasterManager interface {
 	AddIDsRecursively(c *Cue)
 	GetDefaultCueStack() *Stack
 	ProcessForever(ctx context.Context)
+	GetLightManager() *light.StateManager
 }
 
 //Master is the parent of all CueStacks, is a singleton
 type Master struct {
-	CueStacks []Stack `json:"cue_stacks"`
-	currentID int64
-	cl        clock.Clock
-	idLock    sync.Mutex
+	CueStacks    []Stack `json:"cue_stacks"`
+	currentID    int64
+	cl           clock.Clock
+	idLock       sync.Mutex
+	LightManager *light.StateManager
 }
 
 //cueMaster singleton
 var cueMasterSingleton Master
 
 //InitializeMaster initializes the cuemaster
-func InitializeMaster(cl clock.Clock) MasterManager {
+func InitializeMaster(cl clock.Clock, ls *light.StateManager) MasterManager {
 	return &Master{
-		currentID: 1,
-		cl:        cl,
-		CueStacks: []Stack{{Priority: 1, Name: "main"}},
+		currentID:    1,
+		cl:           cl,
+		CueStacks:    []Stack{{Priority: 1, Name: "main"}},
+		LightManager: ls,
 	}
 }
 
@@ -88,4 +91,9 @@ func (cm *Master) ProcessForever(ctx context.Context) {
 	for x := range cm.CueStacks {
 		go cm.ProcessStack(ctx, &cm.CueStacks[x])
 	}
+}
+
+//GetLightManager returns a poitner to the light state manager
+func (cm *Master) GetLightManager() *light.StateManager {
+	return cm.LightManager
 }

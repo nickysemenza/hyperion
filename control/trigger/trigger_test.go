@@ -10,6 +10,7 @@ import (
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
+	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,7 @@ func TestTrigger(t *testing.T) {
 		},
 	}
 	ctx := config.InjectIntoContext(context.Background())
-	m := cue.InitializeMaster(clock.RealClock{})
+	m := cue.InitializeMaster(clock.RealClock{}, &light.StateManager{})
 	stack := m.GetDefaultCueStack()
 
 	//should start with empty cue stack

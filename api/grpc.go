@@ -55,11 +55,12 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 		return err
 	}
 	for {
-		allLights := light.GetLightsByName()
+
+		allLights := light.GetLightsByName() //TODO: fix this
 		var pbLights []*pb.Light
 
 		for k, v := range allLights {
-			color := light.GetCurrentState(v.GetName()).RGB.AsPB()
+			color := s.master.GetLightManager().GetCurrentState(v.GetName()).RGB.AsPB()
 			pbLights = append(pbLights, &pb.Light{
 				Name:         k,
 				Type:         v.GetType(),

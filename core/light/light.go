@@ -16,7 +16,7 @@ import (
 type Light interface {
 	GetName() string
 	GetType() string
-	SetState(context.Context, TargetState)
+	SetState(context.Context, *StateManager, TargetState)
 }
 
 //constants for the different types of lights
@@ -24,6 +24,13 @@ const (
 	TypeHue     = "hue"
 	TypeDMX     = "DMX"
 	TypeGeneric = "generic"
+)
+
+type ctxKey int
+
+//Context keys
+const (
+	ContextKeyLightNames ctxKey = iota
 )
 
 //TargetState represents the state of a light, is source of truth
@@ -56,42 +63,29 @@ type StateManager struct {
 	hueConnection HueConnection
 }
 
-var states StateManager
-
-//GetManager returns the light state manager
-func GetManager() *StateManager {
-	states.stateMapLock.RLock()
-	defer states.stateMapLock.RUnlock()
-	return &states
-}
-
 //SetCurrentState will set the current state for a light
-func SetCurrentState(name string, s State) {
-	states.stateMapLock.Lock()
-	defer states.stateMapLock.Unlock()
-	if states.byName == nil {
-		states.byName = make(StateMap)
-	}
-	states.byName[name] = s
+func (s *StateManager) SetCurrentState(name string, new State) {
+	s.stateMapLock.Lock()
+	defer s.stateMapLock.Unlock()
+	s.byName[name] = new
 }
 
 //GetLightNames returns all the light names
-//TODO: move this to pull from config in context
-func GetLightNames() []string {
-	states.stateMapLock.RLock()
-	defer states.stateMapLock.RUnlock()
-	keys := make([]string, 0, len(states.byName))
-	for k := range states.byName {
+func (s *StateManager) GetLightNames() []string {
+	s.stateMapLock.RLock()
+	defer s.stateMapLock.RUnlock()
+	keys := make([]string, 0, len(s.byName))
+	for k := range s.byName {
 		keys = append(keys, k)
 	}
 	return keys
 }
 
 //GetCurrentState will get the current state for a light
-func GetCurrentState(name string) *State {
-	states.stateMapLock.RLock()
-	defer states.stateMapLock.RUnlock()
-	state, ok := states.byName[name]
+func (s *StateManager) GetCurrentState(name string) *State {
+	s.stateMapLock.RLock()
+	defer s.stateMapLock.RUnlock()
+	state, ok := s.byName[name]
 	if ok {
 		return &state
 	}
@@ -131,11 +125,12 @@ type HueConnection interface {
 }
 
 //Initialize parses light config
-func Initialize(ctx context.Context, h HueConnection) error {
+func Initialize(ctx context.Context, h HueConnection) (*StateManager, error) {
 	config := mainConfig.GetServerConfig(ctx)
-	states.stateMapLock.Lock()
-	states.hueConnection = h
-	states.stateMapLock.Unlock()
+	s := StateManager{
+		hueConnection: h,
+	}
+	s.byName = make(StateMap)
 
 	ByName = make(NameMap)
 	for i := range config.Lights.Hue {
@@ -144,7 +139,7 @@ func Initialize(ctx context.Context, h HueConnection) error {
 			HueID: x.HueID,
 			Name:  x.Name,
 		}
-		SetCurrentState(x.Name, State{})
+		s.SetCurrentState(x.Name, State{})
 	}
 	for i := range config.Lights.DMX {
 		x := &config.Lights.DMX[i]
@@ -154,15 +149,15 @@ func Initialize(ctx context.Context, h HueConnection) error {
 			Universe:     x.Universe,
 			Profile:      x.Profile,
 		}
-		SetCurrentState(x.Name, State{})
+		s.SetCurrentState(x.Name, State{})
 	}
 	for i := range config.Lights.Generic {
 		x := &config.Lights.Generic[i]
 		ByName[x.Name] = &GenericLight{
 			Name: x.Name,
 		}
-		SetCurrentState(x.Name, State{})
+		s.SetCurrentState(x.Name, State{})
 	}
 
-	return nil
+	return &s, nil
 }

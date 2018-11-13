@@ -62,7 +62,7 @@ func (d *DMXLight) GetType() string {
 }
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
-func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.RGB) {
+func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, sm *StateManager, color color.RGB) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
 	span.SetTag("dmx-name", d.Name)
 	defer span.Finish()
@@ -78,15 +78,15 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.R
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[1], value: gVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[2], value: bVal})
 
-	SetCurrentState(d.Name, State{RGB: color})
+	sm.SetCurrentState(d.Name, State{RGB: color})
 
 }
 
 //SetState updates the light's state.
 //TODO: other properties? on/off?
-func (d *DMXLight) SetState(ctx context.Context, target TargetState) {
+func (d *DMXLight) SetState(ctx context.Context, sm *StateManager, target TargetState) {
 	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
-	currentState := GetCurrentState(d.Name)
+	currentState := sm.GetCurrentState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
 	defer span.Finish()
@@ -99,14 +99,14 @@ func (d *DMXLight) SetState(ctx context.Context, target TargetState) {
 	for x := 0; x < numSteps; x++ {
 		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)
 		//keep state updated:
-		d.blindlySetRGBToStateAndDMX(ctx, interpolated)
+		d.blindlySetRGBToStateAndDMX(ctx, sm, interpolated)
 
 		time.Sleep(tickIntervalFadeInterpolation)
 	}
 
-	d.blindlySetRGBToStateAndDMX(ctx, target.RGB)
+	d.blindlySetRGBToStateAndDMX(ctx, sm, target.RGB)
 	span.LogKV("event", "finished fade interpolation")
-	SetCurrentState(d.Name, target.ToState())
+	sm.SetCurrentState(d.Name, target.ToState())
 
 }
 
