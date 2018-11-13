@@ -19,7 +19,7 @@ import (
 
 //Server conforms to interface for proto generated stubs
 type Server struct {
-	master *cue.Master
+	master cue.MasterManager
 }
 
 //GetPing is test thing
@@ -80,7 +80,7 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 }
 
 //ServeRPC runs a RPC server
-func ServeRPC(ctx context.Context, wg *sync.WaitGroup, master *cue.Master) {
+func ServeRPC(ctx context.Context, wg *sync.WaitGroup, master cue.MasterManager) {
 	RPCConfig := config.GetServerConfig(ctx).Inputs.RPC
 	if !RPCConfig.Enabled {
 		log.Info("rpc is not enabled")

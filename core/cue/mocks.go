@@ -48,3 +48,8 @@ func (m *MockMaster) GetDefaultCueStack() *Stack {
 	args := m.Called()
 	return args.Get(0).(*Stack)
 }
+
+//ProcessForever is a mock implementation.
+func (m *MockMaster) ProcessForever(ctx context.Context) {
+	m.Called()
+}

@@ -41,7 +41,7 @@ func init() {
 }
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
-		c.JSON(200, c.MustGet("master").(*cue.Master))
+		c.JSON(200, c.MustGet("master").(cue.MasterManager))
 	}
 }
 
@@ -67,7 +67,7 @@ func runCommands(c *gin.Context) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "runCommands")
 	defer span.Finish()
 	if err := c.ShouldBindJSON(&commands); err == nil {
-		m := c.MustGet("master").(*cue.Master)
+		m := c.MustGet("master").(cue.MasterManager)
 		cs := m.GetDefaultCueStack()
 		for _, eachCommand := range commands {
 			x, err := cue.NewFromCommand(ctx, eachCommand)
@@ -90,7 +90,7 @@ func runCommands(c *gin.Context) {
 
 }
 func getMaster(c *gin.Context) {
-	c.JSON(200, c.MustGet("master").(*cue.Master))
+	c.JSON(200, c.MustGet("master").(cue.MasterManager))
 }
 
 //createCue takes a JSON cue, and adds it to the default cuestack.
@@ -100,7 +100,7 @@ func createCue(c *gin.Context) {
 	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
-		m := c.MustGet("master").(*cue.Master)
+		m := c.MustGet("master").(cue.MasterManager)
 		stack := m.GetDefaultCueStack()
 		newCue.Source.Input = cue.SourceInputAPI
 		newCue.Source.Type = cue.SourceTypeJSON
@@ -162,7 +162,7 @@ const (
 	wsTypeCueList   = "CUE_MASTER"
 )
 
-func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duration, master *cue.Master) {
+func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duration, master cue.MasterManager) {
 	conn, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("Failed to set websocket upgrade ", err)
@@ -179,7 +179,7 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 	}()
 }
 
-func getRouter(ctx context.Context, master *cue.Master, testMode bool) *gin.Engine {
+func getRouter(ctx context.Context, master cue.MasterManager, testMode bool) *gin.Engine {
 	if testMode {
 		gin.SetMode(gin.TestMode)
 
@@ -227,7 +227,7 @@ func getRouter(ctx context.Context, master *cue.Master, testMode bool) *gin.Engi
 }
 
 //ServeHTTP runs the gin server
-func ServeHTTP(ctx context.Context, wg *sync.WaitGroup, master *cue.Master) {
+func ServeHTTP(ctx context.Context, wg *sync.WaitGroup, master cue.MasterManager) {
 	defer wg.Done()
 	httpConfig := config.GetServerConfig(ctx).Inputs.HTTP
 	if !httpConfig.Enabled {

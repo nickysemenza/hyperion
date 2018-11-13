@@ -21,6 +21,7 @@ type MasterManager interface {
 	EnQueueCue(c Cue, cs *Stack) *Cue
 	AddIDsRecursively(c *Cue)
 	GetDefaultCueStack() *Stack
+	ProcessForever(ctx context.Context)
 }
 
 //Master is the parent of all CueStacks, is a singleton
@@ -35,7 +36,7 @@ type Master struct {
 var cueMasterSingleton Master
 
 //InitializeMaster initializes the cuemaster
-func InitializeMaster(cl clock.Clock) *Master {
+func InitializeMaster(cl clock.Clock) MasterManager {
 	return &Master{
 		currentID: 1,
 		cl:        cl,
