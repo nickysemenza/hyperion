@@ -66,7 +66,7 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 				Universe:     tt.fields.Universe,
 				Profile:      tt.fields.Profile,
 			}
-			sm, _ := Initialize(ctx, nil)
+			sm, _ := NewManager(ctx, nil)
 			d.blindlySetRGBToStateAndDMX(ctx, sm, tt.color)
 			ds := InitializeDMXState()
 			//green means first chan should be 0, secnd 255

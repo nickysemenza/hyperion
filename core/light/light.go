@@ -120,39 +120,41 @@ type HueConnection interface {
 	GetAllLights() ([]lights.Light, error)
 }
 
-//Initialize parses light config
-func Initialize(ctx context.Context, h HueConnection) (*Manager, error) {
+//NewManager parses light config
+func NewManager(ctx context.Context, h HueConnection) (*Manager, error) {
 	config := mainConfig.GetServerConfig(ctx)
-	s := Manager{
+	m := Manager{
 		hueConnection: h,
+		states:        make(StateMap),
+		items:         make(NameMap),
 	}
-	s.states = make(StateMap)
-	s.items = make(NameMap)
+	//populate with each type of light
+	//TODO: validate that names are unique
 	for i := range config.Lights.Hue {
 		x := &config.Lights.Hue[i]
-		s.items[x.Name] = &HueLight{
+		m.items[x.Name] = &HueLight{
 			HueID: x.HueID,
 			Name:  x.Name,
 		}
-		s.SetState(x.Name, State{})
+		m.SetState(x.Name, State{})
 	}
 	for i := range config.Lights.DMX {
 		x := &config.Lights.DMX[i]
-		s.items[x.Name] = &DMXLight{
+		m.items[x.Name] = &DMXLight{
 			Name:         x.Name,
 			StartAddress: x.StartAddress,
 			Universe:     x.Universe,
 			Profile:      x.Profile,
 		}
-		s.SetState(x.Name, State{})
+		m.SetState(x.Name, State{})
 	}
 	for i := range config.Lights.Generic {
 		x := &config.Lights.Generic[i]
-		s.items[x.Name] = &GenericLight{
+		m.items[x.Name] = &GenericLight{
 			Name: x.Name,
 		}
-		s.SetState(x.Name, State{})
+		m.SetState(x.Name, State{})
 	}
 
-	return &s, nil
+	return &m, nil
 }

@@ -126,7 +126,7 @@ func TestSetColor(t *testing.T) {
 			ctx := s.InjectIntoContext(context.Background())
 
 			h := new(MockHueConn)
-			sm, err := Initialize(ctx, h)
+			sm, err := NewManager(ctx, h)
 			require.NoError(t, err)
 			h.On("SetLightState", hl.HueID, mock.AnythingOfType("lights.State"))
 

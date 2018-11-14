@@ -38,7 +38,7 @@ func TestFindLightByName(t *testing.T) {
 	hue1 := &HueLight{Name: "hue1"}
 
 	s := &config.Server{}
-	m, err := Initialize(s.InjectIntoContext(context.Background()), nil)
+	m, err := NewManager(s.InjectIntoContext(context.Background()), nil)
 	require.NoError(t, err)
 	m.items["hue1"] = hue1
 	m.items["dmx1"] = dmx1

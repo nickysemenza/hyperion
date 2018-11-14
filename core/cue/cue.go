@@ -93,7 +93,6 @@ type FrameAction struct {
 	ID        int64             `json:"id"`
 	LightName string            `json:"light_name"`
 	Light     light.Light       `json:"light"`
-	//TODO: add `light`
 	//TODO: add way to have a noop action (to block aka wait for time)
 }
 

@@ -30,11 +30,11 @@ func Run(ctx context.Context) {
 
 	//Initialize lights (including hue output)
 	hueConn := lights.New(c.Outputs.Hue.Address, c.Outputs.Hue.Username)
-	ls, _ := light.Initialize(ctx, hueConn)
+	lm, _ := light.NewManager(ctx, hueConn)
 
-	master := cue.InitializeMaster(clock.RealClock{}, ls)
+	master := cue.InitializeMaster(clock.RealClock{}, lm)
 
-	lightNames := ls.GetLightNames()
+	lightNames := lm.GetLightNames()
 	ctx = context.WithValue(ctx, light.ContextKeyLightNames, lightNames) //TODO: hacky
 
 	go tracing.InitTracer(ctx)
