@@ -51,7 +51,7 @@ jobs:
           path: .
   test-ui:
     docker:
-      - image: node:9.3.0
+      - image: node:10.13.0
     working_directory: ~/hyperion/ui
     steps:
       - checkout:
@@ -64,7 +64,7 @@ jobs:
           path: ~/hyperion/ui
   build-ui:
     docker:
-      - image: node:9.3.0
+      - image: node:10.13.0
     working_directory: ~/hyperion/ui
     steps:
       - checkout:
