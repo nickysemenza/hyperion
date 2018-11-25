@@ -62,7 +62,7 @@ func (d *DMXLight) GetType() string {
 }
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
-func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.RGB) {
+func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, m *Manager, color color.RGB) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
 	span.SetTag("dmx-name", d.Name)
 	defer span.Finish()
@@ -72,21 +72,21 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, color color.R
 	rVal, gVal, bVal := color.AsComponents()
 
 	span.LogKV("event", "begin getDMXStateInstance")
-	ds := getDMXStateInstance()
+	ds := InitializeDMXState()
 	span.LogKV("event", "now setting values")
-	ds.setDMXValues(ctx, dmxOperation{universe: d.Universe, channel: rgbChannelIds[0], value: rVal},
+	ds.set(ctx, dmxOperation{universe: d.Universe, channel: rgbChannelIds[0], value: rVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[1], value: gVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[2], value: bVal})
 
-	SetCurrentState(d.Name, State{RGB: color})
+	m.SetState(d.Name, State{RGB: color})
 
 }
 
 //SetState updates the light's state.
 //TODO: other properties? on/off?
-func (d *DMXLight) SetState(ctx context.Context, target TargetState) {
+func (d *DMXLight) SetState(ctx context.Context, m *Manager, target TargetState) {
 	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
-	currentState := GetCurrentState(d.Name)
+	currentState := m.GetState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
 	defer span.Finish()
@@ -99,42 +99,42 @@ func (d *DMXLight) SetState(ctx context.Context, target TargetState) {
 	for x := 0; x < numSteps; x++ {
 		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)
 		//keep state updated:
-		d.blindlySetRGBToStateAndDMX(ctx, interpolated)
+		d.blindlySetRGBToStateAndDMX(ctx, m, interpolated)
 
 		time.Sleep(tickIntervalFadeInterpolation)
 	}
 
-	d.blindlySetRGBToStateAndDMX(ctx, target.RGB)
+	d.blindlySetRGBToStateAndDMX(ctx, m, target.RGB)
 	span.LogKV("event", "finished fade interpolation")
-	SetCurrentState(d.Name, target.ToState())
+	m.SetState(d.Name, target.ToState())
 
 }
 
-//dmxState holds the DMX512 values for each channel
-type dmxState struct {
+//DMXState holds the DMX512 values for each channel
+type DMXState struct {
 	universes map[int][]byte
 	m         sync.Mutex
 }
 
 var (
-	dmxStateInstance *dmxState
+	dmxStateInstance *DMXState
 	once             sync.Once
 )
 
-//getDMXStateInstance makes a singleton for dmxState
-func getDMXStateInstance() *dmxState {
+//InitializeDMXState makes a singleton for dmxState
+func InitializeDMXState() *DMXState {
 	once.Do(func() {
 		m := make(map[int][]byte)
-		dmxStateInstance = &dmxState{universes: m}
+		dmxStateInstance = &DMXState{universes: m}
 
 	})
 	return dmxStateInstance
 }
-func (s *dmxState) getDmxValue(universe, channel int) int {
+func (s *DMXState) getValue(universe, channel int) int {
 	return int(s.universes[universe][channel-1])
 }
 
-func (s *dmxState) setDMXValues(ctx context.Context, ops ...dmxOperation) error {
+func (s *DMXState) set(ctx context.Context, ops ...dmxOperation) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValues")
 	defer span.Finish()
 	span.SetTag("operations", ops)
@@ -155,7 +155,7 @@ func (s *dmxState) setDMXValues(ctx context.Context, ops ...dmxOperation) error 
 	return nil
 }
 
-func (s *dmxState) initializeUniverse(universe int) {
+func (s *DMXState) initializeUniverse(universe int) {
 	if s.universes[universe] == nil {
 		chans := make([]byte, 255)
 		s.universes[universe] = chans
@@ -183,7 +183,7 @@ func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, wg
 			log.Println("SendDMXWorker shutdown")
 			return ctx.Err()
 		case <-t.C:
-			for k, v := range getDMXStateInstance().universes {
+			for k, v := range InitializeDMXState().universes {
 				timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
 				client.SendDmx(k, v)
 				timer.ObserveDuration()

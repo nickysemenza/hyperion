@@ -92,44 +92,53 @@ type FrameAction struct {
 	NewState  light.TargetState `json:"new_state"`
 	ID        int64             `json:"id"`
 	LightName string            `json:"light_name"`
-	//TODO: add `light`
+	Light     light.Light       `json:"light"`
 	//TODO: add way to have a noop action (to block aka wait for time)
 }
 
 //ProcessStack processes cues
-func (m *Master) ProcessStack(ctx context.Context, cs *Stack) {
-	log.Printf("[CueStack: %s]\n", cs.Name)
+func (m *Master) ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup) {
 	cueBackoff := config.GetServerConfig(ctx).Timings.CueBackoff
+	defer wg.Done()
+
+	t := time.NewTimer(cueBackoff)
+	defer t.Stop()
+	log.Printf("ProcessStack started at %v, name=%v", time.Now(), cs.Name)
 
 	for {
-		if nextCue := cs.deQueueNextCue(); nextCue != nil {
-			ctx := context.WithValue(ctx, keyStackName, cs.Name)
-			span, ctx := opentracing.StartSpanFromContext(ctx, "cue processing")
-			span.LogKV("event", "popped from stack")
-			span.SetTag("cuestack-name", cs.Name)
-			span.SetTag("cue-id", nextCue.ID)
-			span.SetBaggageItem("cue-id", string(nextCue.ID))
-			cs.ActiveCue = nextCue
-			nextCue.Status = statusActive
-			nextCue.StartedAt = time.Now()
-			var wg sync.WaitGroup //todo: move this elsewhere?
-			wg.Add(1)
-			m.ProcessCue(ctx, nextCue, &wg)
-			//post processing cleanup
-			nextCue.FinishedAt = time.Now()
-			nextCue.Status = statusProcessed
-			nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
-			cs.ActiveCue = nil
-			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
+		select {
+		case <-ctx.Done():
+			log.Printf("ProcessStack shutdown, name=%v", cs.Name)
+			return //ctx.Err()
+		case <-t.C:
+			if nextCue := cs.deQueueNextCue(); nextCue != nil {
+				ctx := context.WithValue(ctx, keyStackName, cs.Name)
+				span, ctx := opentracing.StartSpanFromContext(ctx, "cue processing")
+				span.LogKV("event", "popped from stack")
+				span.SetTag("cuestack-name", cs.Name)
+				span.SetTag("cue-id", nextCue.ID)
+				span.SetBaggageItem("cue-id", string(nextCue.ID))
+				cs.ActiveCue = nextCue
+				nextCue.Status = statusActive
+				nextCue.StartedAt = time.Now()
+				wg.Add(1)
+				m.ProcessCue(ctx, nextCue, wg)
+				//post processing cleanup
+				nextCue.FinishedAt = time.Now()
+				nextCue.Status = statusProcessed
+				nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
+				cs.ActiveCue = nil
+				cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
 
-			//update metrics
-			metrics.CueExecutionDrift.Set(nextCue.getDurationDrift().Seconds())
-			metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
-			metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
-			span.Finish()
-		} else {
-			//backoff?
-			m.cl.Sleep(cueBackoff)
+				//update metrics
+				metrics.CueExecutionDrift.Set(nextCue.getDurationDrift().Seconds())
+				metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
+				metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
+				span.Finish()
+				t.Reset(0)
+			} else {
+				t.Reset(cueBackoff)
+			}
 		}
 	}
 }
@@ -186,6 +195,7 @@ func (m *Master) AddIDsRecursively(c *Cue) {
 			if eachAction.ID == 0 {
 				eachAction.ID = m.getNextIDForUse()
 			}
+			eachAction.Light = m.GetLightManager().GetByName(eachAction.LightName)
 		}
 	}
 }
@@ -291,8 +301,8 @@ func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *s
 		WithFields(log.Fields{"duration": cfa.NewState.Duration, "now_ms": now, "light": cfa.LightName}).
 		Infof("ProcessFrameAction (color=%v)", cfa.NewState.RGB.TermString())
 
-	if l := light.GetByName(cfa.LightName); l != nil {
-		go l.SetState(ctx, cfa.NewState)
+	if l := m.GetLightManager().GetByName(cfa.LightName); l != nil {
+		go l.SetState(ctx, m.LightManager, cfa.NewState)
 	} else {
 		log.Errorf("Cannot find light by name: %s\n", cfa.LightName)
 	}
@@ -311,7 +321,6 @@ func (cfa *FrameAction) MarshalJSON() ([]byte, error) {
 		DurationMS time.Duration `json:"action_duration_ms"`
 		*Alias
 	}{
-		Light:      light.GetByName(cfa.LightName),
 		DurationMS: cfa.NewState.Duration / time.Millisecond,
 		Alias:      (*Alias)(cfa),
 	})

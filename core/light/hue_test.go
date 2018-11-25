@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/require"
 
@@ -70,9 +71,11 @@ func TestGetDiscoveredHues(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := new(MockHueConn)
-			states.hueConnection = h
+			m := Manager{
+				hueConnection: h,
+			}
 			h.On("GetAllLights").Return(tt.resp, tt.err)
-			require.Equal(t, tt.expected, GetDiscoveredHues(context.Background()).ByName)
+			require.Equal(t, tt.expected, m.GetDiscoveredHues(context.Background()).ByName)
 			h.AssertExpectations(t)
 		})
 	}
@@ -119,13 +122,17 @@ func TestSetColor(t *testing.T) {
 				HueID: 4,
 				Name:  "foo",
 			}
+			s := &config.Server{}
+			ctx := s.InjectIntoContext(context.Background())
+
 			h := new(MockHueConn)
-			states.hueConnection = h
+			sm, err := NewManager(ctx, h)
+			require.NoError(t, err)
 			h.On("SetLightState", hl.HueID, mock.AnythingOfType("lights.State"))
 
 			targetState := TargetState{Duration: tt.timing}
 			targetState.State.RGB = tt.color
-			hl.SetState(context.Background(), targetState)
+			hl.SetState(context.Background(), sm, targetState)
 			time.Sleep(time.Millisecond)
 			h.AssertExpectations(t)
 

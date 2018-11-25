@@ -27,13 +27,17 @@ func Run(ctx context.Context) {
 	wg := sync.WaitGroup{}
 
 	c := config.GetServerConfig(ctx)
-	master := cue.InitializeMaster(clock.RealClock{})
-
-	go tracing.InitTracer(ctx)
 
 	//Initialize lights (including hue output)
 	hueConn := lights.New(c.Outputs.Hue.Address, c.Outputs.Hue.Username)
-	light.Initialize(ctx, hueConn)
+	lm, _ := light.NewManager(ctx, hueConn)
+
+	master := cue.InitializeMaster(clock.RealClock{}, lm)
+
+	lightNames := lm.GetLightNames()
+	ctx = context.WithValue(ctx, light.ContextKeyLightNames, lightNames) //TODO: hacky
+
+	go tracing.InitTracer(ctx)
 
 	//Set up Homekit Server
 	wg.Add(1)
@@ -48,7 +52,7 @@ func Run(ctx context.Context) {
 	go api.ServeHTTP(ctx, &wg, master)
 
 	//proceess cues forever
-	master.ProcessForever(ctx)
+	master.ProcessForever(ctx, &wg)
 
 	olaConfig := c.Outputs.OLA
 	if !olaConfig.Enabled {

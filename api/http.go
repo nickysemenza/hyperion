@@ -41,19 +41,20 @@ func init() {
 }
 func aa(b string) func(*gin.Context) {
 	return func(c *gin.Context) {
-		c.JSON(200, c.MustGet("master").(cue.MasterManager))
+		c.JSON(200, c.MustGet(ginContextKeyMaster).(cue.MasterManager))
 	}
 }
 
 func debug(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
+	master := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
 	debugData := struct {
 		Config  *config.Server       `json:"config"`
 		Hues    light.DiscoveredHues `json:"discovered_hues"`
 		Version string               `json:"version"`
 	}{
 		Config:  config.GetServerConfig(ctx),
-		Hues:    light.GetDiscoveredHues(ctx),
+		Hues:    master.GetLightManager().GetDiscoveredHues(ctx),
 		Version: config.GetVersion(),
 	}
 
@@ -67,7 +68,7 @@ func runCommands(c *gin.Context) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "runCommands")
 	defer span.Finish()
 	if err := c.ShouldBindJSON(&commands); err == nil {
-		m := c.MustGet("master").(cue.MasterManager)
+		m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
 		cs := m.GetDefaultCueStack()
 		for _, eachCommand := range commands {
 			x, err := cue.NewFromCommand(ctx, eachCommand)
@@ -90,7 +91,7 @@ func runCommands(c *gin.Context) {
 
 }
 func getMaster(c *gin.Context) {
-	c.JSON(200, c.MustGet("master").(cue.MasterManager))
+	c.JSON(200, c.MustGet(ginContextKeyMaster).(cue.MasterManager))
 }
 
 //createCue takes a JSON cue, and adds it to the default cuestack.
@@ -100,7 +101,7 @@ func createCue(c *gin.Context) {
 	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err == nil {
-		m := c.MustGet("master").(cue.MasterManager)
+		m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
 		stack := m.GetDefaultCueStack()
 		newCue.Source.Input = cue.SourceInputAPI
 		newCue.Source.Type = cue.SourceTypeJSON
@@ -141,7 +142,8 @@ func hexFade(c *gin.Context) {
 
 }
 func getLightInventory(c *gin.Context) {
-	c.JSON(200, light.GetLightsByName())
+	master := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
+	c.JSON(200, master.GetLightManager().GetLightsByName())
 }
 
 var wsupgrader = websocket.Upgrader{
@@ -172,7 +174,7 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 	go func() {
 		for {
 			//todo: only emit when things have changed
-			conn.WriteJSON(&wsWrapper{Data: light.GetLightsByName(), Type: wsTypeLightList})
+			conn.WriteJSON(&wsWrapper{Data: master.GetLightManager().GetLightsByName(), Type: wsTypeLightList})
 			conn.WriteJSON(&wsWrapper{Data: master, Type: wsTypeCueList})
 			time.Sleep(tickInterval)
 		}
@@ -200,7 +202,7 @@ func getRouter(ctx context.Context, master cue.MasterManager, testMode bool) *gi
 
 	//inject pointer to cuemaster into gin context
 	router.Use(func(c *gin.Context) {
-		c.Set("master", master)
+		c.Set(ginContextKeyMaster, master)
 	})
 
 	//register prometheus gin metrics middleware

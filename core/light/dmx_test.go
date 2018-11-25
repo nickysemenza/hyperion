@@ -29,12 +29,12 @@ func TestDMXAttributeChannels(t *testing.T) {
 	}
 }
 func TestDMX(t *testing.T) {
-	s1 := getDMXStateInstance()
-	s1.setDMXValues(context.Background(), dmxOperation{2, 22, 40})
+	s1 := InitializeDMXState()
+	s1.set(context.Background(), dmxOperation{2, 22, 40})
 
-	s2 := getDMXStateInstance()
+	s2 := InitializeDMXState()
 	require.EqualValues(t, 40, s2.universes[2][21], "didn't set DMX state instance properly")
-	require.Error(t, s2.setDMXValues(context.Background(), dmxOperation{2, 0, 2}), "should not allow channel 0")
+	require.Error(t, s2.set(context.Background(), dmxOperation{2, 0, 2}), "should not allow channel 0")
 	require.Equal(t, s1, s2, "should be a singleton!")
 }
 
@@ -58,7 +58,6 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 	c.DMXProfiles["a"] = config.LightProfileDMX{Name: "a", Channels: map[string]int{"red": 1, "green": 2, "blue": 3}}
 
 	ctx := c.InjectIntoContext(context.Background())
-	Initialize(ctx, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,11 +66,12 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 				Universe:     tt.fields.Universe,
 				Profile:      tt.fields.Profile,
 			}
-			d.blindlySetRGBToStateAndDMX(ctx, tt.color)
-			ds := getDMXStateInstance()
+			sm, _ := NewManager(ctx, nil)
+			d.blindlySetRGBToStateAndDMX(ctx, sm, tt.color)
+			ds := InitializeDMXState()
 			//green means first chan should be 0, secnd 255
-			require.Equal(t, 0, ds.getDmxValue(tt.fields.Universe, tt.fields.StartAddress))
-			require.Equal(t, 255, ds.getDmxValue(tt.fields.Universe, 1+tt.fields.StartAddress))
+			require.Equal(t, 0, ds.getValue(tt.fields.Universe, tt.fields.StartAddress))
+			require.Equal(t, 255, ds.getValue(tt.fields.Universe, 1+tt.fields.StartAddress))
 		})
 	}
 }
@@ -98,10 +98,10 @@ func TestSendDMXWorker(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	s := getDMXStateInstance()
+	s := InitializeDMXState()
 	s.universes = make(map[int][]byte) //TODO: make it so i don't have to reset
-	s.setDMXValues(ctx, dmxOperation{1, 1, 12})
-	s.setDMXValues(ctx, dmxOperation{3, 9, 100})
+	s.set(ctx, dmxOperation{1, 1, 12})
+	s.set(ctx, dmxOperation{3, 9, 100})
 
 	chans1 := make([]byte, 255)
 	chans1[0] = 12

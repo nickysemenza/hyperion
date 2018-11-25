@@ -2,6 +2,7 @@ package cue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -69,7 +70,13 @@ func BuildCueFromUserCommand(ctx context.Context, command config.UserCommand, ar
 
 	//build lua list of light names
 	luaLightList := L.NewTable()
-	for _, name := range light.GetLightNames() {
+
+	val := ctx.Value(light.ContextKeyLightNames)
+	if val == nil {
+		return nil, errors.New("couldn't read light names from context")
+	}
+
+	for _, name := range val.([]string) {
 		//TODO: pull light names from ctx
 		luaLightList.Append(lua.LString(name))
 	}
