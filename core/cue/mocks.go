@@ -19,8 +19,8 @@ func (m *MockMaster) AddIDsRecursively(c *Cue) {
 }
 
 //ProcessStack is a mock implementation.
-func (m *MockMaster) ProcessStack(ctx context.Context, cs *Stack) {
-	m.Called(ctx, cs)
+func (m *MockMaster) ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup) {
+	m.Called(ctx, cs, wg)
 }
 
 //ProcessCue is a mock implementation.
@@ -51,8 +51,8 @@ func (m *MockMaster) GetDefaultCueStack() *Stack {
 }
 
 //ProcessForever is a mock implementation.
-func (m *MockMaster) ProcessForever(ctx context.Context) {
-	m.Called()
+func (m *MockMaster) ProcessForever(ctx context.Context, wg *sync.WaitGroup) {
+	m.Called(ctx, wg)
 }
 
 //GetLightManager ris a mock implementation.

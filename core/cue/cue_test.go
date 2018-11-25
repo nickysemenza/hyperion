@@ -187,7 +187,9 @@ func BenchmarkCueFrameProcessing(b *testing.B) {
 	frame := Frame{Actions: actions}
 	m := InitializeMaster(clock.RealClock{}, &light.Manager{})
 
-	m.ProcessFrame(context.Background(), &frame, &sync.WaitGroup{})
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	m.ProcessFrame(context.Background(), &frame, &wg)
 }
 
 func TestAddingIDsToUnmarshalledCue(t *testing.T) {

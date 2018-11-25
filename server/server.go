@@ -52,7 +52,7 @@ func Run(ctx context.Context) {
 	go api.ServeHTTP(ctx, &wg, master)
 
 	//proceess cues forever
-	master.ProcessForever(ctx)
+	master.ProcessForever(ctx, &wg)
 
 	olaConfig := c.Outputs.OLA
 	if !olaConfig.Enabled {

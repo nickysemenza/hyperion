@@ -97,39 +97,48 @@ type FrameAction struct {
 }
 
 //ProcessStack processes cues
-func (m *Master) ProcessStack(ctx context.Context, cs *Stack) {
-	log.Printf("[CueStack: %s]\n", cs.Name)
+func (m *Master) ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup) {
 	cueBackoff := config.GetServerConfig(ctx).Timings.CueBackoff
+	defer wg.Done()
+
+	t := time.NewTimer(cueBackoff)
+	defer t.Stop()
+	log.Printf("ProcessStack started at %v, name=%v", time.Now(), cs.Name)
 
 	for {
-		if nextCue := cs.deQueueNextCue(); nextCue != nil {
-			ctx := context.WithValue(ctx, keyStackName, cs.Name)
-			span, ctx := opentracing.StartSpanFromContext(ctx, "cue processing")
-			span.LogKV("event", "popped from stack")
-			span.SetTag("cuestack-name", cs.Name)
-			span.SetTag("cue-id", nextCue.ID)
-			span.SetBaggageItem("cue-id", string(nextCue.ID))
-			cs.ActiveCue = nextCue
-			nextCue.Status = statusActive
-			nextCue.StartedAt = time.Now()
-			var wg sync.WaitGroup //todo: move this elsewhere?
-			wg.Add(1)
-			m.ProcessCue(ctx, nextCue, &wg)
-			//post processing cleanup
-			nextCue.FinishedAt = time.Now()
-			nextCue.Status = statusProcessed
-			nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
-			cs.ActiveCue = nil
-			cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
+		select {
+		case <-ctx.Done():
+			log.Printf("ProcessStack shutdown, name=%v", cs.Name)
+			return //ctx.Err()
+		case <-t.C:
+			if nextCue := cs.deQueueNextCue(); nextCue != nil {
+				ctx := context.WithValue(ctx, keyStackName, cs.Name)
+				span, ctx := opentracing.StartSpanFromContext(ctx, "cue processing")
+				span.LogKV("event", "popped from stack")
+				span.SetTag("cuestack-name", cs.Name)
+				span.SetTag("cue-id", nextCue.ID)
+				span.SetBaggageItem("cue-id", string(nextCue.ID))
+				cs.ActiveCue = nextCue
+				nextCue.Status = statusActive
+				nextCue.StartedAt = time.Now()
+				wg.Add(1)
+				m.ProcessCue(ctx, nextCue, wg)
+				//post processing cleanup
+				nextCue.FinishedAt = time.Now()
+				nextCue.Status = statusProcessed
+				nextCue.RealDuration = nextCue.FinishedAt.Sub(nextCue.StartedAt)
+				cs.ActiveCue = nil
+				cs.ProcessedCues = append(cs.ProcessedCues, *nextCue)
 
-			//update metrics
-			metrics.CueExecutionDrift.Set(nextCue.getDurationDrift().Seconds())
-			metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
-			metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
-			span.Finish()
-		} else {
-			//backoff?
-			m.cl.Sleep(cueBackoff)
+				//update metrics
+				metrics.CueExecutionDrift.Set(nextCue.getDurationDrift().Seconds())
+				metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
+				metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
+				span.Finish()
+				t.Reset(0)
+			} else {
+				t.Reset(cueBackoff)
+			}
 		}
 	}
 }

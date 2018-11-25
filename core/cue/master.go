@@ -12,14 +12,14 @@ import (
 
 //MasterManager is an interface
 type MasterManager interface {
-	ProcessStack(ctx context.Context, cs *Stack)
+	ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup)
 	ProcessCue(ctx context.Context, c *Cue, wg *sync.WaitGroup)
 	ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup)
 	ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *sync.WaitGroup)
 	EnQueueCue(c Cue, cs *Stack) *Cue
 	AddIDsRecursively(c *Cue)
 	GetDefaultCueStack() *Stack
-	ProcessForever(ctx context.Context)
+	ProcessForever(ctx context.Context, wg *sync.WaitGroup)
 	GetLightManager() *light.Manager
 }
 
@@ -70,9 +70,10 @@ func (cm *Master) GetDefaultCueStack() *Stack {
 }
 
 //ProcessForever runs all the cuestacks
-func (cm *Master) ProcessForever(ctx context.Context) {
+func (cm *Master) ProcessForever(ctx context.Context, wg *sync.WaitGroup) {
 	for x := range cm.CueStacks {
-		go cm.ProcessStack(ctx, &cm.CueStacks[x])
+		wg.Add(1)
+		go cm.ProcessStack(ctx, &cm.CueStacks[x], wg)
 	}
 }
 
