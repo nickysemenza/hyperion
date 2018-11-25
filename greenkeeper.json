@@ -1,0 +1,10 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "ui/package.json",
+        "ui/src/semantic/tasks/config/admin/templates/package.json"
+      ]
+    }
+  }
+}
