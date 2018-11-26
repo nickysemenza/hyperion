@@ -23,7 +23,7 @@ beforeEach(function() {
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  const store = configureStore();
+  const store = configureStore;
   ReactDOM.render(
     <MemoryRouter>
       <Provider store={store}>
