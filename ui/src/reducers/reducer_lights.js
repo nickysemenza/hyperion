@@ -1,6 +1,8 @@
 import { RECEIVE_LIGHT_LIST } from '../actions/lights';
+import { RECEIVE_STATE_LIST } from '../actions/lights';
 const INITIAL_STATE = {
-  lights: { lights: {} }
+  lights: { lights: {} },
+  states: { states: {} }
 };
 
 export default function(state = INITIAL_STATE, action) {
@@ -9,6 +11,11 @@ export default function(state = INITIAL_STATE, action) {
       return {
         ...state,
         lights: action.lights
+      };
+    case RECEIVE_STATE_LIST:
+      return {
+        ...state,
+        states: action.states
       };
     default:
       return state;

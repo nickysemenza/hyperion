@@ -160,8 +160,9 @@ type wsWrapper struct {
 }
 
 const (
-	wsTypeLightList = "LIGHT_LIST"
-	wsTypeCueList   = "CUE_MASTER"
+	wsTypeLightList   = "LIGHT_LIST"
+	wsTypeCueList     = "CUE_MASTER"
+	wsTypeLightStates = "LIGHT_STATES"
 )
 
 func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duration, master cue.MasterManager) {
@@ -176,6 +177,7 @@ func wshandler(w http.ResponseWriter, r *http.Request, tickInterval time.Duratio
 			//todo: only emit when things have changed
 			conn.WriteJSON(&wsWrapper{Data: master.GetLightManager().GetLightsByName(), Type: wsTypeLightList})
 			conn.WriteJSON(&wsWrapper{Data: master, Type: wsTypeCueList})
+			conn.WriteJSON(&wsWrapper{Data: master.GetLightManager().GetAllStates(), Type: wsTypeLightStates})
 			time.Sleep(tickInterval)
 		}
 	}()

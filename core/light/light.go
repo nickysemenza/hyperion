@@ -95,6 +95,11 @@ func (m *Manager) GetState(name string) *State {
 	return nil
 }
 
+//GetAllStates will get the current state for all lights
+func (m *Manager) GetAllStates() *StateMap {
+	return &m.states
+}
+
 //DebugString gives info
 func DebugString(l Light) string {
 	return fmt.Sprintf("%s - %s", l.GetName(), l.GetType())

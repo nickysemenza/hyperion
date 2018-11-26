@@ -2,9 +2,10 @@ import React from 'react';
 import { ColorBox } from '../components/LightState';
 import { Table } from 'semantic-ui-react';
 import { getLightType } from '../utils';
-const LightTable = ({ lights }) => {
+const LightTable = ({ lights, states }) => {
   let tableRows = Object.keys(lights).map(k => {
     let eachLight = lights[k];
+    let eachState = states ? states[k] : null;
     let type = getLightType(eachLight);
     let { name, state, ...meta } = eachLight;
     return (
@@ -15,10 +16,10 @@ const LightTable = ({ lights }) => {
           <code>{JSON.stringify(meta, null, 2)}</code>
         </Table.Cell>
         <Table.Cell>
-          <ColorBox state={state} />
+          <ColorBox state={eachState} />
         </Table.Cell>
         <Table.Cell>
-          <code>{JSON.stringify(state)}</code>
+          <code>{JSON.stringify(eachState)}</code>
         </Table.Cell>
       </Table.Row>
     );

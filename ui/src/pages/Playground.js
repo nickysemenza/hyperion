@@ -104,7 +104,7 @@ class Playground extends Component {
         >
           click me!
         </div>
-        <LightTable lights={this.props.lights} />
+        <LightTable lights={this.props.lights} states={this.props.states} />
       </div>
     );
   }
@@ -112,7 +112,8 @@ class Playground extends Component {
 
 function mapStateToProps(state) {
   return {
-    lights: state.lights.lights
+    lights: state.lights.lights,
+    states: state.lights.states
   };
 }
 

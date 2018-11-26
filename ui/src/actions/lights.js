@@ -1,6 +1,7 @@
 import apiFetch from './index';
 
 export const RECEIVE_LIGHT_LIST = 'RECEIVE_LIGHT_LIST';
+export const RECEIVE_STATE_LIST = 'RECEIVE_STATE_LIST';
 
 export function fetchLightList() {
   return dispatch => {

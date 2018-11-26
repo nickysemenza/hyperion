@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/nickysemenza/hyperion/core/config"
+	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
@@ -60,4 +61,19 @@ func TestFindLightByName(t *testing.T) {
 			t.Errorf("got %s, expected %s", res, x.expected)
 		}
 	}
+}
+
+func TestManagerState(t *testing.T) {
+	require := require.New(t)
+	s := &config.Server{}
+	m, err := NewManager(s.InjectIntoContext(context.Background()), nil)
+	require.NoError(err)
+
+	newState := State{RGB: color.RGB{R: 255}}
+	m.SetState("light1", newState)
+	m.SetState("light2", newState)
+	require.Nil(m.GetState("foo"))
+	require.Equal(255, m.GetState("light1").RGB.R)
+	require.Equal(2, len(*m.GetAllStates()))
+
 }

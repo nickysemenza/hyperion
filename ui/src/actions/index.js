@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '../config';
-import { RECEIVE_LIGHT_LIST } from './lights';
+import { RECEIVE_LIGHT_LIST, RECEIVE_STATE_LIST } from './lights';
 import { RECEIVE_CUE_MASTER } from './cues';
 export default function apiFetch(endpoint, options = {}) {
   options.headers = {
@@ -20,10 +20,15 @@ export const receiveSocketData = json => {
         type: RECEIVE_LIGHT_LIST,
         lights: data
       };
-    case WS_TYPE_CUEMASTER:
+    case WS_TYPE_LIGHT_LIST:
       return {
-        type: RECEIVE_CUE_MASTER,
-        cuemaster: data
+        type: RECEIVE_LIGHT_LIST,
+        lights: data
+      };
+    case 'LIGHT_STATES':
+      return {
+        type: RECEIVE_STATE_LIST,
+        states: data
       };
     case WS_META_OPEN:
       return {
