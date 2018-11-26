@@ -15,3 +15,12 @@ function receiveLightList(lights) {
     lights
   };
 }
+
+export function sendCommands(commands) {
+  return dispatch => {
+    return apiFetch('commands', {
+      method: 'POST',
+      body: JSON.stringify(commands)
+    }).then(response => response.json());
+  };
+}

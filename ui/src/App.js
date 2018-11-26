@@ -9,6 +9,7 @@ import WS from './components/WS';
 import Helpers from './components/Helpers';
 import { Container } from 'semantic-ui-react';
 import ReduxToastr from 'react-redux-toastr';
+import Playground from './pages/Playground';
 
 const App = () => (
   <Router>
@@ -29,6 +30,7 @@ const App = () => (
       >
         <Switch>
           <Route exact path="/" component={Home} />
+          <Route path="/playground" component={Playground} />
           <Route path="/lights" component={LightList} />
           <Route path="/cues" component={CueList} />
         </Switch>
