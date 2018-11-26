@@ -1,10 +1,5 @@
-import {
-  LightTypeHue,
-  LightTypeDMX,
-  LightTypeGeneric,
-  getLightType,
-  rgbToHex
-} from './utils';
+import { rgbToHex } from './utils';
+import { Light } from './types';
 test('correctly identifies light type', () => {
   let tt = [
     {
@@ -12,7 +7,7 @@ test('correctly identifies light type', () => {
         hue_id: 1,
         name: 'hue1'
       },
-      expected: LightTypeHue
+      expected: Light.TypeHue
     },
     {
       light: {
@@ -21,17 +16,18 @@ test('correctly identifies light type', () => {
         universe: 1,
         profile: 'china-par-1'
       },
-      expected: LightTypeDMX
+      expected: Light.TypeDMX
     },
     {
       light: {
         name: 'generic1'
       },
-      expected: LightTypeGeneric
+      expected: Light.TypeGeneric
     }
   ];
   tt.forEach(tc => {
-    expect(getLightType(tc['light'])).toBe(tc['expected']);
+    let l = new Light(tc['light']);
+    expect(l.getType()).toBe(tc['expected']);
   });
 });
 
