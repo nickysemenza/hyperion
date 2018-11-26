@@ -47,7 +47,10 @@
     }
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": ["prettier --single-quote --write", "git add"]
+    "src/**/*.{js,jsx,json,css,tsx}": [
+      "prettier --single-quote --write",
+      "git add"
+    ]
   },
   "devDependencies": {
     "enzyme": "^3.2.0",

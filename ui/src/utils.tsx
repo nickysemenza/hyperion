@@ -1,6 +1,6 @@
 const componentToHex = (c: number) => {
   var hex = c.toString(16);
-  return hex.length === 1 ? "0" + hex : hex;
+  return hex.length === 1 ? '0' + hex : hex;
 };
 
 export const rgbToHex = (
@@ -9,7 +9,7 @@ export const rgbToHex = (
   b: number,
   withoutPound = false
 ) =>
-  (withoutPound ? "" : "#") +
+  (withoutPound ? '' : '#') +
   componentToHex(r) +
   componentToHex(g) +
   componentToHex(b);
