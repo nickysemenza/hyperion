@@ -1,17 +1,17 @@
 import React from 'react';
 import { ColorBox } from '../components/LightState';
 import { Table } from 'semantic-ui-react';
-import { getLightType } from '../utils';
+import { Light } from '../types';
 const LightTable = ({ lights, states }) => {
   let tableRows = Object.keys(lights).map(k => {
     let eachLight = lights[k];
+    let light = new Light(lights[k]);
     let eachState = states ? states[k] : null;
-    let type = getLightType(eachLight);
     let { name, state, ...meta } = eachLight;
     return (
       <Table.Row key={name}>
         <Table.Cell>{name}</Table.Cell>
-        <Table.Cell>{type}</Table.Cell>
+        <Table.Cell>{light.getType()}</Table.Cell>
         <Table.Cell>
           <code>{JSON.stringify(meta, null, 2)}</code>
         </Table.Cell>

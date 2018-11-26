@@ -9,10 +9,8 @@ import { Provider } from 'react-redux';
 import 'react-redux-toastr/lib/css/react-redux-toastr.min.css';
 import './semantic/dist/semantic.min.css';
 
-const store = configureStore();
-
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={configureStore}>
     <App />
   </Provider>,
   document.getElementById('root')
