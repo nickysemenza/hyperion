@@ -12,78 +12,91 @@
 
 */
 
-var gulp = require('gulp'),
+var
+  gulp      = require('gulp'),
+
   // node dependencies
-  console = require('better-console'),
-  del = require('del'),
-  fs = require('fs'),
-  path = require('path'),
-  git = require('gulp-git'),
+  console   = require('better-console'),
+  del       = require('del'),
+  fs        = require('fs'),
+  path      = require('path'),
+  git       = require('gulp-git'),
   githubAPI = require('github'),
-  mkdirp = require('mkdirp'),
+  mkdirp    = require('mkdirp'),
+
   // admin files
-  github = require('../../config/admin/github.js'),
-  release = require('../../config/admin/release'),
-  project = require('../../config/project/release'),
+  github    = require('../../config/admin/github.js'),
+  release   = require('../../config/admin/release'),
+  project   = require('../../config/project/release'),
+
+
   // oAuth configuration for GitHub
-  oAuth = fs.existsSync(__dirname + '/../../config/admin/oauth.js')
+  oAuth     = fs.existsSync(__dirname + '/../../config/admin/oauth.js')
     ? require('../../config/admin/oauth')
     : false,
+
   // shorthand
-  version = project.version;
+  version = project.version
+;
 
 module.exports = function(callback) {
-  var index = -1,
+
+  var
+    index = -1,
     total = release.distributions.length,
     timer,
     stream,
-    stepRepo;
+    stepRepo
+  ;
 
-  if (!oAuth) {
-    console.error(
-      'Must add oauth token for GitHub in tasks/config/admin/oauth.js'
-    );
+  if(!oAuth) {
+    console.error('Must add oauth token for GitHub in tasks/config/admin/oauth.js');
     return;
   }
 
   // Do Git commands synchronously per component, to avoid issues
   stepRepo = function() {
+
     index = index + 1;
 
-    if (index >= total) {
+    if(index >= total) {
       callback();
       return;
     }
 
-    var component = release.distributions[index],
+    var
+      component          = release.distributions[index],
       lowerCaseComponent = component.toLowerCase(),
-      outputDirectory = path.resolve(release.outputRoot + lowerCaseComponent),
-      repoName = release.distRepoRoot + component,
-      gitOptions = { cwd: outputDirectory },
-      pullOptions = { args: '-q', cwd: outputDirectory, quiet: true },
-      resetOptions = { args: '-q --hard', cwd: outputDirectory, quiet: true },
-      gitURL = 'git@github.com:' + release.org + '/' + repoName + '.git',
-      repoURL = 'https://github.com/' + release.org + '/' + repoName + '/',
-      localRepoSetup = fs.existsSync(path.join(outputDirectory, '.git'));
+      outputDirectory    = path.resolve(release.outputRoot + lowerCaseComponent),
+      repoName           = release.distRepoRoot + component,
+
+      gitOptions         = { cwd: outputDirectory },
+      pullOptions        = { args: '-q', cwd: outputDirectory, quiet: true },
+      resetOptions       = { args: '-q --hard', cwd: outputDirectory, quiet: true },
+      gitURL             = 'git@github.com:' + release.org + '/' + repoName + '.git',
+      repoURL            = 'https://github.com/' + release.org + '/' + repoName + '/',
+      localRepoSetup     = fs.existsSync(path.join(outputDirectory, '.git'))
+    ;
 
     console.log('Processing repository: ' + outputDirectory);
 
     // create folder if doesn't exist
-    if (!fs.existsSync(outputDirectory)) {
+    if( !fs.existsSync(outputDirectory) ) {
       mkdirp.sync(outputDirectory);
     }
 
     // clean folder
-    if (release.outputRoot.search('../repos') == 0) {
+    if(release.outputRoot.search('../repos') == 0) {
       console.info('Cleaning dir', outputDirectory);
-      del.sync([outputDirectory + '**/*'], { silent: true, force: true });
+      del.sync([outputDirectory + '**/*'], {silent: true, force: true});
     }
 
     // set-up local repo
     function setupRepo() {
-      if (localRepoSetup) {
+      if(localRepoSetup) {
         addRemote();
-      } else {
+      }
+      else {
         initRepo();
       }
     }
@@ -91,7 +104,7 @@ module.exports = function(callback) {
     function initRepo() {
       console.info('Initializing repository for ' + component);
       git.init(gitOptions, function(error) {
-        if (error) {
+        if(error) {
           console.error('Error initializing repo', error);
         }
         addRemote();
@@ -100,21 +113,18 @@ module.exports = function(callback) {
 
     function createRepo() {
       console.info('Creating GitHub repo ' + repoURL);
-      github.repos.createFromOrg(
-        {
-          org: release.org,
-          name: repoName,
-          homepage: release.homepage
-        },
-        function() {
-          setupRepo();
-        }
-      );
+      github.repos.createFromOrg({
+        org      : release.org,
+        name     : repoName,
+        homepage : release.homepage
+      }, function() {
+        setupRepo();
+      });
     }
 
     function addRemote() {
       console.info('Adding remote origin as ' + gitURL);
-      git.addRemote('origin', gitURL, gitOptions, function() {
+      git.addRemote('origin', gitURL, gitOptions, function(){
         pullFiles();
       });
     }
@@ -138,17 +148,22 @@ module.exports = function(callback) {
       // avoid rate throttling
       global.clearTimeout(timer);
       timer = global.setTimeout(function() {
-        stepRepo();
+        stepRepo()
       }, 0);
     }
 
-    if (localRepoSetup) {
+
+    if(localRepoSetup) {
       pullFiles();
-    } else {
+    }
+    else {
       setupRepo();
       // createRepo() only use to create remote repo (easier to do manually)
     }
+
   };
 
   stepRepo();
+
+
 };
