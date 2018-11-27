@@ -74,6 +74,13 @@ dmx_profiles:
         blue: 3
         white: 4
 
+jobs:
+  - command: set(hue2:#FF00FF:0)
+    cron: 1-59/2 * * * *
+    name: test1
+  - command: set(hue2:#0000FF:0)
+    cron: "*/2 * * * *"
+
 commands:
   - setall:
       body: |

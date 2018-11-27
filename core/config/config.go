@@ -78,6 +78,7 @@ type Server struct {
 	}
 	DMXProfiles DMXProfileMap
 	Commands    UserCommandMap
+	Jobs        []Job
 }
 
 //DMXProfileMap represents a map of dmx profiles
@@ -87,6 +88,13 @@ type DMXProfileMap map[string]LightProfileDMX
 type LightHue struct {
 	Name  string
 	HueID int `mapstructure:"hue_id"`
+}
+
+//Job holds a cronjob
+type Job struct {
+	Name    string
+	Command string
+	Cron    string
 }
 
 //LightGeneric holds config info for a Generic
@@ -195,6 +203,7 @@ func LoadServer() *Server {
 	viper.UnmarshalKey("lights", &c.Lights)
 	viper.UnmarshalKey("dmx_profiles", &c.DMXProfiles)
 	viper.UnmarshalKey("commands", &c.Commands)
+	viper.UnmarshalKey("jobs", &c.Jobs)
 
 	return &c
 }

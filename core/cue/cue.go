@@ -40,6 +40,7 @@ const (
 	SourceInputAPI     = "http_api"
 	SourceInputRPC     = "rpc"
 	SourceInputTrigger = "trigger"
+	SourceInputJob     = "job"
 	SourceTypeCommand  = "command"
 	SourceTypeTrigger  = "trigger"
 	SourceTypeJSON     = "json"
@@ -160,7 +161,7 @@ func (m *Master) EnQueueCue(c Cue, cs *Stack) *Cue {
 	cs.m.Lock()
 	defer cs.m.Unlock()
 	m.AddIDsRecursively(&c)
-	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name}).Info("enqueued!")
+	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name, "source": c.Source}).Info("enqueued!")
 
 	cs.Cues = append(cs.Cues, c)
 	return &c

@@ -16,6 +16,7 @@ import (
 
 	"github.com/nickysemenza/hyperion/api"
 	"github.com/nickysemenza/hyperion/control/homekit"
+	"github.com/nickysemenza/hyperion/control/job"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
 	"github.com/nickysemenza/hyperion/core/light"
@@ -50,6 +51,9 @@ func Run(ctx context.Context) {
 	//Setup API server
 	wg.Add(1)
 	go api.ServeHTTP(ctx, &wg, master)
+
+	wg.Add(1)
+	go job.ProcessForever(ctx, &wg, c.Jobs, master)
 
 	//proceess cues forever
 	master.ProcessForever(ctx, &wg)
