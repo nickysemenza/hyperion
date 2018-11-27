@@ -16,6 +16,8 @@ test-ui:
 	cd ui && CI=true yarn test
 test: test-server test-ui
 
+lint-server:
+	revive -formatter friendly -exclude=vendor/... ./...
 generate-proto:
 	protoc --go_out=plugins=grpc:api proto/*.proto
 godepgraph:

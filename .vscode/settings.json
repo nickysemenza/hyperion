@@ -1,0 +1,4 @@
+{
+  "go.lintTool": "revive",
+  "go.lintFlags": ["-exclude=vendor/..."]
+}
