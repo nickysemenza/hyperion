@@ -10,10 +10,13 @@
 
 */
 
-var runSequence = require('run-sequence');
+var
+  runSequence = require('run-sequence')
+;
 
 /* Release All */
 module.exports = function(callback) {
+
   runSequence(
     //'build', // build Semantic
     'init distributions', // sync with current github version
@@ -22,4 +25,5 @@ module.exports = function(callback) {
     'create components', // update each repo
     callback
   );
+
 };

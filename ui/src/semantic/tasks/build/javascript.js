@@ -2,49 +2,60 @@
           Build Task
 *******************************/
 
-var gulp = require('gulp'),
+var
+  gulp         = require('gulp'),
+
   // node dependencies
-  console = require('better-console'),
-  fs = require('fs'),
+  console      = require('better-console'),
+  fs           = require('fs'),
+
   // gulp dependencies
-  chmod = require('gulp-chmod'),
-  flatten = require('gulp-flatten'),
-  gulpif = require('gulp-if'),
-  plumber = require('gulp-plumber'),
-  print = require('gulp-print'),
-  rename = require('gulp-rename'),
-  replace = require('gulp-replace'),
-  uglify = require('gulp-uglify'),
+  chmod        = require('gulp-chmod'),
+  flatten      = require('gulp-flatten'),
+  gulpif       = require('gulp-if'),
+  plumber      = require('gulp-plumber'),
+  print        = require('gulp-print').default,
+  rename       = require('gulp-rename'),
+  replace      = require('gulp-replace'),
+  uglify       = require('gulp-uglify'),
+
   // config
-  config = require('../config/user'),
-  tasks = require('../config/tasks'),
-  install = require('../config/project/install'),
+  config       = require('../config/user'),
+  tasks        = require('../config/tasks'),
+  install      = require('../config/project/install'),
+
   // shorthand
-  globs = config.globs,
-  assets = config.paths.assets,
-  output = config.paths.output,
-  source = config.paths.source,
-  banner = tasks.banner,
-  comments = tasks.regExp.comments,
-  log = tasks.log,
-  settings = tasks.settings;
+  globs        = config.globs,
+  assets       = config.paths.assets,
+  output       = config.paths.output,
+  source       = config.paths.source,
+
+  banner       = tasks.banner,
+  comments     = tasks.regExp.comments,
+  log          = tasks.log,
+  settings     = tasks.settings
+;
 
 // add internal tasks (concat release)
 require('../collections/internal')(gulp);
 
 module.exports = function(callback) {
-  var stream, compressedStream, uncompressedStream;
+
+  var
+    stream,
+    compressedStream,
+    uncompressedStream
+  ;
 
   console.info('Building Javascript');
 
-  if (!install.isSetup()) {
+  if( !install.isSetup() ) {
     console.error('Cannot build files. Run "gulp install" to set-up Semantic');
     return;
   }
 
   // copy source javascript
-  gulp
-    .src(source.definitions + '/**/' + globs.components + '.js')
+  gulp.src(source.definitions + '/**/' + globs.components + '.js')
     .pipe(plumber())
     .pipe(flatten())
     .pipe(replace(comments.license.in, comments.license.out))
@@ -60,5 +71,7 @@ module.exports = function(callback) {
       gulp.start('package compressed js');
       gulp.start('package uncompressed js');
       callback();
-    });
+    })
+  ;
+
 };
