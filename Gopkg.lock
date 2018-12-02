@@ -220,9 +220,12 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:c568d7727aa262c32bdf8a3f7db83614f7af0ed661474b24588de635c20024c7"
+  digest = "1:53e8c5c79716437e601696140e8b1801aae4204f4ec54a504333702a49572c4f"
   name = "github.com/magiconair/properties"
-  packages = ["."]
+  packages = [
+    ".",
+    "assert",
+  ]
   pruneopts = "UT"
   revision = "c2353362d570a7bfa228149c62842019201cfb71"
   version = "v1.8.0"
@@ -284,15 +287,16 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:4a84d57e2caeb905e4624a5cdab10aaf6ca5917009ab1507265fa7fe3ea4199c"
+  digest = "1:15ec535853c3c29f03cca12b7081f30daacf64bf98d07055cf6d57e66a292899"
   name = "github.com/nickysemenza/gola"
   packages = [
     ".",
-    "ola_proto",
-    "ola_rpc",
+    "ola_proto/protocol",
+    "ola_proto/rpc",
   ]
   pruneopts = "UT"
-  revision = "4a869f3481ff322f6a3e951ccf2123ea24ccfaed"
+  revision = "4b41760203ae57c0505a4bf7a54635a906e1838b"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
@@ -679,6 +683,7 @@
     "github.com/heatxsink/go-hue/hue",
     "github.com/heatxsink/go-hue/lights",
     "github.com/lucasb-eyer/go-colorful",
+    "github.com/magiconair/properties/assert",
     "github.com/mcuadros/go-gin-prometheus",
     "github.com/nickysemenza/gola",
     "github.com/opentracing/opentracing-go",

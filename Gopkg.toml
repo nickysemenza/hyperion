@@ -58,8 +58,8 @@
   version = "1.0.0"
 
 [[constraint]]
-  revision = "4a869f3481ff322f6a3e951ccf2123ea24ccfaed"
   name = "github.com/nickysemenza/gola"
+  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
