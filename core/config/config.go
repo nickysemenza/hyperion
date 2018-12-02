@@ -71,14 +71,17 @@ type Server struct {
 	}
 	Triggers []Trigger
 
-	Lights struct {
-		Hue     []LightHue
-		DMX     []LightDMX
-		Generic []LightGeneric
-	}
+	Lights      Lights
 	DMXProfiles DMXProfileMap
 	Commands    UserCommandMap
 	Jobs        []Job
+}
+
+//Lights represents the lists of lights, by type
+type Lights struct {
+	Hue     []LightHue
+	DMX     []LightDMX
+	Generic []LightGeneric
 }
 
 //DMXProfileMap represents a map of dmx profiles

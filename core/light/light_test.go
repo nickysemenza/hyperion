@@ -34,15 +34,28 @@ func TestGenericLightInterface(t *testing.T) {
 
 }
 
+func TestDuplicateLights(t *testing.T) {
+	s := &config.Server{
+		Lights: config.Lights{
+			Hue: []config.LightHue{{Name: "light1", HueID: 1}},
+			DMX: []config.LightDMX{{Name: "light1"}},
+		},
+	}
+	_, err := NewManager(s.InjectIntoContext(context.Background()), nil)
+	require.Error(t, err)
+}
 func TestFindLightByName(t *testing.T) {
 	dmx1 := &DMXLight{Name: "dmx1"}
 	hue1 := &HueLight{Name: "hue1"}
 
-	s := &config.Server{}
+	s := &config.Server{
+		Lights: config.Lights{
+			Hue: []config.LightHue{{Name: "hue1", HueID: 1}},
+			DMX: []config.LightDMX{{Name: "dmx1"}},
+		},
+	}
 	m, err := NewManager(s.InjectIntoContext(context.Background()), nil)
 	require.NoError(t, err)
-	m.items["hue1"] = hue1
-	m.items["dmx1"] = dmx1
 
 	tt := []struct {
 		nameToFind string

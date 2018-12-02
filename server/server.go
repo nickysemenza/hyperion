@@ -31,7 +31,10 @@ func Run(ctx context.Context) {
 
 	//Initialize lights (including hue output)
 	hueConn := lights.New(c.Outputs.Hue.Address, c.Outputs.Hue.Username)
-	lm, _ := light.NewManager(ctx, hueConn)
+	lm, err := light.NewManager(ctx, hueConn)
+	if err != nil {
+		log.Fatalf("error initializing light manager. err='%v'", err)
+	}
 
 	master := cue.InitializeMaster(clock.RealClock{}, lm)
 

@@ -134,9 +134,12 @@ func NewManager(ctx context.Context, h HueConnection) (*Manager, error) {
 		items:         make(NameMap),
 	}
 	//populate with each type of light
-	//TODO: validate that names are unique
 	for i := range config.Lights.Hue {
 		x := &config.Lights.Hue[i]
+		if _, ok := m.items[x.Name]; ok {
+			err := fmt.Errorf("duplicate lights found! name=%s", x.Name)
+			return nil, err
+		}
 		m.items[x.Name] = &HueLight{
 			HueID: x.HueID,
 			Name:  x.Name,
@@ -145,6 +148,10 @@ func NewManager(ctx context.Context, h HueConnection) (*Manager, error) {
 	}
 	for i := range config.Lights.DMX {
 		x := &config.Lights.DMX[i]
+		if _, ok := m.items[x.Name]; ok {
+			err := fmt.Errorf("duplicate lights found! name=%s", x.Name)
+			return nil, err
+		}
 		m.items[x.Name] = &DMXLight{
 			Name:         x.Name,
 			StartAddress: x.StartAddress,
@@ -155,6 +162,10 @@ func NewManager(ctx context.Context, h HueConnection) (*Manager, error) {
 	}
 	for i := range config.Lights.Generic {
 		x := &config.Lights.Generic[i]
+		if _, ok := m.items[x.Name]; ok {
+			err := fmt.Errorf("duplicate lights found! name=%s", x.Name)
+			return nil, err
+		}
 		m.items[x.Name] = &GenericLight{
 			Name: x.Name,
 		}
