@@ -7,23 +7,8 @@ import (
 	"time"
 
 	"github.com/nickysemenza/hyperion/core/config"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-type MockOLAClient struct {
-	mock.Mock
-}
-
-func (c *MockOLAClient) Close() {
-	c.Called()
-	return
-}
-
-func (c *MockOLAClient) SendDmx(universe int, values []byte) (status bool, err error) {
-	args := c.Called(universe, values)
-	return args.Bool(0), nil
-}
 
 func TestSendDMXWorker(t *testing.T) {
 	client := new(MockOLAClient)

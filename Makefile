@@ -29,3 +29,13 @@ docker-build:
 	docker build -t $(IMAGE) .
 docker-run:
 	docker run -p 8080:8080 -e "A=b" $(IMAGE) 
+
+# from: https://goldfishtips.wordpress.com/2018/03/17/cool-makefile-target-for-golang-mocks-generation/
+update-mocks:
+	go list -f '{{.Dir}}' ./... \
+    | grep -v "$(notdir $(CURDIR))$$" \
+	| grep -v "api" \
+    | xargs -n1 ${GOPATH}/bin/mockery \
+	-inpkg -case "underscore" -all \
+	-note "NOTE: run 'make update-mocks' to regenerate" \
+	-dir

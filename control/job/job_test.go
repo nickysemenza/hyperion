@@ -15,7 +15,7 @@ import (
 
 func TestProcessForever(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	m := new(cue.MockMaster)
+	m := new(cue.MockMasterManagerManager)
 	cs := cue.Stack{Name: "foo"}
 	m.On("GetDefaultCueStack").Return(&cs)
 	newCue, err := cue.NewFromCommand(ctx, "set(light1:#FF00FF:0)")
