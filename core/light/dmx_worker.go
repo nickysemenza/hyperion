@@ -50,6 +50,16 @@ func (s *DMXState) initializeUniverse(universe int) {
 	}
 }
 
+//GetDMXState returns the current dmx state
+func (m *StateManager) GetDMXState() *DMXState {
+	return &m.dmxState
+}
+
+//SetDMXState updates the dmxstate
+func (m *StateManager) SetDMXState(ctx context.Context, ops ...dmxOperation) error {
+	return m.dmxState.set(ctx, ops...)
+}
+
 //OLAClient is the interface for communicating with ola
 type OLAClient interface {
 	SendDmx(universe int, values []byte) (status bool, err error)
@@ -57,7 +67,7 @@ type OLAClient interface {
 }
 
 //SendDMXWorker sends OLA the current dmxState across all universes
-func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, manager *Manager, wg *sync.WaitGroup) error {
+func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, manager Manager, wg *sync.WaitGroup) error {
 	defer wg.Done()
 	defer client.Close()
 
@@ -71,7 +81,7 @@ func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, ma
 			log.Println("SendDMXWorker shutdown")
 			return ctx.Err()
 		case <-t.C:
-			for k, v := range manager.dmxState.universes {
+			for k, v := range manager.GetDMXState().universes {
 				timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
 				client.SendDmx(k, v)
 				timer.ObserveDuration()

@@ -18,7 +18,7 @@ func (gl *GenericLight) GetType() string {
 }
 
 //SetState updates the light's state.
-func (gl *GenericLight) SetState(ctx context.Context, m *Manager, target TargetState) {
+func (gl *GenericLight) SetState(ctx context.Context, m Manager, target TargetState) {
 	m.SetState(gl.Name, target.ToState())
 
 }

@@ -71,7 +71,7 @@ func TestGetDiscoveredHues(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := new(MockHueConn)
-			m := Manager{
+			m := StateManager{
 				hueConnection: h,
 			}
 			h.On("GetAllLights").Return(tt.resp, tt.err)

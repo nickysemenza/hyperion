@@ -32,7 +32,7 @@ func (hl *HueLight) GetType() string {
 }
 
 //SetState updates the Hue's state.
-func (hl *HueLight) SetState(ctx context.Context, m *Manager, s TargetState) {
+func (hl *HueLight) SetState(ctx context.Context, m Manager, s TargetState) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight SetState")
 	defer span.Finish()
 	span.SetTag("hue-id", hl.HueID)
@@ -42,7 +42,7 @@ func (hl *HueLight) SetState(ctx context.Context, m *Manager, s TargetState) {
 	defer hl.m.Unlock()
 	span.LogKV("event", "acquired lock")
 	m.SetState(hl.Name, s.ToState())
-	go hl.setColor(ctx, m.hueConnection, s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
+	go hl.setColor(ctx, m.GetHueConnection(), s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
 }
 
 //setColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
@@ -87,8 +87,8 @@ type DiscoveredHues struct {
 }
 
 //GetDiscoveredHues finds all the hues on the network
-func (s *Manager) GetDiscoveredHues(ctx context.Context) DiscoveredHues {
-	lights, _ := s.hueConnection.GetAllLights()
+func (m *StateManager) GetDiscoveredHues(ctx context.Context) DiscoveredHues {
+	lights, _ := m.hueConnection.GetAllLights()
 
 	byName := make(map[string]int)
 	for _, x := range lights {
@@ -96,4 +96,9 @@ func (s *Manager) GetDiscoveredHues(ctx context.Context) DiscoveredHues {
 	}
 
 	return DiscoveredHues{lights, byName}
+}
+
+//GetHueConnection returns the hue connection object
+func (m *StateManager) GetHueConnection() HueConnection {
+	return m.hueConnection
 }

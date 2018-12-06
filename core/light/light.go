@@ -16,7 +16,21 @@ import (
 type Light interface {
 	GetName() string
 	GetType() string
-	SetState(context.Context, *Manager, TargetState)
+	SetState(context.Context, Manager, TargetState)
+}
+
+//Manager is the light manager interface
+type Manager interface {
+	SetState(name string, new State)
+	GetState(name string) *State
+	GetLightNames() []string
+	GetAllStates() *StateMap
+	GetByName(name string) Light
+	GetLightsByName() NameMap
+	GetDMXState() *DMXState
+	SetDMXState(ctx context.Context, ops ...dmxOperation) error
+	GetHueConnection() HueConnection
+	GetDiscoveredHues(ctx context.Context) DiscoveredHues
 }
 
 //constants for the different types of lights
@@ -60,8 +74,8 @@ type NameMap map[string]Light
 //StateMap holds Global light state
 type StateMap map[string]State
 
-//Manager holds the state of lights
-type Manager struct {
+//StateManager holds the state of lights
+type StateManager struct {
 	states        StateMap
 	items         NameMap
 	stateLock     sync.RWMutex
@@ -70,23 +84,14 @@ type Manager struct {
 }
 
 //SetState will set the current state for a light
-func (m *Manager) SetState(name string, new State) {
+func (m *StateManager) SetState(name string, new State) {
 	m.stateLock.Lock()
 	defer m.stateLock.Unlock()
 	m.states[name] = new
 }
 
-//GetLightNames returns all the light names
-func (m *Manager) GetLightNames() []string {
-	keys := make([]string, 0, len(m.items))
-	for k := range m.items {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 //GetState will get the current state for a light
-func (m *Manager) GetState(name string) *State {
+func (m *StateManager) GetState(name string) *State {
 	m.stateLock.RLock()
 	defer m.stateLock.RUnlock()
 	state, ok := m.states[name]
@@ -96,8 +101,17 @@ func (m *Manager) GetState(name string) *State {
 	return nil
 }
 
+//GetLightNames returns all the light names
+func (m *StateManager) GetLightNames() []string {
+	keys := make([]string, 0, len(m.items))
+	for k := range m.items {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 //GetAllStates will get the current state for all lights
-func (m *Manager) GetAllStates() *StateMap {
+func (m *StateManager) GetAllStates() *StateMap {
 	return &m.states
 }
 
@@ -107,12 +121,12 @@ func DebugString(l Light) string {
 }
 
 //GetLightsByName returns lights keyed by name
-func (m *Manager) GetLightsByName() NameMap {
+func (m *StateManager) GetLightsByName() NameMap {
 	return m.items
 }
 
 //GetByName looks up a light by name
-func (m *Manager) GetByName(name string) Light {
+func (m *StateManager) GetByName(name string) Light {
 	light, ok := m.items[name]
 	if ok {
 		return light
@@ -127,9 +141,9 @@ type HueConnection interface {
 }
 
 //NewManager parses light config
-func NewManager(ctx context.Context, h HueConnection) (*Manager, error) {
+func NewManager(ctx context.Context, h HueConnection) (Manager, error) {
 	config := mainConfig.GetServerConfig(ctx)
-	m := Manager{
+	m := StateManager{
 		hueConnection: h,
 		states:        make(StateMap),
 		items:         make(NameMap),

@@ -33,7 +33,7 @@ func TestSendDMXWorker(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	m := Manager{
+	m := StateManager{
 		dmxState: DMXState{universes: make(map[int][]byte)},
 	}
 	m.dmxState.set(ctx, dmxOperation{1, 1, 12})
