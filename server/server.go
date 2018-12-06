@@ -70,7 +70,7 @@ func Run(ctx context.Context) {
 			log.Errorf("could not start DMX worker: could not connect to ola: %v", err)
 		} else {
 			wg.Add(1)
-			go light.SendDMXWorker(ctx, client, olaConfig.Tick, &wg)
+			go light.SendDMXWorker(ctx, client, olaConfig.Tick, lm, &wg)
 		}
 	}
 

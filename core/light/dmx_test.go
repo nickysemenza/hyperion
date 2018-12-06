@@ -2,41 +2,12 @@ package light
 
 import (
 	"context"
-	"sync"
 	"testing"
-	"time"
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-func TestDMXAttributeChannels(t *testing.T) {
-	tt := []struct {
-		profile  config.LightProfileDMX
-		name     string
-		expected int
-	}{
-		{config.LightProfileDMX{Channels: map[string]int{"red": 1, "green": 2}}, "red", 1},
-		{config.LightProfileDMX{Channels: map[string]int{"red": 1, "green": 2}}, "blue", 0},
-	}
-	for _, tc := range tt {
-		res := getChannelIndexForAttribute(&tc.profile, tc.name)
-		if res != tc.expected {
-			t.Errorf("got channel index %d, expected %d", res, tc.expected)
-		}
-	}
-}
-func TestDMX(t *testing.T) {
-	s1 := InitializeDMXState()
-	s1.set(context.Background(), dmxOperation{2, 22, 40})
-
-	s2 := InitializeDMXState()
-	require.EqualValues(t, 40, s2.universes[2][21], "didn't set DMX state instance properly")
-	require.Error(t, s2.set(context.Background(), dmxOperation{2, 0, 2}), "should not allow channel 0")
-	require.Equal(t, s1, s2, "should be a singleton!")
-}
 
 func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 	type fields struct {
@@ -67,54 +38,11 @@ func TestDMXLight_blindlySetRGBToStateAndDMX(t *testing.T) {
 				Profile:      tt.fields.Profile,
 			}
 			sm, _ := NewManager(ctx, nil)
+			sm.dmxState = DMXState{universes: make(map[int][]byte)}
 			d.blindlySetRGBToStateAndDMX(ctx, sm, tt.color)
-			ds := InitializeDMXState()
 			//green means first chan should be 0, secnd 255
-			require.Equal(t, 0, ds.getValue(tt.fields.Universe, tt.fields.StartAddress))
-			require.Equal(t, 255, ds.getValue(tt.fields.Universe, 1+tt.fields.StartAddress))
+			require.Equal(t, 0, sm.dmxState.getValue(tt.fields.Universe, tt.fields.StartAddress))
+			require.Equal(t, 255, sm.dmxState.getValue(tt.fields.Universe, 1+tt.fields.StartAddress))
 		})
 	}
-}
-
-type MockOLAClient struct {
-	mock.Mock
-}
-
-func (c *MockOLAClient) Close() {
-	c.Called()
-	return
-}
-
-func (c *MockOLAClient) SendDmx(universe int, values []byte) (status bool, err error) {
-	args := c.Called(universe, values)
-	return args.Bool(0), nil
-}
-
-func TestSendDMXWorker(t *testing.T) {
-	client := new(MockOLAClient)
-	client.On("Close")
-
-	ctx, cancel := context.WithCancel(context.Background())
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	s := InitializeDMXState()
-	s.universes = make(map[int][]byte) //TODO: make it so i don't have to reset
-	s.set(ctx, dmxOperation{1, 1, 12})
-	s.set(ctx, dmxOperation{3, 9, 100})
-
-	chans1 := make([]byte, 255)
-	chans1[0] = 12
-	client.On("SendDmx", 1, chans1).Return(true, nil)
-
-	chans3 := make([]byte, 255)
-	chans3[8] = 100
-	client.On("SendDmx", 3, chans3).Return(true, nil)
-
-	go SendDMXWorker(ctx, client, time.Millisecond*20, &wg)
-	time.Sleep(time.Millisecond * 100)
-	cancel()
-	wg.Wait()
-	client.AssertExpectations(t)
-
 }
