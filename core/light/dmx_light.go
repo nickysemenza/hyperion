@@ -2,16 +2,12 @@ package light
 
 import (
 	"context"
-	"fmt"
-	"sync"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
-	"github.com/nickysemenza/hyperion/util/metrics"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
@@ -72,9 +68,8 @@ func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, m *Manager, c
 	rVal, gVal, bVal := color.AsComponents()
 
 	span.LogKV("event", "begin getDMXStateInstance")
-	ds := InitializeDMXState()
 	span.LogKV("event", "now setting values")
-	ds.set(ctx, dmxOperation{universe: d.Universe, channel: rgbChannelIds[0], value: rVal},
+	m.dmxState.set(ctx, dmxOperation{universe: d.Universe, channel: rgbChannelIds[0], value: rVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[1], value: gVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[2], value: bVal})
 
@@ -108,89 +103,6 @@ func (d *DMXLight) SetState(ctx context.Context, m *Manager, target TargetState)
 	span.LogKV("event", "finished fade interpolation")
 	m.SetState(d.Name, target.ToState())
 
-}
-
-//DMXState holds the DMX512 values for each channel
-type DMXState struct {
-	universes map[int][]byte
-	m         sync.Mutex
-}
-
-var (
-	dmxStateInstance *DMXState
-	once             sync.Once
-)
-
-//InitializeDMXState makes a singleton for dmxState
-func InitializeDMXState() *DMXState {
-	once.Do(func() {
-		m := make(map[int][]byte)
-		dmxStateInstance = &DMXState{universes: m}
-
-	})
-	return dmxStateInstance
-}
-func (s *DMXState) getValue(universe, channel int) int {
-	return int(s.universes[universe][channel-1])
-}
-
-func (s *DMXState) set(ctx context.Context, ops ...dmxOperation) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValues")
-	defer span.Finish()
-	span.SetTag("operations", ops)
-	s.m.Lock()
-	defer s.m.Unlock()
-	for _, op := range ops {
-		channel := op.channel
-		universe := op.universe
-		value := op.value
-		if channel < 1 || channel > 255 {
-			return fmt.Errorf("dmx channel (%d) not in range, op=%v", channel, op)
-		}
-
-		s.initializeUniverse(universe)
-		s.universes[universe][channel-1] = byte(value)
-	}
-
-	return nil
-}
-
-func (s *DMXState) initializeUniverse(universe int) {
-	if s.universes[universe] == nil {
-		chans := make([]byte, 255)
-		s.universes[universe] = chans
-	}
-}
-
-//OLAClient is the interface for communicating with ola
-type OLAClient interface {
-	SendDmx(universe int, values []byte) (status bool, err error)
-	Close()
-}
-
-//SendDMXWorker sends OLA the current dmxState across all universes
-func SendDMXWorker(ctx context.Context, client OLAClient, tick time.Duration, wg *sync.WaitGroup) error {
-	defer wg.Done()
-	defer client.Close()
-
-	t := time.NewTimer(tick)
-	defer t.Stop()
-	log.Printf("timer started at %v", time.Now())
-
-	for {
-		select {
-		case <-ctx.Done():
-			log.Println("SendDMXWorker shutdown")
-			return ctx.Err()
-		case <-t.C:
-			for k, v := range InitializeDMXState().universes {
-				timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("ola"))
-				client.SendDmx(k, v)
-				timer.ObserveDuration()
-			}
-			t.Reset(tick)
-		}
-	}
 }
 
 func getChannelIndexForAttribute(p *mainConfig.LightProfileDMX, attrName string) int {

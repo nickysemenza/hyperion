@@ -66,6 +66,7 @@ type Manager struct {
 	items         NameMap
 	stateLock     sync.RWMutex
 	hueConnection HueConnection
+	dmxState      DMXState
 }
 
 //SetState will set the current state for a light
@@ -132,6 +133,7 @@ func NewManager(ctx context.Context, h HueConnection) (*Manager, error) {
 		hueConnection: h,
 		states:        make(StateMap),
 		items:         make(NameMap),
+		dmxState:      DMXState{universes: make(map[int][]byte)},
 	}
 	//populate with each type of light
 	for i := range config.Lights.Hue {
