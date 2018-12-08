@@ -17,7 +17,7 @@ test-ui:
 test: test-server test-ui
 
 lint-server:
-	revive -formatter friendly -exclude=vendor/... ./...
+	revive -config revive.toml -formatter friendly -exclude=vendor/... ./...
 generate-proto:
 	protoc --go_out=plugins=grpc:api proto/*.proto
 godepgraph:

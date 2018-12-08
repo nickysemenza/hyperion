@@ -18,4 +18,5 @@ func TestSmoke(t *testing.T) {
 		x.Sleep(time.Millisecond)
 		x.After(time.Millisecond)
 	}
+	require.True(t, true)
 }

@@ -1,4 +1,4 @@
 {
   "go.lintTool": "revive",
-  "go.lintFlags": ["-exclude=vendor/..."]
+  "go.lintFlags": ["-config revive.toml", "-exclude=vendor/..."]
 }

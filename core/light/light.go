@@ -30,7 +30,7 @@ type Manager interface {
 	GetDMXState() *DMXState
 	SetDMXState(ctx context.Context, ops ...dmxOperation) error
 	GetHueConnection() HueConnection
-	GetDiscoveredHues(ctx context.Context) DiscoveredHues
+	GetDiscoveredHues() DiscoveredHues
 }
 
 //constants for the different types of lights

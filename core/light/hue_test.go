@@ -75,7 +75,7 @@ func TestGetDiscoveredHues(t *testing.T) {
 				hueConnection: h,
 			}
 			h.On("GetAllLights").Return(tt.resp, tt.err)
-			require.Equal(t, tt.expected, m.GetDiscoveredHues(context.Background()).ByName)
+			require.Equal(t, tt.expected, m.GetDiscoveredHues().ByName)
 			h.AssertExpectations(t)
 		})
 	}
@@ -143,8 +143,6 @@ func TestSetColor(t *testing.T) {
 			require.Equal(t, tt.expectedTransitionTime, stateParam.TransitionTime)
 			// spew.Dump(h.Calls)
 
-			// h.On("GetAllLights").Return(tt.resp, tt.err)
-			// require.Equal(t, tt.expected, GetDiscoveredHues(context.Background()).ByName)
 		})
 	}
 }

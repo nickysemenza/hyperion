@@ -54,7 +54,7 @@ func debug(c *gin.Context) {
 		Version string               `json:"version"`
 	}{
 		Config:  config.GetServerConfig(ctx),
-		Hues:    master.GetLightManager().GetDiscoveredHues(ctx),
+		Hues:    master.GetLightManager().GetDiscoveredHues(),
 		Version: config.GetVersion(),
 	}
 

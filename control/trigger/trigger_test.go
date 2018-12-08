@@ -35,7 +35,7 @@ func TestTrigger(t *testing.T) {
 	Action(ctx, "bar", 2, m)
 	assert.Len(t, stack.Cues, 1)
 
-	m2 := new(cue.MockMasterManagerManager)
+	m2 := new(cue.MockMasterManager)
 	cs := cue.Stack{Name: "foo"}
 	m2.On("GetDefaultCueStack").Return(&cs)
 	newCue, err := cue.NewFromCommand(ctx, "set(hue2:blue:1s)")

@@ -87,7 +87,7 @@ type DiscoveredHues struct {
 }
 
 //GetDiscoveredHues finds all the hues on the network
-func (m *StateManager) GetDiscoveredHues(ctx context.Context) DiscoveredHues {
+func (m *StateManager) GetDiscoveredHues() DiscoveredHues {
 	lights, _ := m.hueConnection.GetAllLights()
 
 	byName := make(map[string]int)

@@ -60,13 +60,13 @@ func (_m *MockManager) GetDMXState() *DMXState {
 	return r0
 }
 
-// GetDiscoveredHues provides a mock function with given fields: ctx
-func (_m *MockManager) GetDiscoveredHues(ctx context.Context) DiscoveredHues {
-	ret := _m.Called(ctx)
+// GetDiscoveredHues provides a mock function with given fields:
+func (_m *MockManager) GetDiscoveredHues() DiscoveredHues {
+	ret := _m.Called()
 
 	var r0 DiscoveredHues
-	if rf, ok := ret.Get(0).(func(context.Context) DiscoveredHues); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func() DiscoveredHues); ok {
+		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(DiscoveredHues)
 	}
