@@ -54,12 +54,20 @@
   },
   "devDependencies": {
     "enzyme": "^3.2.0",
-    "enzyme-adapter-react-16": "^1.1.0"
+    "enzyme-adapter-react-16": "^1.1.0",
+    "react-test-renderer": "^16.6.3"
   },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!src/semantic/**",
+      "!src/registerServiceWorker.js"
+    ]
+  }
 }
