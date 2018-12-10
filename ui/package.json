@@ -9,7 +9,7 @@
     "@types/react-dom": "^16.0.10",
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "husky": "1.2.0",
     "immutability-helper": "^2.6.2",
     "lint-staged": "8.1.0",
