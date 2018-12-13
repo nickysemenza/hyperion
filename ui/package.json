@@ -10,7 +10,7 @@
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "gulp": "^3.9.1",
-    "husky": "1.2.0",
+    "husky": "1.2.1",
     "immutability-helper": "^2.6.2",
     "lint-staged": "8.1.0",
     "npm-run-all": "^4.1.3",
