@@ -1,14 +1,8 @@
 
-FROM golang:1.10 AS builder-server
-
-# Download and install the latest release of dep
-ADD https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 /usr/bin/dep
-RUN chmod +x /usr/bin/dep
+FROM golang:1.11 AS builder-server
 
 # Copy the code from the host and compile it
-WORKDIR $GOPATH/src/github.com/nickysemenza/hyperion
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure --vendor-only
+WORKDIR /src/hyperion
 COPY . ./
 RUN make build
 # move output binary to root so next stage can grab it more cleanly
