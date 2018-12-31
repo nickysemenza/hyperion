@@ -37,14 +37,12 @@ jobs:
             docker run --entrypoint="./hyperion" nicky/hyperion
   test-server:
     docker:
-      - image: circleci/golang:1.9
-    working_directory: /go/src/github.com/nickysemenza/hyperion
+      - image: circleci/golang:1.11
     steps:
       - checkout
       - run: go get -u github.com/mgechev/revive
+      - run: go build ./...
       - run: make lint-server
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: dep ensure
       - run: ./test_cov.sh
       - run: bash <(curl -s https://codecov.io/bash)
       - store_test_results:
