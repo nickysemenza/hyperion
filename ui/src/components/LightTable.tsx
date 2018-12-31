@@ -1,8 +1,13 @@
 import React from 'react';
-import { ColorBox } from '../components/LightState';
+import { ColorBox } from './LightState';
 import { Table } from 'semantic-ui-react';
 import { Light } from '../types';
-const LightTable = ({ lights, states }) => {
+type LightTableProps = {
+  //TODO: make these more strongly typed
+  lights: any;
+  states: any;
+};
+const LightTable: React.SFC<LightTableProps> = ({ lights, states }) => {
   let tableRows = Object.keys(lights).map(k => {
     let eachLight = lights[k];
     let light = new Light(lights[k]);

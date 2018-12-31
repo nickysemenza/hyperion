@@ -19,17 +19,6 @@ export const CueTableCol = styled.div`
   flex-direction: column;
 `;
 
-// const ColorPreview = styled.div.attrs({
-//   style: ({ hex }) => ({
-//     backgroundColor: hex
-//   })
-// })`
-//   min-width: 15px;
-//   width: 15px;
-//   min-height: 15px;
-//   height: 15px;
-// `;
-
 const CueFrameInner = styled.div.attrs({
   style: ({ width, hex, contrastingTextColor }) => ({
     width: `${width}px`,
@@ -55,7 +44,6 @@ export const CueFrame = ({ ...props }) => {
       {props.duration} ms {' | '}
       {props.debug ? ` (F:${props.frameId} | A:${props.actionId}) | ` : null}
       <b>{props.action.light_name}</b>
-      {/* <ColorPreview hex={hex} /> */}
     </CueFrameInner>
   );
 };
@@ -103,7 +91,7 @@ export const CueLabel = ({ ...props }) => {
       # {id} <br />
       {`${duration} ms`}{' '}
       {cue.status === 'active'
-        ? `${(cue.elapsed_ms / cue.expected_duration_ms * 100).toFixed(1)} %`
+        ? `${((cue.elapsed_ms / cue.expected_duration_ms) * 100).toFixed(1)} %`
         : null}
       <i>
         {(debug && duration_drift_ms && `(+${duration_drift_ms} ms)`) || null}

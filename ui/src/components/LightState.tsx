@@ -1,23 +1,28 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled from '../util/styled-components';
+
 import { rgbToHex } from '../utils';
 
-const SampleBox = styled.div.attrs({
-  style: ({ color }) => ({
-    backgroundColor: color
-  })
-})`
+const SampleBox = styled('div')<{ color: string }>`
+  background-color: ${props => props.color};
   width: 20px;
   padding: 20px;
 `;
 
-export const ColorBox = ({ state }) => {
+type ColorBoxProps = {
+  state: any;
+};
+export const ColorBox: React.SFC<ColorBoxProps> = ({ state }) => {
   if (state === undefined) return null;
   let { rgb } = state;
   return <SampleBox color={rgbToHex(rgb.r, rgb.g, rgb.b)} />;
 };
 
-export const LightState = ({ s, name }) => {
+type LightStateProps = {
+  s: any;
+  name: string;
+};
+export const LightState: React.SFC<LightStateProps> = ({ s, name }) => {
   if (s === undefined) return null;
   let { rgb, ...others } = s;
   return (
