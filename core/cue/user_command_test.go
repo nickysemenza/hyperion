@@ -190,8 +190,11 @@ func TestBuildCueFromUserCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			ctx = context.WithValue(ctx, light.ContextKeyLightNames, []string{"light2"}) //TODO: fix this up (#31)
-			cue, err := BuildCueFromUserCommand(ctx, tt.command, tt.args)
+			m := new(MockMasterManager)
+			lm := new(light.MockManager)
+			lm.On("GetLightNames").Return([]string{"light2"})
+			m.On("GetLightManager").Return(lm)
+			cue, err := BuildCueFromUserCommand(ctx, m, tt.command, tt.args)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

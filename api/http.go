@@ -71,7 +71,7 @@ func runCommands(c *gin.Context) {
 		m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
 		cs := m.GetDefaultCueStack()
 		for _, eachCommand := range commands {
-			x, err := cue.NewFromCommand(ctx, eachCommand)
+			x, err := cue.NewFromCommand(ctx, m, eachCommand)
 			if err != nil {
 				contextLoggerHTTP.Println(err)
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})

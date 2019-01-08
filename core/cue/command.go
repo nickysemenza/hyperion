@@ -22,7 +22,7 @@ var (
 )
 
 //NewFromCommand returns a cue based on a command.
-func NewFromCommand(ctx context.Context, cmd string) (*Cue, error) {
+func NewFromCommand(ctx context.Context, m MasterManager, cmd string) (*Cue, error) {
 	//remove spaces
 	cmd = strings.Replace(cmd, " ", "", -1)
 
@@ -47,9 +47,9 @@ func NewFromCommand(ctx context.Context, cmd string) (*Cue, error) {
 		cue, err = processCycleCommand(argString)
 	default:
 		if userCommand, ok := config.GetServerConfig(ctx).Commands[commandType]; ok {
-			cue, err = BuildCueFromUserCommand(ctx, userCommand, args)
+			cue, err = BuildCueFromUserCommand(ctx, m, userCommand, args)
 		} else if systemCommand, ok := systemCommands[commandType]; ok {
-			cue, err = BuildCueFromUserCommand(ctx, systemCommand, args)
+			cue, err = BuildCueFromUserCommand(ctx, m, systemCommand, args)
 		} else {
 			err = errorUndefinedFunction
 		}

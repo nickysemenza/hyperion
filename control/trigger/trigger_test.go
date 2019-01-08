@@ -38,7 +38,7 @@ func TestTrigger(t *testing.T) {
 	m2 := new(cue.MockMasterManager)
 	cs := cue.Stack{Name: "foo"}
 	m2.On("GetDefaultCueStack").Return(&cs)
-	newCue, err := cue.NewFromCommand(ctx, "set(hue2:blue:1s)")
+	newCue, err := cue.NewFromCommand(ctx, m2, "set(hue2:blue:1s)")
 	newCue.Source = cue.Source{
 		Input: "trigger",
 		Type:  "command",

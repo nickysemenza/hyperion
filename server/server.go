@@ -38,9 +38,6 @@ func Run(ctx context.Context) {
 
 	master := cue.InitializeMaster(clock.RealClock{}, lm)
 
-	lightNames := lm.GetLightNames()
-	ctx = context.WithValue(ctx, light.ContextKeyLightNames, lightNames) //TODO: hacky
-
 	go tracing.InitTracer(ctx)
 
 	//Set up Homekit Server

@@ -103,8 +103,11 @@ func TestCommand(t *testing.T) {
 			require := require.New(t)
 			config := config.Server{}
 			ctx := config.InjectIntoContext(context.Background())
-			ctx = context.WithValue(ctx, light.ContextKeyLightNames, []string{"light2"}) //TODO: fix this up (#31)
-			cue, err := NewFromCommand(ctx, tc.cmd)
+			m := new(MockMasterManager)
+			lm := new(light.MockManager)
+			lm.On("GetLightNames").Return([]string{"light2"})
+			m.On("GetLightManager").Return(lm)
+			cue, err := NewFromCommand(ctx, m, tc.cmd)
 			if tc.expectedCue == nil {
 				require.Nil(cue)
 				require.Error(err)
