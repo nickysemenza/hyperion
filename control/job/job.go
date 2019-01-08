@@ -20,7 +20,7 @@ func ProcessForever(ctx context.Context, wg *sync.WaitGroup, jobs []config.Job, 
 	for _, x := range jobs {
 		job := x
 		c.AddFunc(job.Cron, func() {
-			c, err := cue.NewFromCommand(ctx, job.Command)
+			c, err := cue.NewFromCommand(ctx, master, job.Command)
 			if err != nil {
 				log.Printf("failed to build command for job, job='%v', error='%v'", job, err)
 			} else {

@@ -42,11 +42,6 @@ const (
 
 type ctxKey int
 
-//Context keys
-const (
-	ContextKeyLightNames ctxKey = iota
-)
-
 //TargetState represents the state of a light, is source of truth
 type TargetState struct {
 	// On   bool

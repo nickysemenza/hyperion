@@ -2,7 +2,6 @@ package cue
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -64,20 +63,14 @@ func LuaToHex(L *lua.LState) int {
 }
 
 //BuildCueFromUserCommand processes a lua user command
-func BuildCueFromUserCommand(ctx context.Context, command config.UserCommand, args []string) (*Cue, error) {
+func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command config.UserCommand, args []string) (*Cue, error) {
 	L := lua.NewState()
 	defer L.Close()
 
 	//build lua list of light names
 	luaLightList := L.NewTable()
 
-	val := ctx.Value(light.ContextKeyLightNames)
-	if val == nil {
-		return nil, errors.New("couldn't read light names from context")
-	}
-
-	for _, name := range val.([]string) {
-		//TODO: pull light names from ctx
+	for _, name := range m.GetLightManager().GetLightNames() {
 		luaLightList.Append(lua.LString(name))
 	}
 
