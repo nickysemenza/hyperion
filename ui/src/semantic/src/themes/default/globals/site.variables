@@ -32,7 +32,7 @@
 @emSize   : 14px;
 
 /* The size of page text  */
-@fontSize : 14px;
+@fontSize : 13px;
 
 
 /*-------------------
