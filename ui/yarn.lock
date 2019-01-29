@@ -11076,7 +11076,7 @@ semantic-ui-react@^0.84.0:
     prop-types "^15.6.2"
     shallowequal "^1.1.0"
 
-semantic-ui@^2.4.0:
+semantic-ui@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/semantic-ui/-/semantic-ui-2.4.2.tgz#9187dc0918cf0149a6356466a520142bb1217248"
   integrity sha512-Nr7LDK/MbIM1Imxiktqhz9KOUCUz00rgxEkHb0xZvQUscK0z73SByrF9LYZaat0DQQA1u2dxj0EtEU7xWRu+zg==
