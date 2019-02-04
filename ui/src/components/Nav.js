@@ -1,30 +1,31 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Container, Menu, Label } from 'semantic-ui-react';
+import { LinkContainer } from 'react-router-bootstrap';
+import { Nav, Navbar, Badge } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
-const Nav = ({ user, ws_open }) => (
-  <Menu fixed="top" inverted>
-    <Container>
-      <Menu.Item as={NavLink} to="/" exact header>
-        hyperion
-      </Menu.Item>
-      <Menu.Item as={NavLink} to="/lights">
-        Lights
-      </Menu.Item>
-      <Menu.Item as={NavLink} to="/cues">
-        Cues
-      </Menu.Item>
-      <Menu.Item position="right">
-        <Label color={ws_open ? 'green' : 'red'} horizontal>
-          WebSocket
-        </Label>
-      </Menu.Item>
-    </Container>
-  </Menu>
+const MainNav = ({ user, ws_open }) => (
+  <Navbar bg="dark" variant="dark">
+    <LinkContainer to="/" exact>
+      <Navbar.Brand>Hyperion</Navbar.Brand>
+    </LinkContainer>
+    <Nav className="mr-auto">
+      <LinkContainer to="/lights">
+        <Nav.Link>Lights</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to="/cues">
+        <Nav.Link>Cues</Nav.Link>
+      </LinkContainer>
+    </Nav>
+    <Navbar.Text>
+      <Badge variant={ws_open ? 'success' : 'error'}>websocket</Badge>
+    </Navbar.Text>
+  </Navbar>
 );
 
 function mapStateToProps(state) {
   return { user: state.user, ws_open: state.system.ws_open };
 }
-export default connect(mapStateToProps, {})(Nav);
+export default connect(
+  mapStateToProps,
+  {}
+)(MainNav);

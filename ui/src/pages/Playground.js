@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { Header } from 'semantic-ui-react';
 import LightTable from '../components/LightTable';
 import { sendCommands } from '../actions/lights';
 import { rgbToHex } from '../utils';
@@ -90,13 +89,7 @@ class Playground extends Component {
   render() {
     return (
       <div>
-        <Header
-          as="h2"
-          content="Lights"
-          // subheader="View lights"
-          icon="lightbulb blue"
-          dividing
-        />
+        <h2>lights</h2>
         <div
           tabIndex="0"
           onKeyDown={e => this.handleKey(true, e)}
@@ -121,4 +114,7 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators({ sendCommands }, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Playground);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Playground);

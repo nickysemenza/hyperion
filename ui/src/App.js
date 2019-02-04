@@ -7,7 +7,7 @@ import CueList from './pages/CueList';
 import Nav from './components/Nav';
 import WS from './components/WS';
 import Helpers from './components/Helpers';
-import { Container } from 'semantic-ui-react';
+import { Container } from 'react-bootstrap';
 import ReduxToastr from 'react-redux-toastr';
 import Playground from './pages/Playground';
 
