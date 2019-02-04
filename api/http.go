@@ -80,7 +80,7 @@ func runCommands(c *gin.Context) {
 			x.Source.Input = cue.SourceInputAPI
 			x.Source.Type = cue.SourceTypeCommand
 			x.Source.Meta = eachCommand
-			m.EnQueueCue(*x, cs)
+			m.EnQueueCue(ctx, *x, cs)
 			responses = append(responses, *x)
 		}
 
@@ -105,7 +105,7 @@ func createCue(c *gin.Context) {
 		stack := m.GetDefaultCueStack()
 		newCue.Source.Input = cue.SourceInputAPI
 		newCue.Source.Type = cue.SourceTypeJSON
-		cue := m.EnQueueCue(newCue, stack)
+		cue := m.EnQueueCue(ctx, newCue, stack)
 		span.SetTag("cue-id", cue.ID)
 		c.JSON(200, cue)
 	} else {

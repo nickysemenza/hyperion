@@ -19,13 +19,13 @@ func (_m *MockMasterManager) AddIDsRecursively(c *Cue) {
 	_m.Called(c)
 }
 
-// EnQueueCue provides a mock function with given fields: c, cs
-func (_m *MockMasterManager) EnQueueCue(c Cue, cs *Stack) *Cue {
-	ret := _m.Called(c, cs)
+// EnQueueCue provides a mock function with given fields: ctx, c, cs
+func (_m *MockMasterManager) EnQueueCue(ctx context.Context, c Cue, cs *Stack) *Cue {
+	ret := _m.Called(ctx, c, cs)
 
 	var r0 *Cue
-	if rf, ok := ret.Get(0).(func(Cue, *Stack) *Cue); ok {
-		r0 = rf(c, cs)
+	if rf, ok := ret.Get(0).(func(context.Context, Cue, *Stack) *Cue); ok {
+		r0 = rf(ctx, c, cs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*Cue)

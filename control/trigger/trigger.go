@@ -38,7 +38,7 @@ func process(ctx context.Context, t trigger, m cue.MasterManager) {
 				c.Source.Input = cue.SourceInputTrigger
 				c.Source.Type = cue.SourceTypeCommand
 				c.Source.Meta = fmt.Sprintf("trigger=%s:%d", t.source, t.id)
-				master.EnQueueCue(*c, stack)
+				master.EnQueueCue(ctx, *c, stack)
 			}
 			// TODO: require one command per trigger, return here
 		}

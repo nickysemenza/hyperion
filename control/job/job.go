@@ -28,7 +28,7 @@ func ProcessForever(ctx context.Context, wg *sync.WaitGroup, jobs []config.Job, 
 				c.Source.Input = cue.SourceInputJob
 				c.Source.Type = cue.SourceTypeCommand
 				c.Source.Meta = fmt.Sprintf("job=%v", job)
-				master.EnQueueCue(*c, stack)
+				master.EnQueueCue(ctx, *c, stack)
 			}
 			fmt.Printf("processing cron: %s", job.Command)
 		})

@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/nickysemenza/hyperion/core/config"
@@ -25,7 +26,7 @@ func TestProcessForever(t *testing.T) {
 		Meta:  "job={foo set(light1:#FF00FF:0) * * * * *}",
 	}
 	require.NoError(t, err)
-	m.On("EnQueueCue", *newCue, &cs).Return(newCue)
+	m.On("EnQueueCue", mock.Anything, *newCue, &cs).Return(newCue)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go ProcessForever(ctx, &wg, []config.Job{
@@ -35,6 +36,6 @@ func TestProcessForever(t *testing.T) {
 	time.Sleep(time.Second * 3)
 	cancel()
 	wg.Wait()
-	assert.Equal(t, 1, 1)
+	require.Equal(t, 1, 1)
 	m.AssertExpectations(t)
 }

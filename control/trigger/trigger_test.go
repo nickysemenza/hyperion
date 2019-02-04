@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/nickysemenza/hyperion/util/clock"
@@ -45,7 +47,7 @@ func TestTrigger(t *testing.T) {
 		Meta:  "trigger=foo:1",
 	}
 	require.NoError(t, err)
-	m2.On("EnQueueCue", *newCue, &cs).Return(newCue)
+	m2.On("EnQueueCue", mock.Anything, *newCue, &cs).Return(newCue)
 
 	Action(ctx, "foo", 1, m2)
 	m2.AssertExpectations(t)

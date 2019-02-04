@@ -16,7 +16,7 @@ type MasterManager interface {
 	ProcessCue(ctx context.Context, c *Cue, wg *sync.WaitGroup)
 	ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup)
 	ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *sync.WaitGroup)
-	EnQueueCue(c Cue, cs *Stack) *Cue
+	EnQueueCue(ctx context.Context, c Cue, cs *Stack) *Cue
 	AddIDsRecursively(c *Cue)
 	GetDefaultCueStack() *Stack
 	ProcessForever(ctx context.Context, wg *sync.WaitGroup)

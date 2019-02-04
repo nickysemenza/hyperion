@@ -3,6 +3,7 @@ package cue
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -157,10 +158,13 @@ func (cs *Stack) deQueueNextCue() *Cue {
 
 //EnQueueCue puts a cue on the queue
 //it also assigns the cue (and subcomponents) an ID
-func (m *Master) EnQueueCue(c Cue, cs *Stack) *Cue {
+func (m *Master) EnQueueCue(ctx context.Context, c Cue, cs *Stack) *Cue {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "EnQueueCue")
+	defer span.Finish()
 	cs.m.Lock()
 	defer cs.m.Unlock()
 	m.AddIDsRecursively(&c)
+	span.SetBaggageItem("cue-id", fmt.Sprint(c.ID))
 	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name, "source": c.Source}).Info("enqueued!")
 
 	cs.Cues = append(cs.Cues, c)

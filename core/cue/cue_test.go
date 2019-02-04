@@ -115,12 +115,13 @@ func TestCueDurationHelpers(t *testing.T) {
 }
 
 func TestCueQueueing(t *testing.T) {
+	ctx := context.Background()
 	m := InitializeMaster(clock.RealClock{}, &light.StateManager{})
 	cs := Stack{}
 	assert.Nil(t, cs.deQueueNextCue(), "deque on empty should return nil")
 
-	c1 := m.EnQueueCue(Cue{Name: "c1"}, &cs)
-	c2 := m.EnQueueCue(Cue{Name: "c2"}, &cs)
+	c1 := m.EnQueueCue(ctx, Cue{Name: "c1"}, &cs)
+	c2 := m.EnQueueCue(ctx, Cue{Name: "c2"}, &cs)
 	require.NotEqual(t, c1.ID, c2.ID)
 
 	assert.Equal(t, len(cs.Cues), 2)
@@ -129,7 +130,7 @@ func TestCueQueueing(t *testing.T) {
 
 	assert.Equal(t, pop.Name, "c1", "queue should be FIFO")
 
-	m.EnQueueCue(Cue{Name: "c3"}, &cs)
+	m.EnQueueCue(ctx, Cue{Name: "c3"}, &cs)
 	assert.Equal(t, cs.deQueueNextCue().Name, "c2", "queue should be FIFO")
 	assert.Equal(t, cs.deQueueNextCue().Name, "c3", "queue should be FIFO")
 

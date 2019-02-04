@@ -22,7 +22,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
 	github.com/lucasb-eyer/go-colorful v0.0.0-20180526135729-345fbb3dbcdb
-	github.com/magiconair/properties v1.8.0
 	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mcuadros/go-gin-prometheus v0.0.0-20180525164355-3f93884fa240

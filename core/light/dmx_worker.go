@@ -24,6 +24,7 @@ func (s *DMXState) getValue(universe, channel int) int {
 
 func (s *DMXState) set(ctx context.Context, ops ...dmxOperation) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValues")
+	span.SetTag("service.name", "dmx")
 	defer span.Finish()
 	span.SetTag("operations", ops)
 	s.m.Lock()
