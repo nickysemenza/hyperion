@@ -1,0 +1,10 @@
+$font-family-sans-serif: "Montserrat", sans-serif;
+$font-size: 13px;
+
+$theme-colors: (
+  "success": #27ae60,
+  "primary": #2980b9,
+  "danger": #c0392b
+);
+
+@import "bootstrap/scss/bootstrap.scss";

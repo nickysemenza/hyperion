@@ -28,6 +28,11 @@ export const receiveSocketData = (json: any) => {
         type: WS_META_OPEN,
         open: data
       };
+    case 'CUE_MASTER':
+      return {
+        type: 'RECEIVE_CUE_MASTER',
+        cuemaster: data
+      };
     default:
       return { type: null };
   }

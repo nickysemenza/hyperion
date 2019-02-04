@@ -9,7 +9,7 @@ dev-server: build
 dev-client: build
 	./hyperion client
 dev-ui:
-	cd ui && yarn run dev
+	cd ui && yarn run
 test-server: 
 	go test -v -race -cover  ./...
 test-ui:

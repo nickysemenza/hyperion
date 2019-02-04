@@ -2,19 +2,12 @@ import React, { Component } from 'react';
 
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { Header } from 'semantic-ui-react';
 import LightTable from '../components/LightTable';
 class LightList extends Component {
   render() {
     return (
       <div>
-        <Header
-          as="h2"
-          content="Lights"
-          // subheader="View lights"
-          icon="lightbulb blue"
-          dividing
-        />
+        <h2>lights</h2>
         <LightTable
           foo="bar"
           lights={this.props.lights}
@@ -36,4 +29,7 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators({}, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(LightList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LightList);

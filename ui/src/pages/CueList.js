@@ -11,7 +11,7 @@ import {
   Progress
 } from '../components/Cue';
 import { bindActionCreators } from 'redux';
-import { Header, Button, Icon, Divider } from 'semantic-ui-react';
+import { Button, ButtonGroup } from 'react-bootstrap';
 class cueList extends Component {
   state = {
     scale: 0.8,
@@ -133,34 +133,22 @@ class cueList extends Component {
 
     return (
       <div>
-        <Header
-          as="h2"
-          content="Cues"
-          subheader="View and control the cuestack"
-          icon="play circle outline blue"
-          dividing
-        />
+        <h2>cues</h2>
         {/* zoom buttons */}
-        <Button.Group>
-          <Button onClick={() => this.changeZoom('out')} icon>
-            <Icon name="zoom-out" />
-          </Button>
-          <Button onClick={() => this.changeZoom('in')} icon>
-            <Icon name="zoom-in" />
-          </Button>
+        <ButtonGroup>
+          <Button onClick={() => this.changeZoom('out')}>zoom out</Button>
+          <Button onClick={() => this.changeZoom('in')}>zoom in</Button>
           <Button
-            toggle
             active={this.state.autoZoom}
             onClick={() => this.changeZoom('auto')}
-            icon
           >
-            <Icon name="magic" />
+            auto-zoom
           </Button>
           <Button active={this.state.debug} onClick={this.toggleDebug}>
             debug
           </Button>
-        </Button.Group>
-        <Divider />
+        </ButtonGroup>
+        <hr />
         <CueTable>
           <CueTableCol>
             {cueList.map(c => {
@@ -185,7 +173,7 @@ class cueList extends Component {
           <CueTableCol>
             {Object.keys(all).map(k => {
               return (
-                <div>
+                <div key={k + '-23'}>
                   <CueFrameWrapper key={k + '-2'}>
                     <Progress
                       cue={cuesById[parseInt(k, 10)]}
@@ -214,4 +202,7 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators({ fetchCueMaster }, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(cueList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(cueList);
