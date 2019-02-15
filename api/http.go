@@ -65,30 +65,33 @@ func runCommands(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
 	var commands []string
 	var responses []cue.Cue
-	span, ctx := opentracing.StartSpanFromContext(ctx, "runCommands")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "http: run commands")
 	defer span.Finish()
-	if err := c.ShouldBindJSON(&commands); err == nil {
-		m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
-		cs := m.GetDefaultCueStack()
-		for _, eachCommand := range commands {
-			x, err := cue.NewFromCommand(ctx, m, eachCommand)
-			if err != nil {
-				contextLoggerHTTP.Println(err)
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
-				return
-			}
-			x.Source.Input = cue.SourceInputAPI
-			x.Source.Type = cue.SourceTypeCommand
-			x.Source.Meta = eachCommand
-			m.EnQueueCue(ctx, *x, cs)
-			responses = append(responses, *x)
-		}
-
-		c.JSON(200, responses)
-	} else {
+	if err := c.ShouldBindJSON(&commands); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-
+	m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
+	cs := m.GetDefaultCueStack()
+	for _, eachCommand := range commands {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "http: run single Command")
+		x, err := cue.CommandToCue(ctx, m, eachCommand)
+		if err != nil {
+			span.SetTag("error", true)
+			span.LogKV("error", err)
+			contextLoggerHTTP.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
+			span.Finish()
+			return
+		}
+		x.Source.Input = cue.SourceInputAPI
+		x.Source.Type = cue.SourceTypeCommand
+		x.Source.Meta = eachCommand
+		m.EnQueueCue(ctx, *x, cs)
+		responses = append(responses, *x)
+		span.Finish()
+	}
+	c.JSON(200, responses)
 }
 func getMaster(c *gin.Context) {
 	c.JSON(200, c.MustGet(ginContextKeyMaster).(cue.MasterManager))
@@ -100,17 +103,19 @@ func createCue(c *gin.Context) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "createCue")
 	defer span.Finish()
 	var newCue cue.Cue
-	if err := c.ShouldBindJSON(&newCue); err == nil {
-		m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
-		stack := m.GetDefaultCueStack()
-		newCue.Source.Input = cue.SourceInputAPI
-		newCue.Source.Type = cue.SourceTypeJSON
-		cue := m.EnQueueCue(ctx, newCue, stack)
-		span.SetTag("cue-id", cue.ID)
-		c.JSON(200, cue)
-	} else {
+	if err := c.ShouldBindJSON(&newCue); err != nil {
+		span.SetTag("error", true)
+		span.LogKV("error", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+	m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
+	stack := m.GetDefaultCueStack()
+	newCue.Source.Input = cue.SourceInputAPI
+	newCue.Source.Type = cue.SourceTypeJSON
+	cue := m.EnQueueCue(ctx, newCue, stack)
+	span.SetTag("cue-id", cue.ID)
+	c.JSON(200, cue)
 }
 
 //hexFade returns an image representing the fade from one hex val to another

@@ -10,6 +10,7 @@ import (
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
 var (
@@ -21,19 +22,26 @@ var (
 	errorWrongPartLen      = errors.New("command: wrong number of colon delimited groups")
 )
 
-//NewFromCommand returns a cue based on a command.
-func NewFromCommand(ctx context.Context, m MasterManager, cmd string) (*Cue, error) {
+//CommandToCue returns a cue based on a command.
+func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "command: ToCue")
+	defer span.Finish()
 	//remove spaces
+
 	cmd = strings.Replace(cmd, " ", "", -1)
 
 	//extracts: `match1(match2)`
 	re := regexp.MustCompile(`(?m)(.*?)\((.*?)\)`)
 	groups := re.FindAllStringSubmatch(cmd, -1)
+	span.SetTag("command", cmd)
 	if len(groups) != 1 {
+		span.SetTag("error", true)
+		span.LogKV("error", errorMissingFunction)
 		return nil, errorMissingFunction
 	}
 	commandType := groups[0][1]
 	argString := groups[0][2]
+	span.SetTag("command-type", commandType)
 
 	args := strings.Split(argString, ",")
 
@@ -56,6 +64,8 @@ func NewFromCommand(ctx context.Context, m MasterManager, cmd string) (*Cue, err
 	}
 
 	if err != nil {
+		span.SetTag("error", true)
+		span.LogKV("error", err)
 		return nil, err
 	}
 	return cue, nil

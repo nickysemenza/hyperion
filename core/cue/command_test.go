@@ -107,7 +107,7 @@ func TestCommand(t *testing.T) {
 			lm := new(light.MockManager)
 			lm.On("GetLightNames").Return([]string{"light2"})
 			m.On("GetLightManager").Return(lm)
-			cue, err := NewFromCommand(ctx, m, tc.cmd)
+			cue, err := CommandToCue(ctx, m, tc.cmd)
 			if tc.expectedCue == nil {
 				require.Nil(cue)
 				require.Error(err)

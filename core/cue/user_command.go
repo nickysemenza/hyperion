@@ -8,6 +8,7 @@ import (
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -64,6 +65,9 @@ func LuaToHex(L *lua.LState) int {
 
 //BuildCueFromUserCommand processes a lua user command
 func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command config.UserCommand, args []string) (*Cue, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "luacommand: build")
+	defer span.Finish()
+
 	L := lua.NewState()
 	defer L.Close()
 
@@ -74,8 +78,10 @@ func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command confi
 		luaLightList.Append(lua.LString(name))
 	}
 
+	span, ctx = opentracing.StartSpanFromContext(ctx, "luacommand: set globals")
 	L.SetGlobal("light_list", luaLightList)
 	L.SetGlobal("rgb_to_hex", L.NewFunction(LuaToHex))
+	span.Finish()
 
 	//transform arg list
 	lArgs := make([]lua.LValue, len(args))
@@ -84,16 +90,29 @@ func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command confi
 	}
 
 	//run the lua command blob
-	if err := L.DoString(command.Body); err != nil {
-		return nil, fmt.Errorf("user command processing error, could not run provided lua code err=%v", err)
+	span, ctx = opentracing.StartSpanFromContext(ctx, "luacommand: run command blob")
+	err := L.DoString(command.Body)
+	span.Finish()
+	if err != nil {
+		err = fmt.Errorf("user command processing error, could not run provided lua code err=%v", err)
+		span.SetTag("error", true)
+		span.LogKV("error", err)
+		return nil, err
 	}
 	//call user definedprocess func
-	if err := L.CallByParam(lua.P{
+	span, ctx = opentracing.StartSpanFromContext(ctx, "luacommand: run process func")
+	err = L.CallByParam(lua.P{
 		Fn:      L.GetGlobal("process"),
 		NRet:    1,
 		Protect: true,
-	}, lArgs...); err != nil {
-		return nil, fmt.Errorf("user command processing error, could not call process() err=%v", err)
+	}, lArgs...)
+	span.Finish()
+	if err != nil {
+		err = fmt.Errorf("user command processing error, could not call process() err=%v", err)
+		span.SetTag("error", true)
+		span.LogKV("error", err)
+		return nil, err
+
 	}
 	//get/pop the return value
 	ret := L.Get(-1)
@@ -101,8 +120,14 @@ func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command confi
 
 	//unmarshal returned data into a LuaCue
 	var c LuaCue
-	if err := gluamapper.Map(ret.(*lua.LTable), &c); err != nil {
-		return nil, fmt.Errorf("user command processing error could not unmarshal result, err=%v", err)
+	span, ctx = opentracing.StartSpanFromContext(ctx, "luacommand: unmarshal retval into cue")
+	err = gluamapper.Map(ret.(*lua.LTable), &c)
+	span.Finish()
+	if err != nil {
+		err = fmt.Errorf("user command processing error could not unmarshal result, err=%v", err)
+		span.SetTag("error", true)
+		span.LogKV("error", err)
+		return nil, err
 	}
 
 	return c.toCue()

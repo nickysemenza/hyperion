@@ -159,7 +159,7 @@ func (cs *Stack) deQueueNextCue() *Cue {
 //EnQueueCue puts a cue on the queue
 //it also assigns the cue (and subcomponents) an ID
 func (m *Master) EnQueueCue(ctx context.Context, c Cue, cs *Stack) *Cue {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "EnQueueCue")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "cue: enqueue")
 	defer span.Finish()
 	cs.m.Lock()
 	defer cs.m.Unlock()

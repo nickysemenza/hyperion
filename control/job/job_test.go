@@ -19,7 +19,7 @@ func TestProcessForever(t *testing.T) {
 	m := new(cue.MockMasterManager)
 	cs := cue.Stack{Name: "foo"}
 	m.On("GetDefaultCueStack").Return(&cs)
-	newCue, err := cue.NewFromCommand(ctx, m, "set(light1:#FF00FF:0)")
+	newCue, err := cue.CommandToCue(ctx, m, "set(light1:#FF00FF:0)")
 	newCue.Source = cue.Source{
 		Input: cue.SourceInputJob,
 		Type:  cue.SourceTypeCommand,
