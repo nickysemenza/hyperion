@@ -16,7 +16,7 @@ ADD ui/ ./
 ENV NODE_PATH=/node_modules
 ENV PATH=$PATH:/node_modules/.bin
 RUN yarn
-RUN yarn run build-all
+RUN yarn run build
 
 FROM alpine
 COPY --from=builder-ui /app/build ./ui/build

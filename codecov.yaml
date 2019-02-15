@@ -1,3 +1,2 @@
 ignore:
-  - "ui/src/semantic/**/*"
   - "**/mock_*.go"
