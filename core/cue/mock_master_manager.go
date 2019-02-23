@@ -4,6 +4,7 @@
 
 package cue
 
+import config "github.com/nickysemenza/hyperion/core/config"
 import context "context"
 import light "github.com/nickysemenza/hyperion/core/light"
 import mock "github.com/stretchr/testify/mock"
@@ -29,6 +30,22 @@ func (_m *MockMasterManager) EnQueueCue(ctx context.Context, c Cue, cs *Stack) *
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*Cue)
+		}
+	}
+
+	return r0
+}
+
+// GetCommands provides a mock function with given fields:
+func (_m *MockMasterManager) GetCommands() config.UserCommandMap {
+	ret := _m.Called()
+
+	var r0 config.UserCommandMap
+	if rf, ok := ret.Get(0).(func() config.UserCommandMap); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(config.UserCommandMap)
 		}
 	}
 
@@ -90,4 +107,9 @@ func (_m *MockMasterManager) ProcessFrameAction(ctx context.Context, cfa *FrameA
 // ProcessStack provides a mock function with given fields: ctx, cs, wg
 func (_m *MockMasterManager) ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup) {
 	_m.Called(ctx, cs, wg)
+}
+
+// SetCommands provides a mock function with given fields: _a0
+func (_m *MockMasterManager) SetCommands(_a0 config.UserCommandMap) {
+	_m.Called(_a0)
 }

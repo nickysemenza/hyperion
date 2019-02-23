@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/tracing"
@@ -48,6 +47,7 @@ func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error
 
 	var cue *Cue
 	var err error
+
 	switch commandType {
 
 	case "set":
@@ -55,7 +55,7 @@ func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error
 	case "cycle":
 		cue, err = processCycleCommand(argString)
 	default:
-		if userCommand, ok := config.GetServerConfig(ctx).Commands[commandType]; ok {
+		if userCommand, ok := m.GetCommands()[commandType]; ok {
 			cue, err = BuildCueFromUserCommand(ctx, m, userCommand, args)
 		} else if systemCommand, ok := systemCommands[commandType]; ok {
 			cue, err = BuildCueFromUserCommand(ctx, m, systemCommand, args)

@@ -37,6 +37,7 @@ func Run(ctx context.Context) {
 	}
 
 	master := cue.InitializeMaster(clock.RealClock{}, lm)
+	master.SetCommands(c.Commands)
 
 	tracing.InitTracer(c.Tracing.ServerAddress, c.Tracing.ServiceName)
 

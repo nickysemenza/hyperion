@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"sync"
 
+	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/clock"
 )
@@ -21,6 +22,9 @@ type MasterManager interface {
 	GetDefaultCueStack() *Stack
 	ProcessForever(ctx context.Context, wg *sync.WaitGroup)
 	GetLightManager() light.Manager
+
+	SetCommands(config.UserCommandMap)
+	GetCommands() config.UserCommandMap
 }
 
 //Master is the parent of all CueStacks, is a singleton
@@ -30,6 +34,7 @@ type Master struct {
 	cl           clock.Clock
 	idLock       sync.Mutex
 	LightManager light.Manager
+	commands     config.UserCommandMap
 }
 
 //cueMaster singleton
@@ -43,6 +48,13 @@ func InitializeMaster(cl clock.Clock, ls light.Manager) MasterManager {
 		CueStacks:    []Stack{{Priority: 1, Name: "main"}},
 		LightManager: ls,
 	}
+}
+
+func (cm *Master) SetCommands(c config.UserCommandMap) {
+	cm.commands = c
+}
+func (cm *Master) GetCommands() config.UserCommandMap {
+	return cm.commands
 }
 
 //DumpToFile write the CueMaster to a file
