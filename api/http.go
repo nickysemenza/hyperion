@@ -77,8 +77,7 @@ func runCommands(c *gin.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "http: run single Command")
 		x, err := cue.CommandToCue(ctx, m, eachCommand)
 		if err != nil {
-			span.SetTag("error", true)
-			span.LogKV("error", err)
+			tracing.SetError(span, err)
 			contextLoggerHTTP.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
 			span.Finish()
@@ -104,8 +103,7 @@ func createCue(c *gin.Context) {
 	defer span.Finish()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err != nil {
-		span.SetTag("error", true)
-		span.LogKV("error", err)
+		tracing.SetError(span, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

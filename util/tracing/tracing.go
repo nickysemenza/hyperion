@@ -71,11 +71,12 @@ func GinMiddleware(ctx context.Context) gin.HandlerFunc {
 
 type stringTagName string
 
-// var (
-// LightMeta = lightMetaInfo("light.meta")
-// )
-
 // Set adds a string tag to the `span`
 func (tag stringTagName) Set(span opentracing.Span, value string) {
 	span.SetTag(string(tag), value)
+}
+
+func SetError(span opentracing.Span, err error) {
+	span.SetTag("error", true)
+	span.LogKV("error", err.Error())
 }

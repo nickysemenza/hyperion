@@ -10,6 +10,8 @@ import (
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
+	"github.com/nickysemenza/hyperion/util/tracing"
+
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
@@ -35,8 +37,7 @@ func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error
 	groups := re.FindAllStringSubmatch(cmd, -1)
 	span.SetTag("command", cmd)
 	if len(groups) != 1 {
-		span.SetTag("error", true)
-		span.LogKV("error", errorMissingFunction)
+		tracing.SetError(span, errorMissingFunction)
 		return nil, errorMissingFunction
 	}
 	commandType := groups[0][1]
@@ -64,8 +65,7 @@ func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error
 	}
 
 	if err != nil {
-		span.SetTag("error", true)
-		span.LogKV("error", err)
+		tracing.SetError(span, err)
 		return nil, err
 	}
 	return cue, nil

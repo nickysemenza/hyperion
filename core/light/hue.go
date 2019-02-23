@@ -12,6 +12,7 @@ import (
 	"github.com/heatxsink/go-hue/lights"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
+	"github.com/nickysemenza/hyperion/util/tracing"
 )
 
 //HueLight is a philips hue light.
@@ -73,9 +74,15 @@ func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, colo
 	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now(), "brightness": brightness, "on": isOn}).Infof("HueLight setColor: %s", color.TermString())
 	span.LogEventWithPayload("sending hue light change to bridge", state)
 	timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("hue"))
-	bridgeConn.SetLightState(lightID, *state) //TODO: use response
+	_, err := bridgeConn.SetLightState(lightID, *state) //TODO: use response
+	if err != nil {
+		tracing.SetError(span, err)
+		log.WithFields(log.Fields{"hue_light_id": lightID}).Infof("HueLight setColor failure: %v", err)
+		return err
+	}
 	timer.ObserveDuration()
 	span.LogKV("event", "done")
+	return nil
 }
 
 func getTransitionTimeAs100msMultiple(t time.Duration) uint16 {

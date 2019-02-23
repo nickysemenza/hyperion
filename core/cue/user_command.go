@@ -8,6 +8,8 @@ import (
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
+	"github.com/nickysemenza/hyperion/util/tracing"
+
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
@@ -95,8 +97,7 @@ func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command confi
 	span.Finish()
 	if err != nil {
 		err = fmt.Errorf("user command processing error, could not run provided lua code err=%v", err)
-		span.SetTag("error", true)
-		span.LogKV("error", err)
+		tracing.SetError(span, err)
 		return nil, err
 	}
 	//call user definedprocess func
@@ -109,8 +110,7 @@ func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command confi
 	span.Finish()
 	if err != nil {
 		err = fmt.Errorf("user command processing error, could not call process() err=%v", err)
-		span.SetTag("error", true)
-		span.LogKV("error", err)
+		tracing.SetError(span, err)
 		return nil, err
 
 	}
@@ -125,8 +125,7 @@ func BuildCueFromUserCommand(ctx context.Context, m MasterManager, command confi
 	span.Finish()
 	if err != nil {
 		err = fmt.Errorf("user command processing error could not unmarshal result, err=%v", err)
-		span.SetTag("error", true)
-		span.LogKV("error", err)
+		tracing.SetError(span, err)
 		return nil, err
 	}
 
