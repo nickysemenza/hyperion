@@ -8,8 +8,12 @@ import (
 	"sync"
 	"time"
 
+	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
@@ -23,6 +27,9 @@ type Server struct {
 
 //GetPing is test thing
 func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "grpc: getping")
+	span.LogKV("message", in.Message)
+	defer span.Finish()
 	return &pb.Ping{Message: fmt.Sprintf("hi back! (%s)", in.Message)}, nil
 }
 
@@ -55,6 +62,7 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 	}
 	for {
 
+		span, _ := opentracing.StartSpanFromContext(stream.Context(), "grpc: streamGetLights")
 		allLights := s.master.GetLightManager().GetLightsByName() //TODO: fix this
 		var pbLights []*pb.Light
 
@@ -74,6 +82,7 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 			log.Println(err)
 			break
 		}
+		span.Finish()
 		time.Sleep(tick)
 	}
 	return nil
@@ -91,7 +100,16 @@ func ServeRPC(ctx context.Context, wg *sync.WaitGroup, master cue.MasterManager)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_opentracing.StreamServerInterceptor(),
+			grpc_prometheus.StreamServerInterceptor,
+		)),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_opentracing.UnaryServerInterceptor(),
+			grpc_prometheus.UnaryServerInterceptor,
+		)),
+	)
 	pb.RegisterAPIServer(grpcServer, &Server{master: master})
 	go grpcServer.Serve(lis)
 

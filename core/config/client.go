@@ -10,6 +10,11 @@ import (
 //Client represents client config
 type Client struct {
 	ServerAddress string
+	Tracing       struct {
+		Enabled       bool
+		ServerAddress string
+		ServiceName   string
+	}
 }
 
 //GetClientConfig extracts Client config from context
@@ -38,5 +43,12 @@ func LoadClient() *Client {
 	c := Client{}
 	viper.SetDefault("client.server", "localhost:8888")
 	c.ServerAddress = viper.GetString("client.server")
+
+	if viper.IsSet("tracing") {
+		c.Tracing.Enabled = true
+		c.Tracing.ServerAddress = viper.GetString("tracing.server")
+		c.Tracing.ServiceName = viper.GetString("tracing.servicename")
+	}
+
 	return &c
 }

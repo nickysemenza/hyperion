@@ -17,6 +17,7 @@ func (gl *GenericLight) GetType() string {
 	return TypeGeneric
 }
 
+//GetID returns a fake light id
 func (gl *GenericLight) GetID() string {
 	return "generic-n/a"
 }

@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nickysemenza/hyperion/core/config"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	jaeger "github.com/uber/jaeger-client-go"
@@ -16,9 +15,8 @@ import (
 )
 
 //InitTracer starts a global jaeger tracer
-func InitTracer(ctx context.Context) {
-	config := config.GetServerConfig(ctx).Tracing
-	if !config.Enabled {
+func InitTracer(serverAddress, serviceName string) {
+	if serverAddress == "" {
 		log.Info("tracing is not enabled")
 		opentracing.SetGlobalTracer(opentracing.NoopTracer{})
 		return
@@ -28,7 +26,7 @@ func InitTracer(ctx context.Context) {
 	// 	transport.HTTPBatchSize(1),
 	// )
 
-	sender, err := jaeger.NewUDPTransport(config.ServerAddress, 0)
+	sender, err := jaeger.NewUDPTransport(serverAddress, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +39,7 @@ func InitTracer(ctx context.Context) {
 			LogSpans: true,
 		},
 	}
-	tracer, _, _ := cfg.New(config.ServiceName,
+	tracer, _, _ := cfg.New(serviceName,
 		jaegercfg.Reporter(jaeger.NewRemoteReporter(
 			sender,
 			jaeger.ReporterOptions.BufferFlushInterval(1*time.Second),
@@ -50,6 +48,8 @@ func InitTracer(ctx context.Context) {
 
 	// defer closer.Close()
 	opentracing.SetGlobalTracer(tracer)
+	log.Info("tracing enabled", serverAddress, serviceName)
+
 }
 
 //GinMiddleware is a gin middleware for initializing a trace via a HTTP request
@@ -76,6 +76,7 @@ func (tag stringTagName) Set(span opentracing.Span, value string) {
 	span.SetTag(string(tag), value)
 }
 
+//SetError sets the error tag to true, and logs the error.
 func SetError(span opentracing.Span, err error) {
 	span.SetTag("error", true)
 	span.LogKV("error", err.Error())

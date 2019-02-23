@@ -18,6 +18,8 @@ require (
 	github.com/golang/protobuf v1.2.0
 	github.com/gorilla/websocket v1.2.0
 	github.com/gosexy/to v0.0.0-20141221203644-c20e083e3123 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/heatxsink/go-hue v0.0.0-20170108211435-077c5fe84349
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect

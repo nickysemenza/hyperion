@@ -32,7 +32,7 @@ func (hl *HueLight) GetType() string {
 	return TypeHue
 }
 
-//GetType returns the type of light.
+//GetID returns the type of light.
 func (hl *HueLight) GetID() string {
 	return string(hl.HueID)
 }

@@ -38,7 +38,7 @@ func Run(ctx context.Context) {
 
 	master := cue.InitializeMaster(clock.RealClock{}, lm)
 
-	go tracing.InitTracer(ctx)
+	tracing.InitTracer(c.Tracing.ServerAddress, c.Tracing.ServiceName)
 
 	//Set up Homekit Server
 	wg.Add(1)
