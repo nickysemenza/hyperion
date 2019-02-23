@@ -39,3 +39,11 @@ update-mocks:
 	-inpkg -case "underscore" -all \
 	-note "NOTE: run 'make update-mocks' to regenerate" \
 	-dir
+
+# start openlighting server with:
+#	UI http://localhost:9092/ola.html
+# 	Server on :9010
+ola-dev: 
+	olad -p 9092
+ola-patch:
+	ola_patch --device 10 --port 0 --universe 1
