@@ -31,26 +31,29 @@ func (hl *HueLight) GetType() string {
 	return TypeHue
 }
 
+//GetType returns the type of light.
+func (hl *HueLight) GetID() string {
+	return string(hl.HueID)
+}
+
 //SetState updates the Hue's state.
 func (hl *HueLight) SetState(ctx context.Context, m Manager, s TargetState) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight SetState")
 	defer span.Finish()
-	span.SetTag("hue-id", hl.HueID)
-	span.SetTag("hue-name", hl.GetName())
+	setSpanMeta(span, hl)
 	span.LogKV("event", "acquiring lock")
 	hl.m.Lock()
 	defer hl.m.Unlock()
 	span.LogKV("event", "acquired lock")
 	m.SetState(hl.Name, s.ToState())
-	go hl.setColor(ctx, m.GetHueConnection(), s.RGB, s.Duration) //todo: goroutine might be defeating purpose of lock??
+	hl.setColor(ctx, m.GetHueConnection(), s.RGB, s.Duration)
 }
 
 //setColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
-func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, color color.RGB, timing time.Duration) {
+func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, color color.RGB, timing time.Duration) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight setColor")
 	defer span.Finish()
-	span.SetTag("hue-id", hl.HueID)
-	span.SetTag("hue-name", hl.GetName())
+	setSpanMeta(span, hl)
 
 	lightID := hl.HueID
 	x, y, _ := color.GetXyy()

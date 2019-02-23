@@ -12,4 +12,4 @@ services:
       - "16686:16686" # http
       - "14268:14268"
       - "9411:9411"
-    image: "jaegertracing/all-in-one:1.6"
+    image: "jaegertracing/all-in-one:1.10"

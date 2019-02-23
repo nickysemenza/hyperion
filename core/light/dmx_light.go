@@ -2,6 +2,7 @@ package light
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -57,10 +58,15 @@ func (d *DMXLight) GetType() string {
 	return TypeDMX
 }
 
+//GetID returns the a unique id: dmx address info + profile mame
+func (d *DMXLight) GetID() string {
+	return fmt.Sprintf("u:%d-a:%d-p:%s", d.Universe, d.StartAddress, d.Profile)
+}
+
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
 func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, m Manager, color color.RGB) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
-	span.SetTag("dmx-name", d.Name)
+	setSpanMeta(span, d)
 	defer span.Finish()
 	span.LogKV("event", "getting channel ids")
 	rgbChannelIds := d.getChannelIDForAttributes(ctx, ChannelRed, ChannelGreen, ChannelBlue)
@@ -84,9 +90,10 @@ func (d *DMXLight) SetState(ctx context.Context, m Manager, target TargetState) 
 	currentState := m.GetState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
+	setSpanMeta(span, d)
 	defer span.Finish()
-	span.SetTag("dmx-name", d.Name)
 	span.SetTag("target-duration-ms", target.Duration)
+	span.SetTag("num-steps", numSteps)
 
 	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.TermString(), target.String(), numSteps)
 	span.LogKV("event", "begin fade interpolation")

@@ -56,10 +56,9 @@ func InitTracer(ctx context.Context) {
 func GinMiddleware(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "request: "+c.Request.Method+" "+c.Request.URL.Path)
-		span.SetTag(string(ext.HTTPMethod), c.Request.Method)
-		span.SetTag(string(ext.HTTPUrl), c.Request.URL.Path)
-		span.LogKV("event", "begin")
-		defer span.SetTag(string(ext.HTTPStatusCode), c.Writer.Status())
+		ext.HTTPMethod.Set(span, c.Request.Method)
+		ext.HTTPUrl.Set(span, c.Request.URL.Path)
+		defer ext.HTTPStatusCode.Set(span, uint16(c.Writer.Status()))
 		defer span.Finish()
 		c.Set("ctx", ctx)
 		if sc, ok := span.Context().(jaeger.SpanContext); ok {
@@ -68,4 +67,15 @@ func GinMiddleware(ctx context.Context) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+type stringTagName string
+
+// var (
+// LightMeta = lightMetaInfo("light.meta")
+// )
+
+// Set adds a string tag to the `span`
+func (tag stringTagName) Set(span opentracing.Span, value string) {
+	span.SetTag(string(tag), value)
 }
