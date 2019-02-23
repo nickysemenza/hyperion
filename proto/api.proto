@@ -5,10 +5,27 @@ service API {
 
     rpc StreamCueMaster(ConnectionSettings) returns (stream MarshalledJSON) {}
     rpc StreamGetLights(ConnectionSettings) returns (stream Lights) {}
+
+    rpc ProcessCommands(CommandsRequest) returns (CuesResponse) {}
 }
+
+
 
 message Ping {
     string message = 1;
+}
+
+message CommandsRequest {
+    repeated string commands = 1;
+}
+
+message Cue {
+    int32 ExpectedDurationMS = 1;
+}
+
+message CuesResponse {
+    repeated Cue cues = 1;
+    string err = 2;
 }
 
 message MarshalledJSON {

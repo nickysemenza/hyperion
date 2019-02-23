@@ -17,6 +17,7 @@ import (
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
+	"github.com/nickysemenza/hyperion/util/tracing"
 	"google.golang.org/grpc"
 )
 
@@ -31,6 +32,34 @@ func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
 	span.LogKV("message", in.Message)
 	defer span.Finish()
 	return &pb.Ping{Message: fmt.Sprintf("hi back! (%s)", in.Message)}, nil
+}
+
+func (s *Server) ProcessCommands(ctx context.Context, in *pb.CommandsRequest) (*pb.CuesResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "grpc: process comamnds")
+	span.LogKV("num-commands", len(in.Commands))
+	defer span.Finish()
+
+	var responses []*pb.Cue
+	m := s.master
+	cs := m.GetDefaultCueStack()
+	for _, eachCommand := range in.Commands {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "grpc: run single Command")
+		x, err := cue.CommandToCue(ctx, m, eachCommand)
+		if err != nil {
+			tracing.SetError(span, err)
+			span.Finish()
+			return &pb.CuesResponse{Err: err.Error()}, err
+		}
+		x.Source.Input = cue.SourceInputRPC
+		x.Source.Type = cue.SourceTypeCommand
+		x.Source.Meta = eachCommand
+		m.EnQueueCue(ctx, *x, cs)
+		responses = append(responses, &pb.Cue{
+			ExpectedDurationMS: int32(x.GetDuration() / time.Millisecond),
+		})
+		span.Finish()
+	}
+	return &pb.CuesResponse{Cues: responses}, nil
 }
 
 //StreamCueMaster streams the cuemaster

@@ -6,6 +6,8 @@ import (
 	"io"
 	"sort"
 
+	"github.com/davecgh/go-spew/spew"
+
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/tracing"
@@ -38,8 +40,22 @@ func Run(ctx context.Context) {
 
 	client := pb.NewAPIClient(conn)
 
-	span, _ := opentracing.StartSpanFromContext(ctx, "getping")
-	ping, _ := client.GetPing(ctx, &pb.Ping{Message: "test"})
+	span, sCtx := opentracing.StartSpanFromContext(ctx, "getping")
+	ping, _ := client.GetPing(sCtx, &pb.Ping{Message: "test"})
+	span.LogKV("resp", ping.GetMessage())
+	span.Finish()
+
+	span, sCtx = opentracing.StartSpanFromContext(ctx, "command test")
+	resp, err := client.ProcessCommands(sCtx, &pb.CommandsRequest{Commands: []string{
+		"set(par1+hue2:green+red:0.7s+1s)",
+		"set(par1:blue:1s)",
+		"blackout(0)",
+		"set(par1:#FF5500:300ms)",
+	}})
+	if err != nil {
+		tracing.SetError(span, err)
+	}
+	spew.Dump(resp)
 	span.LogKV("resp", ping.GetMessage())
 	span.Finish()
 
