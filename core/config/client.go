@@ -33,7 +33,7 @@ func (s *Client) InjectIntoContext(ctx context.Context) context.Context {
 
 //LoadClient returns client config
 func LoadClient() *Client {
-	viper.SetConfigName("config")
+	viper.SetConfigName("hyperion")
 	viper.AddConfigPath("$HOME/.hyperion")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()

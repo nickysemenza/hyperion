@@ -147,7 +147,7 @@ func GetVersion() string {
 
 //LoadServer returns the server config (using viper)
 func LoadServer() *Server {
-	viper.SetConfigName("config")
+	viper.SetConfigName("hyperion")
 	viper.AddConfigPath("$HOME/.hyperion")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
