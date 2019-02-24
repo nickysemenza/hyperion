@@ -34,6 +34,7 @@ func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
 	return &pb.Ping{Message: fmt.Sprintf("hi back! (%s)", in.Message)}, nil
 }
 
+//ProcessCommands processing a list of commands
 func (s *Server) ProcessCommands(ctx context.Context, in *pb.CommandsRequest) (*pb.CuesResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "grpc: process comamnds")
 	span.LogKV("num-commands", len(in.Commands))

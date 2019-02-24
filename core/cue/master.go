@@ -50,9 +50,12 @@ func InitializeMaster(cl clock.Clock, ls light.Manager) MasterManager {
 	}
 }
 
+//SetCommands sets the user command map
 func (cm *Master) SetCommands(c config.UserCommandMap) {
 	cm.commands = c
 }
+
+//GetCommands retrieves the user command map
 func (cm *Master) GetCommands() config.UserCommandMap {
 	return cm.commands
 }
