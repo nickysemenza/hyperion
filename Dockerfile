@@ -21,6 +21,4 @@ RUN yarn run build
 FROM alpine
 COPY --from=builder-ui /app/build ./ui/build
 COPY --from=builder-server /hyperion ./hyperion
-COPY config-example.yaml config.yaml
-EXPOSE 8080 
 ENTRYPOINT ["./hyperion","server"]
