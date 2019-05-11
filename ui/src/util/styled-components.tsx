@@ -1,10 +1,9 @@
+import * as styledComponents from 'styled-components';
+import { ThemedStyledComponentsModule } from 'styled-components';
 interface ThemeInterface {
   primaryColor: string;
   primaryColorInverted: string;
 }
-
-import * as styledComponents from 'styled-components';
-import { ThemedStyledComponentsModule } from 'styled-components';
 
 const {
   default: styled,
