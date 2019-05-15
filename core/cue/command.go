@@ -10,8 +10,7 @@ import (
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/tracing"
-
-	opentracing "github.com/opentracing/opentracing-go"
+	"go.opencensus.io/trace"
 )
 
 var (
@@ -25,8 +24,8 @@ var (
 
 //CommandToCue returns a cue based on a command.
 func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "command: ToCue")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "command: ToCue")
+	defer span.End()
 	//remove spaces
 
 	cmd = strings.Replace(cmd, " ", "", -1)
@@ -34,14 +33,14 @@ func CommandToCue(ctx context.Context, m MasterManager, cmd string) (*Cue, error
 	//extracts: `match1(match2)`
 	re := regexp.MustCompile(`(?m)(.*?)\((.*?)\)`)
 	groups := re.FindAllStringSubmatch(cmd, -1)
-	span.SetTag("command", cmd)
+	//span.SetTag("command", cmd)
 	if len(groups) != 1 {
 		tracing.SetError(span, errorMissingFunction)
 		return nil, errorMissingFunction
 	}
 	commandType := groups[0][1]
 	argString := groups[0][2]
-	span.SetTag("command-type", commandType)
+	//span.SetTag("command-type", commandType)
 
 	args := strings.Split(argString, ",")
 

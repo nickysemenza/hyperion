@@ -8,12 +8,10 @@ import (
 	"sync"
 	"time"
 
-	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/trace"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	pb "github.com/nickysemenza/hyperion/api/proto"
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
@@ -28,27 +26,31 @@ type Server struct {
 
 //GetPing is test thing
 func (s *Server) GetPing(ctx context.Context, in *pb.Ping) (*pb.Ping, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "grpc: getping")
-	span.LogKV("message", in.Message)
-	defer span.Finish()
+	_, span := trace.StartSpan(ctx, "grpc: getping")
+	span.Annotate([]trace.Attribute{
+		trace.StringAttribute("message", in.Message),
+	}, "todo:event")
+	defer span.End()
 	return &pb.Ping{Message: fmt.Sprintf("hi back! (%s)", in.Message)}, nil
 }
 
 //ProcessCommands processing a list of commands
 func (s *Server) ProcessCommands(ctx context.Context, in *pb.CommandsRequest) (*pb.CuesResponse, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "grpc: process comamnds")
-	span.LogKV("num-commands", len(in.Commands))
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "grpc: process comamnds")
+	span.Annotate([]trace.Attribute{
+		trace.Int64Attribute("num-commands", int64(len(in.Commands))),
+	}, "todo:event")
+	defer span.End()
 
 	var responses []*pb.Cue
 	m := s.master
 	cs := m.GetDefaultCueStack()
 	for _, eachCommand := range in.Commands {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "grpc: run single Command")
+		ctx, span := trace.StartSpan(ctx, "grpc: run single Command")
 		x, err := cue.CommandToCue(ctx, m, eachCommand)
 		if err != nil {
 			tracing.SetError(span, err)
-			span.Finish()
+			span.End()
 			return &pb.CuesResponse{Err: err.Error()}, err
 		}
 		x.Source.Input = cue.SourceInputRPC
@@ -58,7 +60,7 @@ func (s *Server) ProcessCommands(ctx context.Context, in *pb.CommandsRequest) (*
 		responses = append(responses, &pb.Cue{
 			ExpectedDurationMS: int32(x.GetDuration() / time.Millisecond),
 		})
-		span.Finish()
+		span.End()
 	}
 	return &pb.CuesResponse{Cues: responses}, nil
 }
@@ -92,7 +94,7 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 	}
 	for {
 
-		span, _ := opentracing.StartSpanFromContext(stream.Context(), "grpc: streamGetLights")
+		_, span := trace.StartSpan(stream.Context(), "grpc: streamGetLights")
 		allLights := s.master.GetLightManager().GetLightsByName() //TODO: fix this
 		var pbLights []*pb.Light
 
@@ -112,7 +114,7 @@ func (s *Server) StreamGetLights(in *pb.ConnectionSettings, stream pb.API_Stream
 			log.Println(err)
 			break
 		}
-		span.Finish()
+		span.End()
 		time.Sleep(tick)
 	}
 	return nil
@@ -131,17 +133,11 @@ func ServeRPC(ctx context.Context, wg *sync.WaitGroup, master cue.MasterManager)
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer(
-		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-			grpc_opentracing.StreamServerInterceptor(),
-			grpc_prometheus.StreamServerInterceptor,
-		)),
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			grpc_opentracing.UnaryServerInterceptor(),
-			grpc_prometheus.UnaryServerInterceptor,
-		)),
+		grpc.StatsHandler(new(ocgrpc.ServerHandler)),
 	)
 	pb.RegisterAPIServer(grpcServer, &Server{master: master})
 	go grpcServer.Serve(lis)
+	log.Printf("serving GRPC on %s", RPCConfig.Address)
 
 	<-ctx.Done()
 	log.Printf("[grpc] shutdown")

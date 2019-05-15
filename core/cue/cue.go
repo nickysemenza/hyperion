@@ -3,15 +3,14 @@ package cue
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/light"
 	"github.com/nickysemenza/hyperion/util/metrics"
-	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 )
 
 type ctxKey int
@@ -115,11 +114,11 @@ func (m *Master) ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup
 		case <-t.C:
 			if nextCue := cs.deQueueNextCue(); nextCue != nil {
 				ctx := context.WithValue(ctx, keyStackName, cs.Name)
-				span, ctx := opentracing.StartSpanFromContext(ctx, "cue processing")
-				span.LogKV("event", "popped from stack")
-				span.SetTag("cuestack-name", cs.Name)
-				span.SetTag("cue-id", nextCue.ID)
-				span.SetBaggageItem("cue-id", string(nextCue.ID))
+				ctx, span := trace.StartSpan(ctx, "cue processing")
+				span.Annotate([]trace.Attribute{}, "popped from stack")
+				//span.SetTag("cuestack-name", cs.Name)
+				//span.SetTag("cue-id", nextCue.ID)
+				// span.("cue-id", string(nextCue.ID))
 				cs.ActiveCue = nextCue
 				nextCue.Status = statusActive
 				nextCue.StartedAt = time.Now()
@@ -136,7 +135,7 @@ func (m *Master) ProcessStack(ctx context.Context, cs *Stack, wg *sync.WaitGroup
 				metrics.CueExecutionDrift.Set(nextCue.getDurationDrift().Seconds())
 				metrics.CueBacklogCount.WithLabelValues(cs.Name).Set(float64(len(cs.Cues)))
 				metrics.CueProcessedCount.WithLabelValues(cs.Name).Set(float64(len(cs.ProcessedCues)))
-				span.Finish()
+				span.End()
 				t.Reset(0)
 			} else {
 				t.Reset(cueBackoff)
@@ -159,12 +158,11 @@ func (cs *Stack) deQueueNextCue() *Cue {
 //EnQueueCue puts a cue on the queue
 //it also assigns the cue (and subcomponents) an ID
 func (m *Master) EnQueueCue(ctx context.Context, c Cue, cs *Stack) *Cue {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "cue: enqueue")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "cue: enqueue")
+	defer span.End()
 	cs.m.Lock()
 	defer cs.m.Unlock()
 	m.AddIDsRecursively(&c)
-	span.SetBaggageItem("cue-id", fmt.Sprint(c.ID))
 	log.WithFields(log.Fields{"cue_id": c.ID, "stack_name": cs.Name, "source": c.Source}).Info("enqueued!")
 
 	cs.Cues = append(cs.Cues, c)
@@ -174,8 +172,8 @@ func (m *Master) EnQueueCue(ctx context.Context, c Cue, cs *Stack) *Cue {
 //ProcessCue processes cue
 func (m *Master) ProcessCue(ctx context.Context, c *Cue, wg *sync.WaitGroup) {
 	ctx = context.WithValue(ctx, keyCueID, c.ID)
-	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessCue")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "ProcessCue")
+	defer span.End()
 	defer wg.Done()
 	log.WithFields(getLogrusFieldsFromContext(ctx)).Info("ProcessCue")
 	wg.Add(len(c.Frames))
@@ -274,10 +272,10 @@ func (cf *Frame) MarshalJSON() ([]byte, error) {
 //ProcessFrame processes the cueframe
 func (m *Master) ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup) {
 	ctx = context.WithValue(ctx, keyFrameID, cf.ID)
-	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessFrame")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "ProcessFrame")
+	defer span.End()
 	defer wg.Done()
-	span.SetTag("frame-id", cf.ID)
+	//span.SetTag("frame-id", cf.ID)
 
 	log.WithFields(getLogrusFieldsFromContext(ctx)).
 		WithFields(log.Fields{"duration": cf.GetDuration(), "num_actions": len(cf.Actions)}).
@@ -288,17 +286,17 @@ func (m *Master) ProcessFrame(ctx context.Context, cf *Frame, wg *sync.WaitGroup
 		go m.ProcessFrameAction(ctx, &cf.Actions[x], wg)
 	}
 	//no blocking, so wait until all the child frames have theoretically finished
-	span.LogKV("event", "sleeping/blocking for calculated duration of frame")
+	span.Annotate([]trace.Attribute{}, "sleeping/blocking for calculated duration of frame")
 	m.cl.Sleep(cf.GetDuration())
-	span.LogKV("event", "done")
+	span.Annotate([]trace.Attribute{}, "done")
 }
 
 //ProcessFrameAction does job stuff
 func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *sync.WaitGroup) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "ProcessFrameAction")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "ProcessFrameAction")
+	defer span.End()
 	defer wg.Done()
-	span.SetTag("frameaction-id", cfa.ID)
+	//span.SetTag("frameaction-id", cfa.ID)
 
 	ctx = context.WithValue(ctx, keyFrameActionID, cfa.ID)
 	now := time.Now().UnixNano() / int64(time.Millisecond)
@@ -313,9 +311,9 @@ func (m *Master) ProcessFrameAction(ctx context.Context, cfa *FrameAction, wg *s
 	}
 	//goroutine doesn't block, so hold until the SetState has (hopefully) finished timing-wise
 	//TODO: why are we doing this?
-	span.LogKV("event", "sleeping/blocking for duration of action")
+	span.Annotate([]trace.Attribute{}, "sleeping/blocking for duration of action")
 	m.cl.Sleep(cfa.NewState.Duration)
-	span.LogKV("event", "done")
+	span.Annotate([]trace.Attribute{}, "done")
 }
 
 //MarshalJSON override that injects the full Light object.

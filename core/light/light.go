@@ -6,12 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
-
-	"github.com/heatxsink/go-hue/hue"
+	hue "github.com/heatxsink/go-hue/hue"
 	"github.com/heatxsink/go-hue/lights"
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
+	"go.opencensus.io/trace"
 )
 
 //Light is a light
@@ -23,10 +22,10 @@ type Light interface {
 }
 
 // setSpanMeta adds a light meta tags to the `span`
-func setSpanMeta(span opentracing.Span, l Light) {
-	span.SetTag("light.meta.name", l.GetName())
-	span.SetTag("light.meta.id", l.GetID())
-	span.SetTag("light.meta.type", l.GetType())
+func setSpanMeta(span *trace.Span, l Light) {
+	//span.SetTag("light.meta.name", l.GetName())
+	//span.SetTag("light.meta.id", l.GetID())
+	//span.SetTag("light.meta.type", l.GetType())
 }
 
 //Manager is the light manager interface

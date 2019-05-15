@@ -5,14 +5,14 @@ import (
 	"sync"
 	"time"
 
-	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 
 	"github.com/heatxsink/go-hue/lights"
 	"github.com/nickysemenza/hyperion/util/color"
 	"github.com/nickysemenza/hyperion/util/metrics"
 	"github.com/nickysemenza/hyperion/util/tracing"
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 //HueLight is a philips hue light.
@@ -39,22 +39,22 @@ func (hl *HueLight) GetID() string {
 
 //SetState updates the Hue's state.
 func (hl *HueLight) SetState(ctx context.Context, m Manager, s TargetState) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight SetState")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "HueLight SetState")
+	defer span.End()
 	setSpanMeta(span, hl)
-	span.LogKV("event", "acquiring lock")
+	span.Annotate([]trace.Attribute{}, "acquiring lock")
 	hl.m.Lock()
 	defer hl.m.Unlock()
-	span.LogKV("event", "acquired lock")
+	span.Annotate([]trace.Attribute{}, "acquired lock")
 	m.SetState(hl.Name, s.ToState())
 	hl.setColor(ctx, m.GetHueConnection(), s.RGB, s.Duration)
 }
 
 //setColor calls the Hue HTTP API to set the light's state to the given color, with given transition time (full brightness)
 func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, color color.RGB, timing time.Duration) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "HueLight setColor")
-	defer span.Finish()
-	setSpanMeta(span, hl)
+	ctx, span := trace.StartSpan(ctx, "HueLight setColor")
+	defer span.End()
+	// setSpanMeta(span, hl)
 
 	lightID := hl.HueID
 	x, y, _ := color.GetXyy()
@@ -72,7 +72,7 @@ func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, colo
 	}
 
 	log.WithFields(log.Fields{"hue_light_id": lightID, "timing": timing, "now": time.Now(), "brightness": brightness, "on": isOn}).Infof("HueLight setColor: %s", color.TermString())
-	span.LogEventWithPayload("sending hue light change to bridge", state)
+	span.Annotate([]trace.Attribute{}, "sending hue light change to bridge")
 	timer := prometheus.NewTimer(metrics.ExternalResponseTime.WithLabelValues("hue"))
 	_, err := bridgeConn.SetLightState(lightID, *state) //TODO: use response
 	if err != nil {
@@ -81,7 +81,7 @@ func (hl *HueLight) setColor(ctx context.Context, bridgeConn HueConnection, colo
 		return err
 	}
 	timer.ObserveDuration()
-	span.LogKV("event", "done")
+	span.Annotate([]trace.Attribute{}, "done")
 	return nil
 }
 

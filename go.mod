@@ -2,6 +2,7 @@ module github.com/nickysemenza/hyperion
 
 require (
 	cloud.google.com/go v0.38.0 // indirect
+	contrib.go.opencensus.io/exporter/jaeger v0.1.0
 	github.com/2tvenom/golifx v0.0.0-20181128083437-451b36557cb4
 	github.com/aybabtme/rgbterm v0.0.0-20170906152045-cc83f3b3ce59
 	github.com/beorn7/perks v1.0.0 // indirect
@@ -32,10 +33,9 @@ require (
 	github.com/mcuadros/go-gin-prometheus v0.0.0-20181030200533-58963fb32f54
 	github.com/miekg/dns v1.1.9 // indirect
 	github.com/nickysemenza/gola v1.0.0
-	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pelletier/go-toml v1.4.0 // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/prometheus/client_golang v0.9.2
+	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
 	github.com/prometheus/common v0.4.0 // indirect
 	github.com/prometheus/procfs v0.0.0-20190507164030-5867b95ac084 // indirect
@@ -51,6 +51,7 @@ require (
 	github.com/uber/jaeger-lib v2.0.0+incompatible // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 	github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583
+	go.opencensus.io v0.21.0
 	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529 // indirect
 	golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522 // indirect
 	golang.org/x/image v0.0.0-20190507092727-e4e5bf290fec // indirect
@@ -64,7 +65,7 @@ require (
 	golang.org/x/tools v0.0.0-20190511041617-99f201b6807e // indirect
 	google.golang.org/api v0.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20190508193815-b515fa19cec8 // indirect
-	google.golang.org/grpc v1.20.1
+	google.golang.org/grpc v1.19.0
 	honnef.co/go/tools v0.0.0-20190418001031-e561f6794a2a // indirect
 )
 

@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	opentracing "github.com/opentracing/opentracing-go"
-
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 
 	"github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/core/cue"
@@ -24,9 +23,8 @@ func Action(ctx context.Context, source string, id int, master cue.MasterManager
 
 func process(ctx context.Context, t trigger, m cue.MasterManager) {
 	master := m
-	span, ctx := opentracing.StartSpanFromContext(ctx, "process trigger")
-	defer span.Finish()
-	span.LogKV("trigger", t)
+	ctx, span := trace.StartSpan(ctx, "process trigger")
+	defer span.End()
 	triggerConf := config.GetServerConfig(ctx).Triggers
 	log.Printf("new trigger! %v\n", t)
 	for _, each := range triggerConf {

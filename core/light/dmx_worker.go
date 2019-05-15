@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/nickysemenza/hyperion/util/metrics"
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 )
 
 //DMXState holds the DMX512 values for each channel
@@ -23,10 +23,10 @@ func (s *DMXState) getValue(universe, channel int) int {
 }
 
 func (s *DMXState) set(ctx context.Context, ops ...dmxOperation) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "setDMXValues")
-	span.SetTag("service.name", "dmx")
-	defer span.Finish()
-	span.SetTag("operations", ops)
+	ctx, span := trace.StartSpan(ctx, "setDMXValues")
+	//span.SetTag("service.name", "dmx")
+	defer span.End()
+	//span.SetTag("operations", ops)
 	s.m.Lock()
 	defer s.m.Unlock()
 	for _, op := range ops {

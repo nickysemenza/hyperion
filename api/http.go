@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/gin-contrib/pprof"
+	"go.opencensus.io/trace"
 
-	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/nickysemenza/hyperion/util/tracing"
@@ -65,8 +65,8 @@ func runCommands(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
 	var commands []string
 	var responses []cue.Cue
-	span, ctx := opentracing.StartSpanFromContext(ctx, "http: run commands")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "http: run commands")
+	defer span.End()
 	if err := c.ShouldBindJSON(&commands); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -74,13 +74,13 @@ func runCommands(c *gin.Context) {
 	m := c.MustGet(ginContextKeyMaster).(cue.MasterManager)
 	cs := m.GetDefaultCueStack()
 	for _, eachCommand := range commands {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "http: run single Command")
+		ctx, span := trace.StartSpan(ctx, "http: run single Command")
 		x, err := cue.CommandToCue(ctx, m, eachCommand)
 		if err != nil {
 			tracing.SetError(span, err)
 			contextLoggerHTTP.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "command": eachCommand})
-			span.Finish()
+			span.End()
 			return
 		}
 		x.Source.Input = cue.SourceInputAPI
@@ -88,7 +88,7 @@ func runCommands(c *gin.Context) {
 		x.Source.Meta = eachCommand
 		m.EnQueueCue(ctx, *x, cs)
 		responses = append(responses, *x)
-		span.Finish()
+		span.End()
 	}
 	c.JSON(200, responses)
 }
@@ -99,8 +99,8 @@ func getMaster(c *gin.Context) {
 //createCue takes a JSON cue, and adds it to the default cuestack.
 func createCue(c *gin.Context) {
 	ctx := c.MustGet("ctx").(context.Context)
-	span, ctx := opentracing.StartSpanFromContext(ctx, "createCue")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "createCue")
+	defer span.End()
 	var newCue cue.Cue
 	if err := c.ShouldBindJSON(&newCue); err != nil {
 		tracing.SetError(span, err)
@@ -112,7 +112,7 @@ func createCue(c *gin.Context) {
 	newCue.Source.Input = cue.SourceInputAPI
 	newCue.Source.Type = cue.SourceTypeJSON
 	cue := m.EnQueueCue(ctx, newCue, stack)
-	span.SetTag("cue-id", cue.ID)
+	//span.SetTag("cue-id", cue.ID)
 	c.JSON(200, cue)
 }
 

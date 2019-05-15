@@ -6,10 +6,10 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 
 	mainConfig "github.com/nickysemenza/hyperion/core/config"
 	"github.com/nickysemenza/hyperion/util/color"
-	opentracing "github.com/opentracing/opentracing-go"
 )
 
 //Holds strings for the different channel types
@@ -32,8 +32,8 @@ type dmxOperation struct {
 }
 
 func (d *DMXLight) getChannelIDForAttributes(ctx context.Context, attrs ...string) (ids []int) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "getChannelIDForAttribute")
-	defer span.Finish()
+	ctx, span := trace.StartSpan(ctx, "getChannelIDForAttribute")
+	defer span.End()
 	profileMap := mainConfig.GetServerConfig(ctx).DMXProfiles
 	profile, ok := profileMap[d.Profile]
 	ids = make([]int, len(attrs))
@@ -65,16 +65,16 @@ func (d *DMXLight) GetID() string {
 
 //for a given color, blindly set the r,g, and b channels to that color, and update the state to reflect
 func (d *DMXLight) blindlySetRGBToStateAndDMX(ctx context.Context, m Manager, color color.RGB) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "DMXLight blindlySetRGBToStateAndDMX")
+	ctx, span := trace.StartSpan(ctx, "DMXLight blindlySetRGBToStateAndDMX")
 	setSpanMeta(span, d)
-	defer span.Finish()
-	span.LogKV("event", "getting channel ids")
+	defer span.End()
+	span.Annotate([]trace.Attribute{}, "getting channel ids")
 	rgbChannelIds := d.getChannelIDForAttributes(ctx, ChannelRed, ChannelGreen, ChannelBlue)
-	span.LogKV("event", "getting channel values")
+	span.Annotate([]trace.Attribute{}, "getting channel values")
 	rVal, gVal, bVal := color.AsComponents()
 
-	span.LogKV("event", "begin getDMXStateInstance")
-	span.LogKV("event", "now setting values")
+	span.Annotate([]trace.Attribute{}, "begin getDMXStateInstance")
+	span.Annotate([]trace.Attribute{}, "now setting values")
 	m.SetDMXState(ctx, dmxOperation{universe: d.Universe, channel: rgbChannelIds[0], value: rVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[1], value: gVal},
 		dmxOperation{universe: d.Universe, channel: rgbChannelIds[2], value: bVal})
@@ -89,14 +89,14 @@ func (d *DMXLight) SetState(ctx context.Context, m Manager, target TargetState) 
 	tickIntervalFadeInterpolation := mainConfig.GetServerConfig(ctx).Timings.FadeInterpolationTick
 	currentState := m.GetState(d.Name)
 	numSteps := int(target.Duration / tickIntervalFadeInterpolation)
-	span, ctx := opentracing.StartSpanFromContext(ctx, "DMX SetState")
+	ctx, span := trace.StartSpan(ctx, "DMX SetState")
 	setSpanMeta(span, d)
-	defer span.Finish()
-	span.SetTag("target-duration-ms", target.Duration)
-	span.SetTag("num-steps", numSteps)
+	defer span.End()
+	//span.SetTag("target-duration-ms", target.Duration)
+	//span.SetTag("num-steps", numSteps)
 
 	log.Printf("dmx fade [%s] to [%s] over %d steps", currentState.RGB.TermString(), target.String(), numSteps)
-	span.LogKV("event", "begin fade interpolation")
+	span.Annotate([]trace.Attribute{}, "begin fade interpolation")
 	for x := 0; x < numSteps; x++ {
 		interpolated := currentState.RGB.GetInterpolatedFade(target.RGB, x, numSteps)
 		//keep state updated:
@@ -106,7 +106,7 @@ func (d *DMXLight) SetState(ctx context.Context, m Manager, target TargetState) 
 	}
 
 	d.blindlySetRGBToStateAndDMX(ctx, m, target.RGB)
-	span.LogKV("event", "finished fade interpolation")
+	span.Annotate([]trace.Attribute{}, "finished fade interpolation")
 	m.SetState(d.Name, target.ToState())
 
 }
